@@ -1,0 +1,55 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Python entrypoints
+        run: python -m py_compile ai_engine/cartoon_avatars.py ai_engine/demo_story.py tools/render_demo_film.py api/app.py
+
+      - name: Validate deploy script
+        run: bash -n tools/deploy_server.sh
+
+      - name: Prepare SSH key
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_SSH_KEY"
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/digital_sage_deploy"
+          chmod 600 "$HOME/.ssh/digital_sage_deploy"
+          ssh-keyscan -H "$DEPLOY_HOST" >> "$HOME/.ssh/known_hosts"
+
+      - name: Deploy to production server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          MIMO_API_BASE: ${{ secrets.MIMO_API_BASE }}
+          MIMO_API_KEY: ${{ secrets.MIMO_API_KEY }}
+        run: |
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_USER"
+          test -n "$MIMO_API_KEY"
+          HOST="${DEPLOY_USER}@${DEPLOY_HOST}" \
+          SSH_KEY="$HOME/.ssh/digital_sage_deploy" \
+          MIMO_API_BASE="${MIMO_API_BASE:-https://api.xiaomimimo.com/v1}" \
+          MIMO_API_KEY="$MIMO_API_KEY" \
+          ./tools/deploy_server.sh

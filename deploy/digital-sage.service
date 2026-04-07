@@ -1,0 +1,15 @@
+[Unit]
+Description=Digital Sage FastAPI service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/srv/digital-sage/current
+EnvironmentFile=/srv/digital-sage/current/.env
+ExecStart=/srv/digital-sage/venv/bin/python /srv/digital-sage/current/api/app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
