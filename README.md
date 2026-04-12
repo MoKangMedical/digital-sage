@@ -2,13 +2,33 @@
 
 与全球最聪明的 100 个大脑对话。
 
+正式产品入口：[https://www.digitalsage.cloud](https://www.digitalsage.cloud)
+
+数字人控制台：[https://www.digitalsage.cloud/console](https://www.digitalsage.cloud/console)
+
+产品定位：一个让用户与全球 100 位顶级思想家、科学家、企业家与治理者进行文本、语音、视频对话的数字智者平台。
+
 ## 当前版本
 
 - 100 位名人思想档案，覆盖商业、科技、科学、医学、思想、文化、治理、设计
 - FastAPI 后端接口：`/api/celebrities`、`/api/chat`、`/api/expert-advice`
+- 新增商业化与知识库接口：`/api/business-model`、`/api/knowledge-library`、`/api/knowledge-library/{celeb_id}`
+- 新增数字人控制台：`/console`
+- 新增数字人 API：`/api/digital-humans`、`/api/digital-humans/{celeb_id}`
+- 新增数字人分身对话 API：`/api/digital-humans/{celeb_id}/sessions`、`/api/digital-dialogue/{session_id}/messages`
+- 新增电话桥接 API：`/api/phone-bridge`、`/api/phone-bridge/outbound`
 - 内置单页前端，可直接浏览名人目录、查看方法论并发起对话
+- 首页已加入通话定价矩阵、现金流场景和知识库 / Skill 训练蓝图
+- 控制台可视化人格卡、声音画像、视觉画像、片段库，并可直接发起主动外呼
 - 无 `MIMO_API_KEY` 时自动切换到本地 fallback persona，方便演示和外网预览
+- 语音分身、电话播报、成片旁白统一走小米 `mimo-v2-tts`
 - 已补充 `vercel.json` 与 `requirements.txt`，可直接部署到 Vercel
+
+## 商业化与知识库蓝图
+
+详细方案见：
+
+- `docs/revenue-knowledge-blueprint.md`
 
 ## 本地启动
 
@@ -17,6 +37,58 @@ python3 api/app.py
 ```
 
 默认端口：`8103`
+
+## 数字人控制台
+
+打开：
+
+- `http://127.0.0.1:8103/console`
+
+当前控制台能力：
+
+- 浏览 100 位数字人及其 readiness
+- 查看人格卡、声音画像、视觉画像、片段库
+- 直接在控制台里和某个智者的分身持续对话
+- 自动生成带口型同步的 `mp4` 视频分身片段
+- 发起主动外呼任务
+- 查看电话桥 provider 状态与最近外呼任务
+
+电话桥默认使用 `mock` 模式；配置 Twilio 后可直接主动外呼。
+
+相关环境变量：
+
+- `DIGITAL_SAGE_PHONE_PROVIDER=mock|twilio`
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_FROM_NUMBER`
+- `APP_BASE_URL`
+
+## MIMO 媒体链路
+
+当前媒体接入策略：
+
+- 文本互动：`mimo-v2-pro`
+- 语音分身 / 电话播报 / Demo 旁白：`mimo-v2-tts`
+- 视频成片：画面继续本地渲染与 ffmpeg 封装，语音与文案链路统一走 MIMO
+
+相关环境变量：
+
+- `MIMO_API_BASE`: 默认 `https://api.xiaomimimo.com/v1`
+- `MIMO_API_KEY`
+- `MIMO_TTS_VOICE`: 默认 `default_zh`
+- `MIMO_FILM_TTS_VOICE`: 可选，单独覆盖成片旁白 voice
+
+新增视频分身接口：
+
+- `POST /api/digital-dialogue/{session_id}/video-last`
+- `GET /api/avatar-video/{video_id}.mp4`
+- `GET /api/avatar-video/{video_id}.jpg`
+
+电话 webhook：
+
+- `POST /api/phone-bridge/twiml/{job_id}/answer`
+- `POST /api/phone-bridge/twiml/{job_id}/gather`
+- `POST /api/phone-bridge/status/{job_id}`
 
 ## 部署
 
