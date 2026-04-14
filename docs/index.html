@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Sage — AI Digital Human Platform</title>
+<meta name="description" content="AI数字人平台——知识、性格、表达力三位一体。让每个人拥有自己的AI数字分身。">
+<meta property="og:title" content="Digital Sage — AI Digital Human Platform">
+<meta property="og:description" content="AI数字人平台——知识、性格、表达力三位一体。让每个人拥有自己的AI数字分身。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://github.com/MoKangMedical/digital-sage">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧙</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060a14;--card:#0d1425;--border:#152035;--text:#e8edf5;--dim:#7b8ba4;--c1:#00e5ff;--c2:#a855f7;--grad:linear-gradient(135deg,var(--c1),var(--c2))}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;background-image:linear-gradient(rgba(0,229,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.015) 1px,transparent 1px);background-size:60px 60px;-webkit-font-smoothing:antialiased}
+.hero{text-align:center;padding:8rem 2rem 5rem;max-width:900px;margin:0 auto}
+.hero h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,4.5vw,3.2rem);font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1.5rem}
+.hero p{color:var(--dim);font-size:1.1rem;line-height:1.8;max-width:650px;margin:0 auto 2.5rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 2rem;border-radius:12px;font-size:1rem;font-weight:600;text-decoration:none;transition:all .3s;border:none;cursor:pointer}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 0 20px rgba(0,229,255,.2)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(0,229,255,.35)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--c1)}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;max-width:1100px;margin:4rem auto;padding:0 2rem}
+.feature{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s}
+.feature:hover{border-color:rgba(0,229,255,.2);transform:translateY(-3px);box-shadow:0 0 30px rgba(0,229,255,.05)}
+.feature h3{font-size:1.05rem;margin-bottom:.5rem}
+.feature p{color:var(--dim);font-size:.88rem;line-height:1.6}
+.feature .ico{font-size:2rem;margin-bottom:1rem}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:800px;margin:0 auto 3rem}
+.stat-val{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-lbl{font-size:.82rem;color:var(--dim);margin-top:.2rem}
+footer{text-align:center;padding:4rem 2rem;color:var(--dim);font-size:.85rem}
+footer a{color:var(--c1);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Digital Sage</h1>
+  <p>AI数字人平台——知识、性格、表达力三位一体。让每个人拥有自己的AI数字分身。</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem">
+    <a href="https://github.com/MoKangMedical/digital-sage" class="btn btn-primary">View on GitHub</a>
+    <a href="#features" class="btn btn-ghost">Explore Features</a>
+  </div>
+</div>
+<div class="features" id="features">
+    <div class="feature">
+      <div class="ico">🧠</div>
+      <h3>Personality Engine</h3>
+      <p>从对话中学习你的思维方式、知识结构、表达风格</p>
+    </div>
+    <div class="feature">
+      <div class="ico">💬</div>
+      <h3>Natural Dialogue</h3>
+      <p>支持中英文自然对话，语境理解和情感感知</p>
+    </div>
+    <div class="feature">
+      <div class="ico">🔗</div>
+      <h3>Multi-Platform</h3>
+      <p>微信、飞书、Discord、Telegram 全平台接入</p>
+    </div>
+    <div class="feature">
+      <div class="ico">📊</div>
+      <h3>Knowledge Graph</h3>
+      <p>个人知识图谱构建，跨领域知识关联</p>
+    </div>
+    <div class="feature">
+      <div class="ico">🛡️</div>
+      <h3>Privacy First</h3>
+      <p>端到端加密，数据完全由用户掌控</p>
+    </div>
+    <div class="feature">
+      <div class="ico">🚀</div>
+      <h3>API Ready</h3>
+      <p>RESTful API + Webhook，轻松集成到任何系统</p>
+    </div>
+</div>
+<footer>
+  <p>Digital Sage — Built with ❤️ by <a href="https://github.com/MoKangMedical">MoKangMedical</a></p>
+</footer>
+</body>
+</html>
