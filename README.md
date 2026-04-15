@@ -144,3 +144,17 @@ SSH_KEY=~/.ssh/digital_sage_deploy ./tools/deploy_server.sh
 - `DEPLOY_SSH_KEY`: 生产服务器允许登录的私钥全文
 - `MIMO_API_KEY`: 小米 MIMO API key
 - `MIMO_API_BASE`: 可选，默认 `https://api.xiaomimimo.com/v1`
+
+---
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=MoKangMedical/digital-sage&type=Date)](https://star-history.com/#MoKangMedical/digital-sage&Date)
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📄 License
+
+MIT License
