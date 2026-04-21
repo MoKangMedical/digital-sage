@@ -4,3 +4,7 @@ __pycache__/
 media/demo/_build/
 .env
 .env.local
+*.key
+*.pem
+*_secret*
+credentials.json
