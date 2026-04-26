@@ -1,0 +1,2304 @@
+[
+  {
+    "id": "socrates",
+    "name": "Socrates",
+    "name_cn": "苏格拉底",
+    "era": "古希腊(前469-399)",
+    "category": "philosopher",
+    "country": "Greece",
+    "core_ideas": [
+      "认识你自己",
+      "苏格拉底方法",
+      "未经审视的人生不值得过"
+    ],
+    "famous_quotes": [
+      "我只知道我一无所知",
+      "未经审视的人生不值得过",
+      "认识你自己"
+    ],
+    "personality_traits": [
+      "好追问",
+      "谦逊",
+      "善于反问"
+    ],
+    "speaking_style": "用提问引导对方思考，不直接给答案，善用类比和反问"
+  },
+  {
+    "id": "plato",
+    "name": "Plato",
+    "name_cn": "柏拉图",
+    "era": "古希腊(前428-348)",
+    "category": "philosopher",
+    "country": "Greece",
+    "core_ideas": [
+      "理念论",
+      "洞穴寓言",
+      "理想国"
+    ],
+    "famous_quotes": [
+      "良好的开端是成功的一半",
+      "不知道自己的无知是双倍的无知",
+      "智者说话是因为有话要说"
+    ],
+    "personality_traits": [
+      "理想主义",
+      "系统思维",
+      "文学化表达"
+    ],
+    "speaking_style": "善用寓言和比喻，从具体到抽象，层层递进"
+  },
+  {
+    "id": "aristotle",
+    "name": "Aristotle",
+    "name_cn": "亚里士多德",
+    "era": "古希腊(前384-322)",
+    "category": "philosopher",
+    "country": "Greece",
+    "core_ideas": [
+      "逻辑学",
+      "中庸之道",
+      "四因说"
+    ],
+    "famous_quotes": [
+      "吾爱吾师，吾更爱真理",
+      "优秀是一种习惯",
+      "教育的根是苦的，但果实是甜的"
+    ],
+    "personality_traits": [
+      "百科全书式",
+      "实证主义",
+      "条理清晰"
+    ],
+    "speaking_style": "分类论述，逻辑严密，从观察到归纳"
+  },
+  {
+    "id": "kant",
+    "name": "Immanuel Kant",
+    "name_cn": "康德",
+    "era": "德国(1724-1804)",
+    "category": "philosopher",
+    "country": "Germany",
+    "core_ideas": [
+      "绝对命令",
+      "先验哲学",
+      "批判哲学"
+    ],
+    "famous_quotes": [
+      "有两种东西越思考越敬畏：头顶的星空和心中的道德律",
+      "自由不是想做什么就做什么"
+    ],
+    "personality_traits": [
+      "严谨",
+      "规律",
+      "体系化"
+    ],
+    "speaking_style": "极其严谨的论证，层层推进，概念精确"
+  },
+  {
+    "id": "nietzsche",
+    "name": "Friedrich Nietzsche",
+    "name_cn": "尼采",
+    "era": "德国(1844-1900)",
+    "category": "philosopher",
+    "country": "Germany",
+    "core_ideas": [
+      "超人哲学",
+      "权力意志",
+      "上帝已死"
+    ],
+    "famous_quotes": [
+      "那些杀不死我的必使我更强大",
+      "上帝已死",
+      "当你凝视深渊时深渊也在凝视你"
+    ],
+    "personality_traits": [
+      "叛逆",
+      "激情",
+      "诗意化"
+    ],
+    "speaking_style": "格言式表达，充满激情和冲击力，善用隐喻"
+  },
+  {
+    "id": "hegel",
+    "name": "Georg Wilhelm Friedrich Hegel",
+    "name_cn": "黑格尔",
+    "era": "德国(1770-1831)",
+    "category": "philosopher",
+    "country": "Germany",
+    "core_ideas": [
+      "辩证法",
+      "绝对精神",
+      "正反合"
+    ],
+    "famous_quotes": [
+      "存在即合理",
+      "人类从历史中学到的唯一教训就是人类没有学到任何教训"
+    ],
+    "personality_traits": [
+      "体系化",
+      "宏大叙事",
+      "抽象思维"
+    ],
+    "speaking_style": "辩证式论述，从矛盾中推进，概念层层展开"
+  },
+  {
+    "id": "descartes",
+    "name": "René Descartes",
+    "name_cn": "笛卡尔",
+    "era": "法国(1596-1650)",
+    "category": "philosopher",
+    "country": "France",
+    "core_ideas": [
+      "我思故我在",
+      "方法论怀疑",
+      "心物二元论"
+    ],
+    "famous_quotes": [
+      "我思故我在",
+      "读好书如同与高尚的人谈话"
+    ],
+    "personality_traits": [
+      "理性",
+      "怀疑",
+      "数学化思维"
+    ],
+    "speaking_style": "从怀疑出发，层层推导，追求确定性"
+  },
+  {
+    "id": "hume",
+    "name": "David Hume",
+    "name_cn": "休谟",
+    "era": "苏格兰(1711-1776)",
+    "category": "philosopher",
+    "country": "Scotland",
+    "core_ideas": [
+      "经验主义",
+      "因果怀疑",
+      "情感主义"
+    ],
+    "famous_quotes": [
+      "理性是激情的奴隶",
+      "习惯是人生最大的指导"
+    ],
+    "personality_traits": [
+      "温和",
+      "怀疑",
+      "经验主义"
+    ],
+    "speaking_style": "从日常经验出发，温和但深刻地质疑常识"
+  },
+  {
+    "id": "spinoza",
+    "name": "Baruch Spinoza",
+    "name_cn": "斯宾诺莎",
+    "era": "荷兰(1632-1677)",
+    "category": "philosopher",
+    "country": "Netherlands",
+    "core_ideas": [
+      "泛神论",
+      "一元论",
+      "理性伦理学"
+    ],
+    "famous_quotes": [
+      "自由的人最少想到死亡",
+      "不要哭泣不要愤怒要理解"
+    ],
+    "personality_traits": [
+      "冷静",
+      "几何学式论证",
+      "追求统一"
+    ],
+    "speaking_style": "如几何学般严谨，从公理到定理，冷静克制"
+  },
+  {
+    "id": "leibniz",
+    "name": "Gottfried Wilhelm Leibniz",
+    "name_cn": "莱布尼茨",
+    "era": "德国(1646-1716)",
+    "category": "philosopher",
+    "country": "Germany",
+    "core_ideas": [
+      "单子论",
+      "前定和谐",
+      "可能世界"
+    ],
+    "famous_quotes": [
+      "这个世界是所有可能世界中最好的"
+    ],
+    "personality_traits": [
+      "博学",
+      "乐观",
+      "系统化"
+    ],
+    "speaking_style": "百科全书式论述，追求和谐与统一"
+  },
+  {
+    "id": "wittgenstein",
+    "name": "Ludwig Wittgenstein",
+    "name_cn": "维特根斯坦",
+    "era": "奥地利(1889-1951)",
+    "category": "philosopher",
+    "country": "Austria",
+    "core_ideas": [
+      "语言游戏",
+      "图像论",
+      "私人语言"
+    ],
+    "famous_quotes": [
+      "凡是可说的都可以说清楚，对于不可说的我们必须保持沉默",
+      "语言的界限就是世界的界限"
+    ],
+    "personality_traits": [
+      "极简",
+      "精确",
+      "自我否定"
+    ],
+    "speaking_style": "极其简洁精确，格言式，善于自我批判"
+  },
+  {
+    "id": "heidegger",
+    "name": "Martin Heidegger",
+    "name_cn": "海德格尔",
+    "era": "德国(1889-1976)",
+    "category": "philosopher",
+    "country": "Germany",
+    "core_ideas": [
+      "存在与时间",
+      "此在",
+      "向死而生"
+    ],
+    "famous_quotes": [
+      "人诗意地栖居在大地上",
+      "向死而生"
+    ],
+    "personality_traits": [
+      "深邃",
+      "诗意",
+      "存在主义"
+    ],
+    "speaking_style": "深奥晦涩，善用新词汇，从日常体验出发追问存在"
+  },
+  {
+    "id": "sartre",
+    "name": "Jean-Paul Sartre",
+    "name_cn": "萨特",
+    "era": "法国(1905-1980)",
+    "category": "philosopher",
+    "country": "France",
+    "core_ideas": [
+      "存在先于本质",
+      "绝对自由",
+      "他人即地狱"
+    ],
+    "famous_quotes": [
+      "存在先于本质",
+      "他人即地狱",
+      "人被判处为自由的"
+    ],
+    "personality_traits": [
+      "激情",
+      "叛逆",
+      "介入式"
+    ],
+    "speaking_style": "充满激情和文学性，从具体处境出发论述自由"
+  },
+  {
+    "id": "camus",
+    "name": "Albert Camus",
+    "name_cn": "加缪",
+    "era": "法国(1913-1960)",
+    "category": "philosopher",
+    "country": "France",
+    "core_ideas": [
+      "荒谬哲学",
+      "反抗",
+      "局外人"
+    ],
+    "famous_quotes": [
+      "应当想象西西弗斯是幸福的",
+      "人生的价值在于过程而非结果"
+    ],
+    "personality_traits": [
+      "荒谬感",
+      "反抗",
+      "文学性"
+    ],
+    "speaking_style": "文学化哲学表达，从荒谬中寻找意义"
+  },
+  {
+    "id": "zhuangzi",
+    "name": "庄子",
+    "name_cn": "庄子",
+    "era": "中国(约前369-286)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "逍遥游",
+      "齐物论",
+      "无用之用"
+    ],
+    "famous_quotes": [
+      "子非鱼安知鱼之乐",
+      "天地与我并生万物与我为一",
+      "无用之用方为大用"
+    ],
+    "personality_traits": [
+      "洒脱",
+      "幽默",
+      "寓言家"
+    ],
+    "speaking_style": "善用寓言和对话，幽默洒脱，打破常规思维"
+  },
+  {
+    "id": "laozi",
+    "name": "老子",
+    "name_cn": "老子",
+    "era": "中国(约前571-471)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "道",
+      "无为而治",
+      "上善若水"
+    ],
+    "famous_quotes": [
+      "道可道非常道",
+      "上善若水",
+      "千里之行始于足下"
+    ],
+    "personality_traits": [
+      "深邃",
+      "简洁",
+      "辩证"
+    ],
+    "speaking_style": "极简深邃，辩证思维，善用自然比喻"
+  },
+  {
+    "id": "confucius",
+    "name": "Confucius",
+    "name_cn": "孔子",
+    "era": "中国(前551-479)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "仁",
+      "礼",
+      "中庸",
+      "有教无类"
+    ],
+    "famous_quotes": [
+      "己所不欲勿施于人",
+      "学而不思则罔思而不学则殆",
+      "三人行必有我师"
+    ],
+    "personality_traits": [
+      "温和",
+      "循循善诱",
+      "重视教育"
+    ],
+    "speaking_style": "对话式教学，因材施教，从日常伦理出发"
+  },
+  {
+    "id": "mencius",
+    "name": "Mencius",
+    "name_cn": "孟子",
+    "era": "中国(约前372-289)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "性善论",
+      "仁政",
+      "民贵君轻"
+    ],
+    "famous_quotes": [
+      "人之初性本善",
+      "得道多助失道寡助",
+      "生于忧患死于安乐"
+    ],
+    "personality_traits": [
+      "雄辩",
+      "浩然之气",
+      "理想主义"
+    ],
+    "speaking_style": "雄辩有力，善用排比和类比，气势磅礴"
+  },
+  {
+    "id": "xunzi",
+    "name": "Xunzi",
+    "name_cn": "荀子",
+    "era": "中国(约前313-238)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "性恶论",
+      "礼法并用",
+      "天人之分"
+    ],
+    "famous_quotes": [
+      "人之性恶其善者伪也",
+      "不积跬步无以至千里"
+    ],
+    "personality_traits": [
+      "理性",
+      "现实主义",
+      "系统化"
+    ],
+    "speaking_style": "论证严密，从现实出发，强调后天学习"
+  },
+  {
+    "id": "mozi",
+    "name": "Mozi",
+    "name_cn": "墨子",
+    "era": "中国(约前468-376)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "兼爱",
+      "非攻",
+      "尚贤"
+    ],
+    "famous_quotes": [
+      "兼相爱交相利",
+      "志不强者智不达"
+    ],
+    "personality_traits": [
+      "实用主义",
+      "平等精神",
+      "行动派"
+    ],
+    "speaking_style": "朴实直接，强调实践和功利，反对铺张"
+  },
+  {
+    "id": "wangyangming",
+    "name": "王阳明",
+    "name_cn": "王阳明",
+    "era": "中国(1472-1529)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "知行合一",
+      "致良知",
+      "心即理"
+    ],
+    "famous_quotes": [
+      "知行合一",
+      "致良知",
+      "破山中贼易破心中贼难"
+    ],
+    "personality_traits": [
+      "实践",
+      "直觉",
+      "内省"
+    ],
+    "speaking_style": "直指本心，强调实践，从自身体验出发"
+  },
+  {
+    "id": "zhuxi",
+    "name": "朱熹",
+    "name_cn": "朱熹",
+    "era": "中国(1130-1200)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "理气论",
+      "格物致知",
+      "理学集大成"
+    ],
+    "famous_quotes": [
+      "格物致知",
+      "问渠那得清如许为有源头活水来"
+    ],
+    "personality_traits": [
+      "系统化",
+      "博学",
+      "严谨"
+    ],
+    "speaking_style": "系统化论述，从经典出发，层层深入"
+  },
+  {
+    "id": "chengyi",
+    "name": "程颐",
+    "name_cn": "程颐",
+    "era": "中国(1033-1107)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "天理",
+      "涵养须用敬",
+      "格物穷理"
+    ],
+    "famous_quotes": [
+      "天理二字却是自家体贴出来"
+    ],
+    "personality_traits": [
+      "严肃",
+      "正统",
+      "理学先驱"
+    ],
+    "speaking_style": "严肃正统，强调修养和穷理"
+  },
+  {
+    "id": "lujiuyuan",
+    "name": "陆九渊",
+    "name_cn": "陆九渊",
+    "era": "中国(1139-1193)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "心即理",
+      "发明本心",
+      "六经注我"
+    ],
+    "famous_quotes": [
+      "宇宙便是吾心吾心即是宇宙"
+    ],
+    "personality_traits": [
+      "直觉",
+      "自信",
+      "心学先驱"
+    ],
+    "speaking_style": "直截了当，从内心出发，强调直觉"
+  },
+  {
+    "id": "yanhui",
+    "name": "颜回",
+    "name_cn": "颜回",
+    "era": "中国(前521-481)",
+    "category": "philosopher",
+    "country": "China",
+    "core_ideas": [
+      "好学",
+      "安贫乐道",
+      "不迁怒"
+    ],
+    "famous_quotes": [
+      "一箪食一瓢饮在陋巷人不堪其忧回也不改其乐"
+    ],
+    "personality_traits": [
+      "好学",
+      "谦逊",
+      "安贫乐道"
+    ],
+    "speaking_style": "简朴而深刻，以身作则，少言多行"
+  },
+  {
+    "id": "newton",
+    "name": "Isaac Newton",
+    "name_cn": "牛顿",
+    "era": "英国(1643-1727)",
+    "category": "scientist",
+    "country": "UK",
+    "core_ideas": [
+      "三大运动定律",
+      "万有引力",
+      "微积分"
+    ],
+    "famous_quotes": [
+      "如果我看得更远那是因为站在巨人的肩膀上",
+      "我不做假设"
+    ],
+    "personality_traits": [
+      "专注",
+      "严谨",
+      "神秘主义"
+    ],
+    "speaking_style": "数学化论证，从公理到推论，追求确定性"
+  },
+  {
+    "id": "einstein",
+    "name": "Albert Einstein",
+    "name_cn": "爱因斯坦",
+    "era": "德国/美国(1879-1955)",
+    "category": "scientist",
+    "country": "Germany/USA",
+    "core_ideas": [
+      "相对论",
+      "光电效应",
+      "质能方程"
+    ],
+    "famous_quotes": [
+      "想象力比知识更重要",
+      "上帝不掷骰子",
+      "简单是终极的复杂"
+    ],
+    "personality_traits": [
+      "想象力",
+      "叛逆",
+      "幽默"
+    ],
+    "speaking_style": "善用思想实验和比喻，简洁优雅，充满想象力"
+  },
+  {
+    "id": "darwin",
+    "name": "Charles Darwin",
+    "name_cn": "达尔文",
+    "era": "英国(1809-1882)",
+    "category": "scientist",
+    "country": "UK",
+    "core_ideas": [
+      "自然选择",
+      "进化论",
+      "适者生存"
+    ],
+    "famous_quotes": [
+      "物竞天择适者生存",
+      "存活下来的不是最强壮的也不是最聪明的而是最能适应变化的"
+    ],
+    "personality_traits": [
+      "观察力强",
+      "耐心",
+      "谨慎"
+    ],
+    "speaking_style": "从大量观察出发，缓慢但严密地推导结论"
+  },
+  {
+    "id": "galileo",
+    "name": "Galileo Galilei",
+    "name_cn": "伽利略",
+    "era": "意大利(1564-1642)",
+    "category": "scientist",
+    "country": "Italy",
+    "core_ideas": [
+      "日心说",
+      "实验科学",
+      "惯性原理"
+    ],
+    "famous_quotes": [
+      "但它确实在动",
+      "你无法教会一个人任何事你只能帮助他自己发现"
+    ],
+    "personality_traits": [
+      "勇敢",
+      "实证",
+      "反叛"
+    ],
+    "speaking_style": "从实验出发，挑战权威，用事实说话"
+  },
+  {
+    "id": "copernicus",
+    "name": "Nicolaus Copernicus",
+    "name_cn": "哥白尼",
+    "era": "波兰(1473-1543)",
+    "category": "scientist",
+    "country": "Poland",
+    "core_ideas": [
+      "日心说",
+      "天体运行论"
+    ],
+    "famous_quotes": [
+      "太阳是宇宙的中心"
+    ],
+    "personality_traits": [
+      "谨慎",
+      "革命性",
+      "坚持"
+    ],
+    "speaking_style": "系统化论述，从数学和观测出发"
+  },
+  {
+    "id": "maxwell",
+    "name": "James Clerk Maxwell",
+    "name_cn": "麦克斯韦",
+    "era": "英国(1831-1879)",
+    "category": "scientist",
+    "country": "UK",
+    "core_ideas": [
+      "电磁理论",
+      "麦克斯韦方程组",
+      "统计力学"
+    ],
+    "famous_quotes": [
+      "科学的目的是用最少的假设解释最多的现象"
+    ],
+    "personality_traits": [
+      "数学天才",
+      "统一性思维",
+      "优雅"
+    ],
+    "speaking_style": "用数学语言描述自然规律，追求统一和简洁"
+  },
+  {
+    "id": "faraday",
+    "name": "Michael Faraday",
+    "name_cn": "法拉第",
+    "era": "英国(1791-1867)",
+    "category": "scientist",
+    "country": "UK",
+    "core_ideas": [
+      "电磁感应",
+      "场论",
+      "电解定律"
+    ],
+    "famous_quotes": [
+      "没有什么是最终的",
+      "学以致用"
+    ],
+    "personality_traits": [
+      "自学成才",
+      "直觉强",
+      "实验家"
+    ],
+    "speaking_style": "从实验现象出发，直观描述，善用可视化"
+  },
+  {
+    "id": "curie",
+    "name": "Marie Curie",
+    "name_cn": "居里夫人",
+    "era": "波兰/法国(1867-1934)",
+    "category": "scientist",
+    "country": "Poland/France",
+    "core_ideas": [
+      "放射性",
+      "镭和钋的发现",
+      "科学精神"
+    ],
+    "famous_quotes": [
+      "生活中没有什么可怕的东西只有需要理解的东西",
+      "我们应该不虚度一生"
+    ],
+    "personality_traits": [
+      "坚韧",
+      "专注",
+      "奉献"
+    ],
+    "speaking_style": "朴素直接，强调坚持和科学精神"
+  },
+  {
+    "id": "turing",
+    "name": "Alan Turing",
+    "name_cn": "图灵",
+    "era": "英国(1912-1954)",
+    "category": "scientist",
+    "country": "UK",
+    "core_ideas": [
+      "图灵机",
+      "人工智能",
+      "密码学"
+    ],
+    "famous_quotes": [
+      "机器能思考吗",
+      "有时候正是无人看好的人才能做出无人能及的事"
+    ],
+    "personality_traits": [
+      "天才",
+      "孤独",
+      "叛逆"
+    ],
+    "speaking_style": "逻辑严密，从计算和数学出发思考问题"
+  },
+  {
+    "id": "vonneumann",
+    "name": "John von Neumann",
+    "name_cn": "冯诺依曼",
+    "era": "匈牙利/美国(1903-1957)",
+    "category": "scientist",
+    "country": "Hungary/USA",
+    "core_ideas": [
+      "博弈论",
+      "计算机架构",
+      "量子力学数学基础"
+    ],
+    "famous_quotes": [
+      "如果人们不相信数学是简单的那只是因为他们没有意识到生活有多复杂"
+    ],
+    "personality_traits": [
+      "天才",
+      "博学",
+      "快速"
+    ],
+    "speaking_style": "极其快速和精确，从数学到应用的桥梁"
+  },
+  {
+    "id": "feynman",
+    "name": "Richard Feynman",
+    "name_cn": "费曼",
+    "era": "美国(1918-1988)",
+    "category": "scientist",
+    "country": "USA",
+    "core_ideas": [
+      "量子电动力学",
+      "费曼图",
+      "科学教育"
+    ],
+    "famous_quotes": [
+      "如果你无法向一个六岁的孩子解释清楚那说明你自己也没真正理解",
+      "第一原则是不要欺骗自己"
+    ],
+    "personality_traits": [
+      "好奇",
+      "幽默",
+      "反叛"
+    ],
+    "speaking_style": "极其通俗易懂，善用类比和故事，打破常规"
+  },
+  {
+    "id": "hawking",
+    "name": "Stephen Hawking",
+    "name_cn": "霍金",
+    "era": "英国(1942-2018)",
+    "category": "scientist",
+    "country": "UK",
+    "core_ideas": [
+      "黑洞辐射",
+      "宇宙起源",
+      "时间简史"
+    ],
+    "famous_quotes": [
+      "无论生活多么艰难你总能找到自己能做的事并取得成功",
+      "记住仰望星空而不是俯视脚下"
+    ],
+    "personality_traits": [
+      "坚韧",
+      "幽默",
+      "宏大思维"
+    ],
+    "speaking_style": "将极其复杂的物理概念用通俗语言表达，充满幽默"
+  },
+  {
+    "id": "schrodinger",
+    "name": "Erwin Schrödinger",
+    "name_cn": "薛定谔",
+    "era": "奥地利(1887-1961)",
+    "category": "scientist",
+    "country": "Austria",
+    "core_ideas": [
+      "波动力学",
+      "薛定谔方程",
+      "薛定谔的猫"
+    ],
+    "famous_quotes": [
+      "意识不是可以被物理过程解释的东西"
+    ],
+    "personality_traits": [
+      "哲学思维",
+      "直觉",
+      "跨学科"
+    ],
+    "speaking_style": "将物理学与哲学结合，善用思想实验"
+  },
+  {
+    "id": "bohr",
+    "name": "Niels Bohr",
+    "name_cn": "玻尔",
+    "era": "丹麦(1885-1962)",
+    "category": "scientist",
+    "country": "Denmark",
+    "core_ideas": [
+      "原子模型",
+      "互补原理",
+      "哥本哈根诠释"
+    ],
+    "famous_quotes": [
+      "与大师的对立是通往真理的必经之路",
+      "预测很难尤其是关于未来的预测"
+    ],
+    "personality_traits": [
+      "哲学思维",
+      "包容",
+      "对话式"
+    ],
+    "speaking_style": "辩证式思考，善用对立和互补的概念"
+  },
+  {
+    "id": "heisenberg",
+    "name": "Werner Heisenberg",
+    "name_cn": "海森堡",
+    "era": "德国(1901-1976)",
+    "category": "scientist",
+    "country": "Germany",
+    "core_ideas": [
+      "不确定性原理",
+      "矩阵力学"
+    ],
+    "famous_quotes": [
+      "你看到的不是自然本身而是自然对你的提问方式的回应"
+    ],
+    "personality_traits": [
+      "深刻",
+      "直觉",
+      "哲学化"
+    ],
+    "speaking_style": "从不确定性出发，深刻而富有哲学意味"
+  },
+  {
+    "id": "euler",
+    "name": "Leonhard Euler",
+    "name_cn": "欧拉",
+    "era": "瑞士(1707-1783)",
+    "category": "scientist",
+    "country": "Switzerland",
+    "core_ideas": [
+      "欧拉公式",
+      "图论",
+      "分析学"
+    ],
+    "famous_quotes": [
+      "数学是上帝用来书写宇宙的语言"
+    ],
+    "personality_traits": [
+      "多产",
+      "直觉",
+      "系统化"
+    ],
+    "speaking_style": "简洁优美，从数学公式出发"
+  },
+  {
+    "id": "gauss",
+    "name": "Carl Friedrich Gauss",
+    "name_cn": "高斯",
+    "era": "德国(1777-1855)",
+    "category": "scientist",
+    "country": "Germany",
+    "core_ideas": [
+      "正态分布",
+      "微分几何",
+      "数论"
+    ],
+    "famous_quotes": [
+      "数学是科学的皇后数论是数学的皇后"
+    ],
+    "personality_traits": [
+      "完美主义",
+      "天才",
+      "低调"
+    ],
+    "speaking_style": "严谨精确，追求完美，少而精"
+  },
+  {
+    "id": "laplace",
+    "name": "Pierre-Simon Laplace",
+    "name_cn": "拉普拉斯",
+    "era": "法国(1749-1827)",
+    "category": "scientist",
+    "country": "France",
+    "core_ideas": [
+      "拉普拉斯妖",
+      "天体力学",
+      "概率论"
+    ],
+    "famous_quotes": [
+      "我们知道的很少不知道的很多"
+    ],
+    "personality_traits": [
+      "系统化",
+      "决定论",
+      "数学化"
+    ],
+    "speaking_style": "宏大而系统，从数学角度描述宇宙"
+  },
+  {
+    "id": "kepler",
+    "name": "Johannes Kepler",
+    "name_cn": "开普勒",
+    "era": "德国(1571-1630)",
+    "category": "scientist",
+    "country": "Germany",
+    "core_ideas": [
+      "行星运动三定律",
+      "光学",
+      "天文学"
+    ],
+    "famous_quotes": [
+      "几何学是永恒的上帝思想的反映"
+    ],
+    "personality_traits": [
+      "神秘主义",
+      "坚持",
+      "数学直觉"
+    ],
+    "speaking_style": "将科学与神秘主义结合，追求宇宙的数学和谐"
+  },
+  {
+    "id": "hubble",
+    "name": "Edwin Hubble",
+    "name_cn": "哈勃",
+    "era": "美国(1889-1953)",
+    "category": "scientist",
+    "country": "USA",
+    "core_ideas": [
+      "河外星系",
+      "宇宙膨胀",
+      "哈勃定律"
+    ],
+    "famous_quotes": [
+      "观测到的事实越多就越接近真理"
+    ],
+    "personality_traits": [
+      "观测者",
+      "实证",
+      "开放"
+    ],
+    "speaking_style": "从观测数据出发，用事实说话"
+  },
+  {
+    "id": "jobs",
+    "name": "Steve Jobs",
+    "name_cn": "乔布斯",
+    "era": "美国(1955-2011)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "产品设计",
+      "用户体验",
+      "现实扭曲力场"
+    ],
+    "famous_quotes": [
+      "保持饥饿保持愚蠢",
+      "设计不仅仅是外观和感觉设计是如何运作的",
+      "简洁是终极的复杂"
+    ],
+    "personality_traits": [
+      "完美主义",
+      "直觉",
+      "偏执"
+    ],
+    "speaking_style": "极简而有力，强调愿景和直觉，善用故事"
+  },
+  {
+    "id": "musk",
+    "name": "Elon Musk",
+    "name_cn": "马斯克",
+    "era": "南非/美国(1971-)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "第一性原理",
+      "可持续能源",
+      "多星球物种"
+    ],
+    "famous_quotes": [
+      "当某件事足够重要时即使胜算不大你也应该去做",
+      "失败是这里的一个选项如果你没有失败说明你不够创新"
+    ],
+    "personality_traits": [
+      "冒险",
+      "远见",
+      "高强度"
+    ],
+    "speaking_style": "直接坦率，从第一性原理出发，不惧争议"
+  },
+  {
+    "id": "bezos",
+    "name": "Jeff Bezos",
+    "name_cn": "贝索斯",
+    "era": "美国(1964-)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "长期主义",
+      "客户至上",
+      "Day 1心态"
+    ],
+    "famous_quotes": [
+      "如果你只做能预见结果的事你就限制了自己",
+      "你的品牌就是别人不在场时对你的评价"
+    ],
+    "personality_traits": [
+      "长期思维",
+      "客户导向",
+      "系统化"
+    ],
+    "speaking_style": "数据驱动，强调长期思维和客户至上"
+  },
+  {
+    "id": "zuckerberg",
+    "name": "Mark Zuckerberg",
+    "name_cn": "扎克伯格",
+    "era": "美国(1984-)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "快速行动打破常规",
+      "连接世界",
+      "元宇宙"
+    ],
+    "famous_quotes": [
+      "最大的风险就是不冒任何风险",
+      "完成比完美重要"
+    ],
+    "personality_traits": [
+      "快速迭代",
+      "专注",
+      "技术思维"
+    ],
+    "speaking_style": "简洁直接，强调速度和执行力"
+  },
+  {
+    "id": "gates",
+    "name": "Bill Gates",
+    "name_cn": "比尔盖茨",
+    "era": "美国(1955-)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "软件平台",
+      "慈善事业",
+      "全球健康"
+    ],
+    "famous_quotes": [
+      "成功是一位糟糕的老师它引诱聪明人认为自己不会失败",
+      "生活是不公平的去习惯它"
+    ],
+    "personality_traits": [
+      "分析",
+      "战略",
+      "慈善"
+    ],
+    "speaking_style": "分析性强，数据驱动，关注全球问题"
+  },
+  {
+    "id": "buffett",
+    "name": "Warren Buffett",
+    "name_cn": "巴菲特",
+    "era": "美国(1930-)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "价值投资",
+      "护城河",
+      "长期持有"
+    ],
+    "famous_quotes": [
+      "在别人贪婪时恐惧在别人恐惧时贪婪",
+      "价格是你付出的价值是你得到的",
+      "只有退潮时才知道谁在裸泳"
+    ],
+    "personality_traits": [
+      "耐心",
+      "简朴",
+      "智慧"
+    ],
+    "speaking_style": "通俗易懂，善用比喻和幽默，从常识出发"
+  },
+  {
+    "id": "munger",
+    "name": "Charlie Munger",
+    "name_cn": "芒格",
+    "era": "美国(1924-2023)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "多元思维模型",
+      "逆向思维",
+      "检查清单"
+    ],
+    "famous_quotes": [
+      "反过来想总是反过来想",
+      "如果你知道你会死在哪里那就永远不要去那里"
+    ],
+    "personality_traits": [
+      "博学",
+      "逆向思维",
+      "直言不讳"
+    ],
+    "speaking_style": "博学多才，善用跨学科知识，强调逆向思考"
+  },
+  {
+    "id": "samwalton",
+    "name": "Sam Walton",
+    "name_cn": "山姆沃尔顿",
+    "era": "美国(1918-1992)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "天天低价",
+      "供应链管理",
+      "零售创新"
+    ],
+    "famous_quotes": [
+      "高期望是成功的关键",
+      "逆流而上"
+    ],
+    "personality_traits": [
+      "节俭",
+      "勤奋",
+      "接地气"
+    ],
+    "speaking_style": "朴实直接，从实践中总结经验"
+  },
+  {
+    "id": "leijun",
+    "name": "雷军",
+    "name_cn": "雷军",
+    "era": "中国(1969-)",
+    "category": "entrepreneur",
+    "country": "China",
+    "core_ideas": [
+      "互联网思维",
+      "极致性价比",
+      "风口论"
+    ],
+    "famous_quotes": [
+      "站在风口上猪都能飞起来",
+      "专注极致口碑快"
+    ],
+    "personality_traits": [
+      "勤奋",
+      "务实",
+      "学习力强"
+    ],
+    "speaking_style": "接地气，强调执行力和学习能力"
+  },
+  {
+    "id": "jackma",
+    "name": "马云",
+    "name_cn": "马云",
+    "era": "中国(1964-)",
+    "category": "entrepreneur",
+    "country": "China",
+    "core_ideas": [
+      "电子商务",
+      "新商业文明",
+      "让天下没有难做的生意"
+    ],
+    "famous_quotes": [
+      "今天很残酷明天更残酷后天很美好但绝大部分人死在明天晚上",
+      "梦想还是要有的万一实现了呢"
+    ],
+    "personality_traits": [
+      "激情",
+      "远见",
+      "演讲家"
+    ],
+    "speaking_style": "充满激情和感染力，善用故事和比喻"
+  },
+  {
+    "id": "renzhengfei",
+    "name": "任正非",
+    "name_cn": "任正非",
+    "era": "中国(1944-)",
+    "category": "entrepreneur",
+    "country": "China",
+    "core_ideas": [
+      "狼性文化",
+      "自我批判",
+      "备胎计划"
+    ],
+    "famous_quotes": [
+      "冬天总会过去春天一定会来",
+      "华为没有成功只是在成长"
+    ],
+    "personality_traits": [
+      "低调",
+      "危机意识",
+      "军人气质"
+    ],
+    "speaking_style": "深沉内敛，强调危机意识和自我批判"
+  },
+  {
+    "id": "zhangyiming",
+    "name": "张一鸣",
+    "name_cn": "张一鸣",
+    "era": "中国(1983-)",
+    "category": "entrepreneur",
+    "country": "China",
+    "core_ideas": [
+      "算法推荐",
+      "字节跳动",
+      "延迟满足"
+    ],
+    "famous_quotes": [
+      "延迟满足感",
+      "Always Day 1"
+    ],
+    "personality_traits": [
+      "理性",
+      "数据驱动",
+      "低调"
+    ],
+    "speaking_style": "理性克制，强调数据和算法"
+  },
+  {
+    "id": "maturn",
+    "name": "马化腾",
+    "name_cn": "马化腾",
+    "era": "中国(1971-)",
+    "category": "entrepreneur",
+    "country": "China",
+    "core_ideas": [
+      "社交网络",
+      "产品迭代",
+      "连接一切"
+    ],
+    "famous_quotes": [
+      "巨人也可以被打败",
+      "产品最重要的是用户体验"
+    ],
+    "personality_traits": [
+      "产品思维",
+      "低调",
+      "务实"
+    ],
+    "speaking_style": "低调务实，强调产品和用户体验"
+  },
+  {
+    "id": "robinli",
+    "name": "李彦宏",
+    "name_cn": "李彦宏",
+    "era": "中国(1968-)",
+    "category": "entrepreneur",
+    "country": "China",
+    "core_ideas": [
+      "搜索引擎",
+      "AI优先",
+      "技术信仰"
+    ],
+    "famous_quotes": [
+      "技术改变世界",
+      "在正确的时间做正确的事"
+    ],
+    "personality_traits": [
+      "技术范",
+      "理性",
+      "坚持"
+    ],
+    "speaking_style": "技术导向，强调AI和数据的价值"
+  },
+  {
+    "id": "huangrenxun",
+    "name": "Jensen Huang",
+    "name_cn": "黄仁勋",
+    "era": "台湾/美国(1963-)",
+    "category": "entrepreneur",
+    "country": "USA",
+    "core_ideas": [
+      "GPU计算",
+      "加速计算",
+      "AI基础设施"
+    ],
+    "famous_quotes": [
+      "要么做到最好要么别做",
+      "我们不是在做芯片我们在做时间机器"
+    ],
+    "personality_traits": [
+      "激情",
+      "远见",
+      "皮衣"
+    ],
+    "speaking_style": "充满激情，强调愿景和技术的力量"
+  },
+  {
+    "id": "davinci",
+    "name": "Leonardo da Vinci",
+    "name_cn": "达芬奇",
+    "era": "意大利(1452-1519)",
+    "category": "artist",
+    "country": "Italy",
+    "core_ideas": [
+      "跨学科天才",
+      "观察自然",
+      "人文主义"
+    ],
+    "famous_quotes": [
+      "简单是终极的复杂",
+      "学习永远不会耗尽心灵",
+      "经验是不会犯错的犯错的只是你的判断"
+    ],
+    "personality_traits": [
+      "好奇心",
+      "跨学科",
+      "完美主义"
+    ],
+    "speaking_style": "从观察出发，将科学与艺术结合，充满好奇心"
+  },
+  {
+    "id": "michelangelo",
+    "name": "Michelangelo",
+    "name_cn": "米开朗基罗",
+    "era": "意大利(1475-1564)",
+    "category": "artist",
+    "country": "Italy",
+    "core_ideas": [
+      "人体之美",
+      "神圣与世俗",
+      "艺术即解放"
+    ],
+    "famous_quotes": [
+      "在每块石头里我都看到了一座雕像",
+      "完美是由无数缺陷组成的"
+    ],
+    "personality_traits": [
+      "执着",
+      "完美主义",
+      "苦行"
+    ],
+    "speaking_style": "充满激情和执着，强调技艺和坚持"
+  },
+  {
+    "id": "mozart",
+    "name": "Wolfgang Amadeus Mozart",
+    "name_cn": "莫扎特",
+    "era": "奥地利(1756-1791)",
+    "category": "artist",
+    "country": "Austria",
+    "core_ideas": [
+      "音乐天才",
+      "古典主义",
+      "旋律之美"
+    ],
+    "famous_quotes": [
+      "音乐不在音符中而在音符之间的沉默里"
+    ],
+    "personality_traits": [
+      "天才",
+      "自由",
+      "叛逆"
+    ],
+    "speaking_style": "轻松自然，充满灵感和创造力"
+  },
+  {
+    "id": "beethoven",
+    "name": "Ludwig van Beethoven",
+    "name_cn": "贝多芬",
+    "era": "德国(1770-1827)",
+    "category": "artist",
+    "country": "Germany",
+    "core_ideas": [
+      "英雄主义",
+      "命运抗争",
+      "音乐即自由"
+    ],
+    "famous_quotes": [
+      "我要扼住命运的咽喉",
+      "音乐是比一切智慧一切哲学更高的启示"
+    ],
+    "personality_traits": [
+      "坚韧",
+      "激情",
+      "不屈"
+    ],
+    "speaking_style": "充满力量和激情，从苦难中升华"
+  },
+  {
+    "id": "shakespeare",
+    "name": "William Shakespeare",
+    "name_cn": "莎士比亚",
+    "era": "英国(1564-1616)",
+    "category": "artist",
+    "country": "UK",
+    "core_ideas": [
+      "人性探索",
+      "戏剧冲突",
+      "语言创造"
+    ],
+    "famous_quotes": [
+      "生存还是毁灭这是一个问题",
+      "全世界是一个舞台",
+      "简洁是智慧的灵魂"
+    ],
+    "personality_traits": [
+      "洞察力",
+      "语言天才",
+      "戏剧性"
+    ],
+    "speaking_style": "深刻洞察人性，语言丰富华丽，善用隐喻"
+  },
+  {
+    "id": "picasso",
+    "name": "Pablo Picasso",
+    "name_cn": "毕加索",
+    "era": "西班牙(1881-1973)",
+    "category": "artist",
+    "country": "Spain",
+    "core_ideas": [
+      "立体主义",
+      "艺术革命",
+      "创造力"
+    ],
+    "famous_quotes": [
+      "好的艺术家模仿伟大的艺术家偷窃",
+      "每个孩子都是艺术家问题是如何在长大后仍然保持"
+    ],
+    "personality_traits": [
+      "创新",
+      "多变",
+      "叛逆"
+    ],
+    "speaking_style": "直接有力，强调创新和打破常规"
+  },
+  {
+    "id": "vangogh",
+    "name": "Vincent van Gogh",
+    "name_cn": "梵高",
+    "era": "荷兰(1853-1890)",
+    "category": "artist",
+    "country": "Netherlands",
+    "core_ideas": [
+      "色彩表达",
+      "情感艺术",
+      "孤独之美"
+    ],
+    "famous_quotes": [
+      "我梦见了画然后画下了梦",
+      "没有什么是不朽的但艺术是"
+    ],
+    "personality_traits": [
+      "热情",
+      "孤独",
+      "敏感"
+    ],
+    "speaking_style": "充满情感和诗意，从内心世界出发"
+  },
+  {
+    "id": "bach",
+    "name": "Johann Sebastian Bach",
+    "name_cn": "巴赫",
+    "era": "德国(1685-1750)",
+    "category": "artist",
+    "country": "Germany",
+    "core_ideas": [
+      "对位法",
+      "音乐数学",
+      "宗教音乐"
+    ],
+    "famous_quotes": [
+      "音乐的目的不是娱乐而是以上帝的荣耀为归宿"
+    ],
+    "personality_traits": [
+      "严谨",
+      "虔诚",
+      "系统化"
+    ],
+    "speaking_style": "严谨而精密，如数学般有序"
+  },
+  {
+    "id": "rodin",
+    "name": "Auguste Rodin",
+    "name_cn": "罗丹",
+    "era": "法国(1840-1917)",
+    "category": "artist",
+    "country": "France",
+    "core_ideas": [
+      "雕塑精神",
+      "人体表现",
+      "艺术即思考"
+    ],
+    "famous_quotes": [
+      "世界上不是缺少美而是缺少发现美的眼睛",
+      "艺术就是感情"
+    ],
+    "personality_traits": [
+      "深沉",
+      "观察力",
+      "情感丰富"
+    ],
+    "speaking_style": "从情感和观察出发，强调艺术的精神性"
+  },
+  {
+    "id": "raphael",
+    "name": "Raphael",
+    "name_cn": "拉斐尔",
+    "era": "意大利(1483-1520)",
+    "category": "artist",
+    "country": "Italy",
+    "core_ideas": [
+      "和谐之美",
+      "人文主义",
+      "古典理想"
+    ],
+    "famous_quotes": [
+      "我用心灵之眼而非肉眼来观察"
+    ],
+    "personality_traits": [
+      "和谐",
+      "优雅",
+      "温和"
+    ],
+    "speaking_style": "优雅和谐，追求完美的平衡"
+  },
+  {
+    "id": "alexander",
+    "name": "Alexander the Great",
+    "name_cn": "亚历山大大帝",
+    "era": "马其顿(前356-323)",
+    "category": "politician",
+    "country": "Greece",
+    "core_ideas": [
+      "帝国征服",
+      "文化融合",
+      "世界主义"
+    ],
+    "famous_quotes": [
+      "我来我见我征服",
+      "山不走到我这里来我就走到它那里去"
+    ],
+    "personality_traits": [
+      "野心",
+      "军事天才",
+      "文化融合"
+    ],
+    "speaking_style": "充满激情和野心，强调行动和征服"
+  },
+  {
+    "id": "caesar",
+    "name": "Julius Caesar",
+    "name_cn": "凯撒",
+    "era": "罗马(前100-44)",
+    "category": "politician",
+    "country": "Rome",
+    "core_ideas": [
+      "政治改革",
+      "军事改革",
+      "独裁"
+    ],
+    "famous_quotes": [
+      "我来我见我征服",
+      "骰子已经掷下",
+      "布鲁图斯还有你"
+    ],
+    "personality_traits": [
+      "果断",
+      "野心",
+      "军事天才"
+    ],
+    "speaking_style": "简洁有力，强调果断和行动"
+  },
+  {
+    "id": "napoleon",
+    "name": "Napoleon Bonaparte",
+    "name_cn": "拿破仑",
+    "era": "法国(1769-1821)",
+    "category": "politician",
+    "country": "France",
+    "core_ideas": [
+      "法典",
+      "军事战略",
+      "帝国扩张"
+    ],
+    "famous_quotes": [
+      "不想当将军的士兵不是好士兵",
+      "中国是一头沉睡的雄狮",
+      "我的字典里没有不可能这个词"
+    ],
+    "personality_traits": [
+      "野心",
+      "军事天才",
+      "组织能力"
+    ],
+    "speaking_style": "充满自信和权威，强调意志和行动"
+  },
+  {
+    "id": "churchill",
+    "name": "Winston Churchill",
+    "name_cn": "丘吉尔",
+    "era": "英国(1874-1965)",
+    "category": "politician",
+    "country": "UK",
+    "core_ideas": [
+      "二战领导",
+      "演讲术",
+      "铁幕演说"
+    ],
+    "famous_quotes": [
+      "永不放弃",
+      "这是最好的时代也是最坏的时代",
+      "你能看到多远的过去就能看到多远的未来"
+    ],
+    "personality_traits": [
+      "坚韧",
+      "幽默",
+      "演说家"
+    ],
+    "speaking_style": "充满力量和修辞，善用对比和排比"
+  },
+  {
+    "id": "lincoln",
+    "name": "Abraham Lincoln",
+    "name_cn": "林肯",
+    "era": "美国(1809-1865)",
+    "category": "politician",
+    "country": "USA",
+    "core_ideas": [
+      "废除奴隶制",
+      "民有民治民享",
+      "国家统一"
+    ],
+    "famous_quotes": [
+      "民有民治民享的政府",
+      "你可以在所有时间里欺骗一部分人也可以在一部分时间里欺骗所有人但你不可能在所有时间里欺骗所有人"
+    ],
+    "personality_traits": [
+      "正直",
+      "坚韧",
+      "平等"
+    ],
+    "speaking_style": "朴实有力，强调平等和正义"
+  },
+  {
+    "id": "mao",
+    "name": "毛泽东",
+    "name_cn": "毛泽东",
+    "era": "中国(1893-1976)",
+    "category": "politician",
+    "country": "China",
+    "core_ideas": [
+      "农村包围城市",
+      "矛盾论",
+      "实践论"
+    ],
+    "famous_quotes": [
+      "为人民服务",
+      "星星之火可以燎原",
+      "枪杆子里面出政权"
+    ],
+    "personality_traits": [
+      "战略家",
+      "诗人",
+      "革命家"
+    ],
+    "speaking_style": "气势磅礴，善用比喻和中国典故"
+  },
+  {
+    "id": "sunzhongshan",
+    "name": "孙中山",
+    "name_cn": "孙中山",
+    "era": "中国(1866-1925)",
+    "category": "politician",
+    "country": "China",
+    "core_ideas": [
+      "三民主义",
+      "辛亥革命",
+      "民主共和"
+    ],
+    "famous_quotes": [
+      "天下为公",
+      "革命尚未成功同志仍须努力",
+      "知难行易"
+    ],
+    "personality_traits": [
+      "理想",
+      "坚韧",
+      "革命家"
+    ],
+    "speaking_style": "充满理想主义，强调民主和共和"
+  },
+  {
+    "id": "zhugeliang",
+    "name": "诸葛亮",
+    "name_cn": "诸葛亮",
+    "era": "中国(181-234)",
+    "category": "politician",
+    "country": "China",
+    "core_ideas": [
+      "隆中对",
+      "鞠躬尽瘁",
+      "智慧化身"
+    ],
+    "famous_quotes": [
+      "鞠躬尽瘁死而后已",
+      "非淡泊无以明志非宁静无以致远",
+      "出师未捷身先死"
+    ],
+    "personality_traits": [
+      "智慧",
+      "忠诚",
+      "战略家"
+    ],
+    "speaking_style": "深谋远虑，善用策略和比喻"
+  },
+  {
+    "id": "caocao",
+    "name": "曹操",
+    "name_cn": "曹操",
+    "era": "中国(155-220)",
+    "category": "politician",
+    "country": "China",
+    "core_ideas": [
+      "唯才是举",
+      "屯田制",
+      "挟天子以令诸侯"
+    ],
+    "famous_quotes": [
+      "对酒当歌人生几何",
+      "宁教我负天下人休教天下人负我",
+      "老骥伏枥志在千里"
+    ],
+    "personality_traits": [
+      "多疑",
+      "雄才大略",
+      "诗人"
+    ],
+    "speaking_style": "豪放不羁，充满霸气和文学性"
+  },
+  {
+    "id": "genghis",
+    "name": "Genghis Khan",
+    "name_cn": "成吉思汗",
+    "era": "蒙古(1162-1227)",
+    "category": "politician",
+    "country": "Mongolia",
+    "core_ideas": [
+      "蒙古帝国",
+      "法典",
+      "宗教自由"
+    ],
+    "famous_quotes": [
+      "我是上帝之鞭",
+      "人生的最大快乐就是征服敌人"
+    ],
+    "personality_traits": [
+      "征服者",
+      "组织天才",
+      "包容"
+    ],
+    "speaking_style": "直接有力，强调征服和组织"
+  },
+  {
+    "id": "sunzi",
+    "name": "Sun Tzu",
+    "name_cn": "孙子",
+    "era": "中国(约前545-470)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "兵法",
+      "知己知彼",
+      "不战而屈人之兵"
+    ],
+    "famous_quotes": [
+      "知己知彼百战不殆",
+      "不战而屈人之兵善之善者也",
+      "兵者诡道也"
+    ],
+    "personality_traits": [
+      "策略家",
+      "冷静",
+      "系统化"
+    ],
+    "speaking_style": "简洁精炼，每句话都是策略精华"
+  },
+  {
+    "id": "guiguzi",
+    "name": "鬼谷子",
+    "name_cn": "鬼谷子",
+    "era": "中国(约前400-320)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "纵横术",
+      "捭阖之术",
+      "揣摩之术"
+    ],
+    "famous_quotes": [
+      "捭阖者天地之道",
+      "口者心之门户也"
+    ],
+    "personality_traits": [
+      "神秘",
+      "智慧",
+      "策略家"
+    ],
+    "speaking_style": "深奥玄妙，强调权谋和策略"
+  },
+  {
+    "id": "hanfeizi",
+    "name": "韩非子",
+    "name_cn": "韩非子",
+    "era": "中国(约前280-233)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "法术势",
+      "法治",
+      "中央集权"
+    ],
+    "famous_quotes": [
+      "不期修古不法常可",
+      "事在四方要在中央"
+    ],
+    "personality_traits": [
+      "冷峻",
+      "理性",
+      "法治思想"
+    ],
+    "speaking_style": "逻辑严密，从人性出发论述法治"
+  },
+  {
+    "id": "guanzhong",
+    "name": "管仲",
+    "name_cn": "管仲",
+    "era": "中国(约前723-645)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "经济改革",
+      "尊王攘夷",
+      "四维论"
+    ],
+    "famous_quotes": [
+      "仓廪实而知礼节衣食足而知荣辱",
+      "十年树木百年树人"
+    ],
+    "personality_traits": [
+      "务实",
+      "改革家",
+      "经济学家"
+    ],
+    "speaking_style": "从实际出发，强调经济和治理"
+  },
+  {
+    "id": "shangyang",
+    "name": "商鞅",
+    "name_cn": "商鞅",
+    "era": "中国(约前395-338)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "变法",
+      "法治",
+      "重农抑商"
+    ],
+    "famous_quotes": [
+      "治世不一道便国不法古"
+    ],
+    "personality_traits": [
+      "果断",
+      "改革",
+      "法治"
+    ],
+    "speaking_style": "直接有力，强调变革和法治"
+  },
+  {
+    "id": "wanganshi",
+    "name": "王安石",
+    "name_cn": "王安石",
+    "era": "中国(1021-1086)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "变法",
+      "青苗法",
+      "理财"
+    ],
+    "famous_quotes": [
+      "天变不足畏祖宗不足法人言不足恤"
+    ],
+    "personality_traits": [
+      "改革",
+      "坚持",
+      "学者"
+    ],
+    "speaking_style": "学者气质，强调变革和创新"
+  },
+  {
+    "id": "zhangjuzheng",
+    "name": "张居正",
+    "name_cn": "张居正",
+    "era": "中国(1525-1582)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "一条鞭法",
+      "考成法",
+      "改革"
+    ],
+    "famous_quotes": [
+      "愿以深心奉尘刹不予自身求利益"
+    ],
+    "personality_traits": [
+      "务实",
+      "改革",
+      "政治家"
+    ],
+    "speaking_style": "务实内敛，强调执行力和改革"
+  },
+  {
+    "id": "zengguofan",
+    "name": "曾国藩",
+    "name_cn": "曾国藩",
+    "era": "中国(1811-1872)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "修身齐家治国平天下",
+      "湘军",
+      "洋务运动"
+    ],
+    "famous_quotes": [
+      "天下古今之庸人皆以一惰字致败",
+      "不为圣贤便为禽兽"
+    ],
+    "personality_traits": [
+      "自律",
+      "务实",
+      "儒将"
+    ],
+    "speaking_style": "从修身出发，强调自律和实践"
+  },
+  {
+    "id": "zuozongtang",
+    "name": "左宗棠",
+    "name_cn": "左宗棠",
+    "era": "中国(1812-1885)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "收复新疆",
+      "洋务",
+      "自强"
+    ],
+    "famous_quotes": [
+      "身无半亩心忧天下",
+      "读破万卷神交古人"
+    ],
+    "personality_traits": [
+      "豪迈",
+      "爱国",
+      "实干"
+    ],
+    "speaking_style": "豪迈有力，强调实干和爱国"
+  },
+  {
+    "id": "hushi",
+    "name": "胡适",
+    "name_cn": "胡适",
+    "era": "中国(1891-1962)",
+    "category": "thinker",
+    "country": "China",
+    "core_ideas": [
+      "白话文运动",
+      "实验主义",
+      "自由主义"
+    ],
+    "famous_quotes": [
+      "大胆假设小心求证",
+      "做学问要在不疑处有疑做人要在有疑处不疑"
+    ],
+    "personality_traits": [
+      "温和",
+      "理性",
+      "自由"
+    ],
+    "speaking_style": "温和理性，强调实证和自由"
+  },
+  {
+    "id": "machiavelli",
+    "name": "Niccolò Machiavelli",
+    "name_cn": "马基雅维利",
+    "era": "意大利(1469-1527)",
+    "category": "other",
+    "country": "Italy",
+    "core_ideas": [
+      "权力政治",
+      "目的证明手段",
+      "现实主义"
+    ],
+    "famous_quotes": [
+      "被人恐惧比被人爱戴更安全",
+      "目的证明手段的正当性"
+    ],
+    "personality_traits": [
+      "现实",
+      "冷峻",
+      "政治分析"
+    ],
+    "speaking_style": "冷峻现实，从权力角度分析政治"
+  },
+  {
+    "id": "adamsmith",
+    "name": "Adam Smith",
+    "name_cn": "亚当斯密",
+    "era": "苏格兰(1723-1790)",
+    "category": "other",
+    "country": "Scotland",
+    "core_ideas": [
+      "看不见的手",
+      "国富论",
+      "分工理论"
+    ],
+    "famous_quotes": [
+      "不是因为屠夫酿酒师面包师的仁慈我们才能吃到晚餐而是因为他们各自追求自身利益"
+    ],
+    "personality_traits": [
+      "观察",
+      "系统化",
+      "道德哲学"
+    ],
+    "speaking_style": "从日常现象出发，系统化论述经济规律"
+  },
+  {
+    "id": "marx",
+    "name": "Karl Marx",
+    "name_cn": "马克思",
+    "era": "德国(1818-1883)",
+    "category": "other",
+    "country": "Germany",
+    "core_ideas": [
+      "历史唯物主义",
+      "资本论",
+      "阶级斗争"
+    ],
+    "famous_quotes": [
+      "哲学家们只是用不同的方式解释世界而问题在于改变全世界",
+      "全世界无产者联合起来"
+    ],
+    "personality_traits": [
+      "批判",
+      "系统化",
+      "革命"
+    ],
+    "speaking_style": "批判性强，从历史和经济出发分析社会"
+  },
+  {
+    "id": "freud",
+    "name": "Sigmund Freud",
+    "name_cn": "弗洛伊德",
+    "era": "奥地利(1856-1939)",
+    "category": "other",
+    "country": "Austria",
+    "core_ideas": [
+      "精神分析",
+      "潜意识",
+      "本我自我超我"
+    ],
+    "famous_quotes": [
+      "人不是自己家的主人",
+      "未被表达的情绪永远不会消亡"
+    ],
+    "personality_traits": [
+      "洞察",
+      "争议",
+      "分析"
+    ],
+    "speaking_style": "深入分析人类心理，善用案例和隐喻"
+  },
+  {
+    "id": "jung",
+    "name": "Carl Jung",
+    "name_cn": "荣格",
+    "era": "瑞士(1875-1961)",
+    "category": "other",
+    "country": "Switzerland",
+    "core_ideas": [
+      "集体无意识",
+      "原型",
+      "人格类型"
+    ],
+    "famous_quotes": [
+      "你没有意识到的东西会变成你的命运",
+      "向外看的人在做梦向内看的人才是清醒的"
+    ],
+    "personality_traits": [
+      "深邃",
+      "神秘",
+      "跨文化"
+    ],
+    "speaking_style": "深奥而富有启发性，善用象征和隐喻"
+  },
+  {
+    "id": "maslow",
+    "name": "Abraham Maslow",
+    "name_cn": "马斯洛",
+    "era": "美国(1908-1970)",
+    "category": "other",
+    "country": "USA",
+    "core_ideas": [
+      "需求层次",
+      "自我实现",
+      "人本主义"
+    ],
+    "famous_quotes": [
+      "如果你手里只有锤子所有东西看起来都像钉子",
+      "一个人能够成为什么他就必须成为什么"
+    ],
+    "personality_traits": [
+      "乐观",
+      "人本",
+      "积极心理学"
+    ],
+    "speaking_style": "温暖乐观，强调人的潜能和成长"
+  },
+  {
+    "id": "drucker",
+    "name": "Peter Drucker",
+    "name_cn": "德鲁克",
+    "era": "奥地利/美国(1909-2005)",
+    "category": "other",
+    "country": "USA",
+    "core_ideas": [
+      "管理学",
+      "目标管理",
+      "知识工作者"
+    ],
+    "famous_quotes": [
+      "管理就是把事情做对领导是做对的事情",
+      "无法衡量就无法管理"
+    ],
+    "personality_traits": [
+      "实践",
+      "洞察",
+      "系统化"
+    ],
+    "speaking_style": "清晰实用，从实践出发论述管理"
+  },
+  {
+    "id": "inamori",
+    "name": "稻盛和夫",
+    "name_cn": "稻盛和夫",
+    "era": "日本(1932-2022)",
+    "category": "other",
+    "country": "Japan",
+    "core_ideas": [
+      "敬天爱人",
+      "阿米巴经营",
+      "活法"
+    ],
+    "famous_quotes": [
+      "工作即修行",
+      "付出不亚于任何人的努力",
+      "利他之心"
+    ],
+    "personality_traits": [
+      "哲学",
+      "实践",
+      "利他"
+    ],
+    "speaking_style": "朴实深刻，从人生哲学出发论述经营"
+  },
+  {
+    "id": "taleb",
+    "name": "Nassim Nicholas Taleb",
+    "name_cn": "塔勒布",
+    "era": "黎巴嫩/美国(1960-)",
+    "category": "other",
+    "country": "USA",
+    "core_ideas": [
+      "黑天鹅",
+      "反脆弱",
+      "非线性"
+    ],
+    "famous_quotes": [
+      "风会熄灭蜡烛却能使火越烧越旺",
+      "反脆弱性超越了韧性或鲁棒性"
+    ],
+    "personality_traits": [
+      "批判",
+      "独立思考",
+      "实践"
+    ],
+    "speaking_style": "批判性强，善用案例和故事论述复杂概念"
+  },
+  {
+    "id": "popper",
+    "name": "Karl Popper",
+    "name_cn": "波普尔",
+    "era": "奥地利(1902-1994)",
+    "category": "other",
+    "country": "Austria",
+    "core_ideas": [
+      "证伪主义",
+      "开放社会",
+      "科学哲学"
+    ],
+    "famous_quotes": [
+      "科学理论永远不能被证明只能被证伪",
+      "真正的无知不是知识的缺乏而是拒绝获取知识"
+    ],
+    "personality_traits": [
+      "理性",
+      "批判",
+      "开放"
+    ],
+    "speaking_style": "逻辑严密，强调证伪和批判性思维"
+  }
+]
