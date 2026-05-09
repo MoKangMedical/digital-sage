@@ -354,9 +354,38 @@ def _build_shell() -> str:
     }
     .status {
       display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       gap: 12px;
       color: var(--muted);
       font-size: 0.94rem;
+    }
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(17, 24, 39, 0.08);
+    }
+    .lang-button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      font: inherit;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+    .lang-button.active {
+      background: linear-gradient(135deg, #111827, #1d4ed8);
+      color: white;
+    }
+    .lang-button:hover {
+      transform: translateY(-1px);
     }
     .hero {
       border-radius: 36px;
@@ -1674,53 +1703,57 @@ def _build_shell() -> str:
     }
   </style>
 </head>
-<body>
+<body data-lang="zh">
   <div class="page">
     <div class="nav">
       <div class="brand">
         <div class="brand-mark">智</div>
         <div>
           <h1>Digital Sage</h1>
-          <p>与全球最聪明的 100 个大脑对话</p>
+          <p id="brandTagline">与全球最聪明的 100 个大脑对话</p>
         </div>
       </div>
       <div class="status">
         <span id="loadedCount">载入中</span>
-        <span>Production Live · DeepSeek</span>
+        <span id="statusLabel">Production Live · DeepSeek</span>
+        <div class="lang-toggle" id="langToggle">
+          <button type="button" class="lang-button active" data-lang="zh">中文</button>
+          <button type="button" class="lang-button" data-lang="en">EN</button>
+        </div>
       </div>
     </div>
 
     <section class="hero">
       <div class="hero-grid">
         <div class="hero-copy">
-          <h2><span>Thought Interface</span>智者</h2>
-          <p>
+          <h2><span id="heroAccent">Thought Interface</span><span id="heroTitle">智者</span></h2>
+          <p id="heroBody">
             把巴菲特、乔布斯、图灵、钟南山、孔子等 100 位人物的公开立场、长期方法论和表达风格，
             整理成一个可对话的判断界面。你不是来玩随机角色扮演，而是来借世界级思路把复杂问题看清一层。
           </p>
           <div class="hero-proof">
-            <span class="proof-pill">100 位长期主义智者</span>
-            <span class="proof-pill">DeepSeek 实时生成回答</span>
-            <span class="proof-pill">首页自带品牌成片</span>
-            <span class="proof-pill">适合创业、产品、战略判断</span>
+            <span class="proof-pill" id="proofPill0">100 位长期主义智者</span>
+            <span class="proof-pill" id="proofPill1">DeepSeek 实时生成回答</span>
+            <span class="proof-pill" id="proofPill2">首页自带品牌成片</span>
+            <span class="proof-pill" id="proofPill3">适合创业、产品、战略判断</span>
           </div>
           <div class="hero-actions">
-            <a class="hero-link primary" href="#filmDemo">观看成片 Demo</a>
-            <a class="hero-link secondary" href="#conversationWorkbench">直接开始对话</a>
+            <a class="hero-link primary" id="heroActionFilm" href="#filmDemo">观看成片 Demo</a>
+            <a class="hero-link secondary" id="heroActionChat" href="#conversationWorkbench">直接开始对话</a>
           </div>
         </div>
         <div class="hero-stats">
           <div>
-            <div class="stat-label">人物总数</div>
+            <div class="stat-label" id="heroStatLabel0">人物总数</div>
             <div class="stat-value" id="heroCount">100</div>
           </div>
           <div>
-            <div class="stat-label">覆盖领域</div>
-            <div class="tiny">商业 / 科技 / 科学 / 医学 / 思想 / 文化 / 治理 / 设计</div>
+            <div class="stat-label" id="heroStatLabel1">覆盖领域</div>
+            <div class="tiny" id="heroStatBody1">商业 / 科技 / 科学 / 医学 / 思想 / 文化 / 治理 / 设计</div>
           </div>
           <div>
-            <div class="stat-label">体验方式</div>
-            <div class="tiny">先看成片，再点典型问题，一键切到对应智者开始对话</div>
+            <div class="stat-label" id="heroStatLabel2">体验方式</div>
+            <div class="tiny" id="heroStatBody2">先看成片，再点典型问题，一键切到对应智者开始对话</div>
           </div>
         </div>
       </div>
@@ -1728,28 +1761,28 @@ def _build_shell() -> str:
 
     <section class="quickstart" id="quickStart">
       <div class="quickstart-copy">
-        <div class="eyebrow">Quick Start</div>
-        <h3>第一次打开，不必先研究。直接带着一个真实问题进入产品。</h3>
-        <p>
+        <div class="eyebrow" id="quickstartEyebrow">Quick Start</div>
+        <h3 id="quickstartTitle">第一次打开，不必先研究。直接带着一个真实问题进入产品。</h3>
+        <p id="quickstartBody">
           下面三条是最容易感受到产品价值的入口。点击后会自动切换到对应人物，
           并把问题填进对话框，适合首访、演示和转发给团队成员试用。
         </p>
       </div>
       <div class="quickstart-grid">
-        <button class="prompt-card" type="button" data-prompt-celeb="sam_altman" data-prompt-text="如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？">
-          <small>创业 / 增长</small>
-          <strong>用山姆·奥特曼的视角，看全球化产品从 0 到 1。</strong>
-          <span>适合创业者、增长负责人、出海团队先快速试一次真实对话。</span>
+        <button class="prompt-card" id="promptCard0" type="button" data-prompt-celeb="sam_altman" data-prompt-text="如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？">
+          <small id="promptCard0Small">创业 / 增长</small>
+          <strong id="promptCard0Strong">用山姆·奥特曼的视角，看全球化产品从 0 到 1。</strong>
+          <span id="promptCard0Body">适合创业者、增长负责人、出海团队先快速试一次真实对话。</span>
         </button>
-        <button class="prompt-card" type="button" data-prompt-celeb="buffett" data-prompt-text="现金流只够 6 个月，我应该先守住利润、客户还是团队？">
-          <small>经营 / 决策</small>
-          <strong>用巴菲特的视角，先拆清企业生死线应该守什么。</strong>
-          <span>适合经营压力、融资窗口、裁撤与聚焦等高压判断场景。</span>
+        <button class="prompt-card" id="promptCard1" type="button" data-prompt-celeb="buffett" data-prompt-text="现金流只够 6 个月，我应该先守住利润、客户还是团队？">
+          <small id="promptCard1Small">经营 / 决策</small>
+          <strong id="promptCard1Strong">用巴菲特的视角，先拆清企业生死线应该守什么。</strong>
+          <span id="promptCard1Body">适合经营压力、融资窗口、裁撤与聚焦等高压判断场景。</span>
         </button>
-        <button class="prompt-card" type="button" data-prompt-celeb="peter_drucker" data-prompt-text="如果团队目标很散，明天开始我该先改哪三个管理动作？">
-          <small>管理 / 组织</small>
-          <strong>用德鲁克的视角，把模糊管理问题收敛成明天就能执行的动作。</strong>
-          <span>适合 CEO、产品负责人、项目 owner 做组织收敛和方向统一。</span>
+        <button class="prompt-card" id="promptCard2" type="button" data-prompt-celeb="peter_drucker" data-prompt-text="如果团队目标很散，明天开始我该先改哪三个管理动作？">
+          <small id="promptCard2Small">管理 / 组织</small>
+          <strong id="promptCard2Strong">用德鲁克的视角，把模糊管理问题收敛成明天就能执行的动作。</strong>
+          <span id="promptCard2Body">适合 CEO、产品负责人、项目 owner 做组织收敛和方向统一。</span>
         </button>
       </div>
     </section>
@@ -1874,10 +1907,10 @@ def _build_shell() -> str:
       <div class="curriculum-head">
         <div>
           <div class="eyebrow">Spark 2 Curriculum</div>
-          <h3>把 100 位智者压成同一套 10 课系统，先看全局，再点进单人课程。</h3>
-          <p>主页和课程站共用同一份课程 catalog。你在这里看到的 10 课框架、领域分布和重点人物，都会直接链接到正式课程页，不再是孤立文案。</p>
+          <h3 id="curriculumTitle">把 100 位智者压成同一套 10 课系统，先看全局，再点进单人课程。</h3>
+          <p id="curriculumBody">主页和课程站共用同一份课程 catalog。你在这里看到的 10 课框架、领域分布和重点人物，都会直接链接到正式课程页，不再是孤立文案。</p>
         </div>
-        <a class="curriculum-link" href="/courses/">进入全部课程</a>
+        <a class="curriculum-link" id="curriculumLink" href="/courses/">进入全部课程</a>
       </div>
 
       <div class="curriculum-shell">
@@ -1886,13 +1919,13 @@ def _build_shell() -> str:
           <div class="blueprint-rail" id="blueprintRail"></div>
         </div>
         <div class="curriculum-panel">
-          <div class="eyebrow">Domains</div>
+          <div class="eyebrow" id="curriculumDomainsEyebrow">Domains</div>
           <div class="domain-board" id="domainBoard"></div>
         </div>
       </div>
 
       <div class="spotlight-panel" id="courseSpotlight">
-        <div class="tiny">课程数据载入中…</div>
+        <div class="tiny" id="courseSpotlightLoading">课程数据载入中…</div>
       </div>
 
       <div class="featured-grid" id="featuredCourses"></div>
@@ -1900,7 +1933,7 @@ def _build_shell() -> str:
 
     <section class="toolbar">
       <div class="search">
-        <span>搜索</span>
+        <span id="searchLabel">搜索</span>
         <input id="searchInput" placeholder="输入中文名、英文名或领域关键词">
       </div>
       <div class="filters" id="filters"></div>
@@ -1908,7 +1941,7 @@ def _build_shell() -> str:
 
     <section class="main">
       <aside class="panel">
-        <h3>Expert Directory</h3>
+        <h3 id="directoryTitle">Expert Directory</h3>
         <div class="expert-list" id="expertList"></div>
       </aside>
 
@@ -1926,15 +1959,15 @@ def _build_shell() -> str:
 
         <section class="detail-grid">
           <article class="detail">
-            <h5>核心价值</h5>
+            <h5 id="detailHeadingValues">核心价值</h5>
             <ul id="coreValues"></ul>
           </article>
           <article class="detail">
-            <h5>判断框架</h5>
+            <h5 id="detailHeadingFramework">判断框架</h5>
             <ul id="framework"></ul>
           </article>
           <article class="detail">
-            <h5>重点立场</h5>
+            <h5 id="detailHeadingPositions">重点立场</h5>
             <ul id="positions"></ul>
           </article>
         </section>
@@ -1945,7 +1978,7 @@ def _build_shell() -> str:
               <img class="chat-avatar" id="chatAvatar" alt="聊天头像">
               <div>
                 <strong id="chatName">正在连接</strong>
-                <div class="tiny">基于公开资料的 AI 模拟回答</div>
+                <div class="tiny" id="chatSubtitle">基于公开资料的 AI 模拟回答</div>
               </div>
             </div>
             <div class="tiny" id="chatSource">准备中</div>
@@ -1953,7 +1986,7 @@ def _build_shell() -> str:
           <div class="chat-log" id="chatLog"></div>
           <form class="chat-form" id="chatForm">
             <textarea id="messageInput" placeholder="例如：如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？"></textarea>
-            <button class="submit" type="submit">开始对话</button>
+            <button class="submit" id="chatSubmit" type="submit">开始对话</button>
           </form>
         </section>
       </div>
@@ -1961,19 +1994,19 @@ def _build_shell() -> str:
 
     <section class="faq-section" id="faq">
       <div class="eyebrow">FAQ</div>
-      <h3>它不是泛泛聊天工具，而是一个为高价值判断设计的认知界面。</h3>
+      <h3 id="faqTitle">它不是泛泛聊天工具，而是一个为高价值判断设计的认知界面。</h3>
       <div class="faq-grid">
         <article class="faq-item">
-          <h4>这是不是简单的名人角色扮演？</h4>
-          <p>不是。Digital Sage 优先围绕人物公开资料、长期立场、判断框架和表达风格来组织回答，重点是帮助你比较不同思路，而不是追求像不像。</p>
+          <h4 id="faqQ0">这是不是简单的名人角色扮演？</h4>
+          <p id="faqA0">不是。Digital Sage 优先围绕人物公开资料、长期立场、判断框架和表达风格来组织回答，重点是帮助你比较不同思路，而不是追求像不像。</p>
         </article>
         <article class="faq-item">
-          <h4>第一次体验，最推荐从哪里开始？</h4>
-          <p>先看首页成片，再点上面的典型问题入口。它会自动切到对应智者，把问题填进输入框，让你在 1 分钟内感受到产品价值。</p>
+          <h4 id="faqQ1">第一次体验，最推荐从哪里开始？</h4>
+          <p id="faqA1">先看首页成片，再点上面的典型问题入口。它会自动切到对应智者，把问题填进输入框，让你在 1 分钟内感受到产品价值。</p>
         </article>
         <article class="faq-item">
-          <h4>它最适合哪些场景？</h4>
-          <p>最适合创业决策、产品方向、战略判断、研究框架梳理，以及那些不能只靠情绪和直觉做决定的关键节点。</p>
+          <h4 id="faqQ2">它最适合哪些场景？</h4>
+          <p id="faqA2">最适合创业决策、产品方向、战略判断、研究框架梳理，以及那些不能只靠情绪和直觉做决定的关键节点。</p>
         </article>
       </div>
     </section>
@@ -1981,15 +2014,179 @@ def _build_shell() -> str:
 
   <script>
     const categoryLabels = {
-      all: "全部",
-      business: "商业",
-      technology: "科技",
-      science: "科学",
-      medical: "医学",
-      philosophy: "思想",
-      culture: "文化",
-      policy: "治理",
-      design: "设计"
+      zh: {
+        all: "全部",
+        business: "商业",
+        technology: "科技",
+        science: "科学",
+        medical: "医学",
+        philosophy: "思想",
+        culture: "文化",
+        policy: "治理",
+        design: "设计"
+      },
+      en: {
+        all: "All",
+        business: "Business",
+        technology: "Technology",
+        science: "Science",
+        medical: "Medical",
+        philosophy: "Philosophy",
+        culture: "Culture",
+        policy: "Governance",
+        design: "Design"
+      }
+    };
+
+    const uiCopy = {
+      zh: {
+        brandTagline: "与全球最聪明的 100 个大脑对话",
+        statusLabel: "Production Live · DeepSeek",
+        heroAccent: "Thought Interface",
+        heroTitle: "智者",
+        heroBody: "把巴菲特、乔布斯、图灵、钟南山、孔子等 100 位人物的公开立场、长期方法论和表达风格，整理成一个可对话的判断界面。你不是来玩随机角色扮演，而是来借世界级思路把复杂问题看清一层。",
+        proofPills: ["100 位长期主义智者", "DeepSeek 实时生成回答", "首页自带品牌成片", "适合创业、产品、战略判断"],
+        heroActions: ["观看成片 Demo", "直接开始对话"],
+        heroStatLabels: ["人物总数", "覆盖领域", "体验方式"],
+        heroStatBodies: ["", "商业 / 科技 / 科学 / 医学 / 思想 / 文化 / 治理 / 设计", "先看成片，再点典型问题，一键切到对应智者开始对话"],
+        quickstartEyebrow: "Quick Start",
+        quickstartTitle: "第一次打开，不必先研究。直接带着一个真实问题进入产品。",
+        quickstartBody: "下面三条是最容易感受到产品价值的入口。点击后会自动切换到对应人物，并把问题填进对话框，适合首访、演示和转发给团队成员试用。",
+        prompts: [
+          {
+            small: "创业 / 增长",
+            strong: "用山姆·奥特曼的视角，看全球化产品从 0 到 1。",
+            body: "适合创业者、增长负责人、出海团队先快速试一次真实对话。"
+          },
+          {
+            small: "经营 / 决策",
+            strong: "用巴菲特的视角，先拆清企业生死线应该守什么。",
+            body: "适合经营压力、融资窗口、裁撤与聚焦等高压判断场景。"
+          },
+          {
+            small: "管理 / 组织",
+            strong: "用德鲁克的视角，把模糊管理问题收敛成明天就能执行的动作。",
+            body: "适合 CEO、产品负责人、项目 owner 做组织收敛和方向统一。"
+          }
+        ],
+        curriculumTitle: "把 100 位智者压成同一套 10 课系统，先看全局，再点进单人课程。",
+        curriculumBody: "主页和课程站共用同一份课程 catalog。你在这里看到的 10 课框架、领域分布和重点人物，都会直接链接到正式课程页，不再是孤立文案。",
+        curriculumLink: "进入全部课程",
+        curriculumDomainsEyebrow: "Domains",
+        courseLoading: "课程数据载入中…",
+        searchLabel: "搜索",
+        searchPlaceholder: "输入中文名、英文名或领域关键词",
+        directoryTitle: "Expert Directory",
+        detailCategoryDefault: "人物档案",
+        detailLoadingName: "载入中",
+        detailLoadingBody: "请稍候，正在加载 100 位智者档案。",
+        detailHeadings: ["核心价值", "判断框架", "重点立场"],
+        chatSubtitle: "基于公开资料的 AI 模拟回答",
+        chatSourcePreparing: "准备中",
+        chatPlaceholder: "例如：如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？",
+        chatSubmit: "开始对话",
+        faqTitle: "它不是泛泛聊天工具，而是一个为高价值判断设计的认知界面。",
+        faq: [
+          {
+            q: "这是不是简单的名人角色扮演？",
+            a: "不是。Digital Sage 优先围绕人物公开资料、长期立场、判断框架和表达风格来组织回答，重点是帮助你比较不同思路，而不是追求像不像。"
+          },
+          {
+            q: "第一次体验，最推荐从哪里开始？",
+            a: "先看首页成片，再点上面的典型问题入口。它会自动切到对应智者，把问题填进输入框，让你在 1 分钟内感受到产品价值。"
+          },
+          {
+            q: "它最适合哪些场景？",
+            a: "最适合创业决策、产品方向、战略判断、研究框架梳理，以及那些不能只靠情绪和直觉做决定的关键节点。"
+          }
+        ],
+        emptySearch: "没有匹配结果。",
+        chatGenerating: "正在生成回答…",
+        demoPause: "暂停 Demo",
+        demoResume: "继续播放",
+        loadedCount: (count) => `已载入 ${count} 位智者`,
+        detailCategory: (labelZh) => labelZh,
+        detailTitle: (profile) => `${profile.title} · ${profile.name_en}`,
+        chatName: (profile) => `与 ${profile.name} 对话`,
+        chatSource: (profile) => `方法论焦点：${profile.focus_tags.slice(0, 3).join(" / ")}`,
+        chatIntro: (profile) => `已进入 ${profile.name} 的思考界面。你可以直接提问，我会优先沿着 ${profile.focus_tags.slice(0, 3).join("、")} 这条线索回答。`,
+        sourceLabelDeepseek: "Source: DeepSeek API",
+        sourceLabelFallback: "Source: Local fallback persona"
+      },
+      en: {
+        brandTagline: "Talk with 100 of the world's sharpest minds",
+        statusLabel: "Production Live · DeepSeek",
+        heroAccent: "Thought Interface",
+        heroTitle: "Digital Sage",
+        heroBody: "Digital Sage turns the public positions, long-term methods, and speaking patterns of 100 iconic thinkers into a conversational judgment interface. This is not random role-play. It is a way to borrow world-class reasoning when the problem in front of you is still unclear.",
+        proofPills: ["100 long-horizon minds", "DeepSeek-generated live answers", "Built-in brand film on the homepage", "Designed for strategy, product, and founder decisions"],
+        heroActions: ["Watch the demo film", "Start a live session"],
+        heroStatLabels: ["Profiles", "Coverage", "Experience"],
+        heroStatBodies: ["", "Business / Technology / Science / Medicine / Philosophy / Culture / Governance / Design", "Watch the film, tap a real prompt, and jump directly into the matched mind."],
+        quickstartEyebrow: "Quick Start",
+        quickstartTitle: "Do not study the interface first. Enter with a real decision.",
+        quickstartBody: "These three prompts are the fastest way to feel the product. Each click switches to the right mind and pre-fills the question so a first-time visitor can understand the value in under a minute.",
+        prompts: [
+          {
+            small: "Founders / Growth",
+            strong: "Use Sam Altman's lens to inspect a 0-to-1 global product.",
+            body: "Best for founders, growth leads, and outbound teams who want one real conversation first."
+          },
+          {
+            small: "Operating / Decisions",
+            strong: "Use Buffett's lens to decide what must be protected first.",
+            body: "Best for cash pressure, financing windows, layoffs, and focus decisions under stress."
+          },
+          {
+            small: "Management / Organization",
+            strong: "Use Drucker's lens to turn vague management pain into next-day actions.",
+            body: "Best for CEOs, product leads, and project owners who need operating alignment."
+          }
+        ],
+        curriculumTitle: "Compress 100 minds into one common 10-lesson system, then move from the big map into any individual curriculum.",
+        curriculumBody: "The homepage and the course site share the same curriculum catalog. The 10-lesson arc, domain map, and featured minds here all link directly into the production course pages.",
+        curriculumLink: "Open full curriculum",
+        curriculumDomainsEyebrow: "Domains",
+        courseLoading: "Loading curriculum data…",
+        searchLabel: "Search",
+        searchPlaceholder: "Search by Chinese name, English name, or domain keyword",
+        directoryTitle: "Expert Directory",
+        detailCategoryDefault: "Profile",
+        detailLoadingName: "Loading",
+        detailLoadingBody: "Loading the 100-mind profile layer.",
+        detailHeadings: ["Core Values", "Judgment Framework", "Core Positions"],
+        chatSubtitle: "AI simulation grounded in public materials",
+        chatSourcePreparing: "Preparing",
+        chatPlaceholder: "Example: If I am building a global product from zero, which three variables would you inspect first?",
+        chatSubmit: "Start session",
+        faqTitle: "This is not a generic chat toy. It is a reasoning surface for high-value decisions.",
+        faq: [
+          {
+            q: "Is this just celebrity role-play?",
+            a: "No. Digital Sage organizes replies around public materials, long-term positions, judgment order, and speaking style. The goal is to compare reasoning systems, not to imitate a face."
+          },
+          {
+            q: "Where should a first-time visitor start?",
+            a: "Watch the film first, then tap one of the live prompts. The product will switch to the right mind, prefill the question, and make the value obvious quickly."
+          },
+          {
+            q: "What is it best suited for?",
+            a: "Founder decisions, product direction, strategic judgment, and research framing, especially when intuition alone is too expensive."
+          }
+        ],
+        emptySearch: "No matching profiles.",
+        chatGenerating: "Generating answer…",
+        demoPause: "Pause demo",
+        demoResume: "Resume demo",
+        loadedCount: (count) => `${count} profiles loaded`,
+        detailCategory: (labelZh, profile, meta) => meta?.category_label_en || labelZh,
+        detailTitle: (profile, meta) => `${profile.name} · ${meta?.category_label_en || profile.title}`,
+        chatName: (profile) => `Talk with ${profile.name_en || profile.name}`,
+        chatSource: (profile) => `Method focus: ${profile.focus_tags.slice(0, 3).join(" / ")}`,
+        chatIntro: (profile) => `You are now inside ${profile.name_en || profile.name}'s reasoning interface. Ask directly and the answer will start from ${profile.focus_tags.slice(0, 3).join(", ")} first.`,
+        sourceLabelDeepseek: "Source: DeepSeek API",
+        sourceLabelFallback: "Source: Local fallback persona"
+      }
     };
 
     const state = {
@@ -1997,7 +2194,14 @@ def _build_shell() -> str:
       courseCatalog: null,
       activeId: null,
       activeCategory: "all",
-      search: ""
+      search: "",
+      lang: (() => {
+        try {
+          return localStorage.getItem("digital-sage-home-lang") || "zh";
+        } catch (err) {
+          return "zh";
+        }
+      })()
     };
 
     const demoScenes = __DEMO_SCENES_JSON__.map((scene) => ({
@@ -2020,24 +2224,56 @@ def _build_shell() -> str:
     };
 
     const els = {
+      brandTagline: document.getElementById("brandTagline"),
+      statusLabel: document.getElementById("statusLabel"),
+      langButtons: Array.from(document.querySelectorAll(".lang-button[data-lang]")),
+      heroAccent: document.getElementById("heroAccent"),
+      heroTitle: document.getElementById("heroTitle"),
+      heroBody: document.getElementById("heroBody"),
+      proofPills: [0, 1, 2, 3].map((index) => document.getElementById(`proofPill${index}`)),
+      heroActionFilm: document.getElementById("heroActionFilm"),
+      heroActionChat: document.getElementById("heroActionChat"),
+      heroStatLabel0: document.getElementById("heroStatLabel0"),
+      heroStatLabel1: document.getElementById("heroStatLabel1"),
+      heroStatLabel2: document.getElementById("heroStatLabel2"),
+      heroStatBody1: document.getElementById("heroStatBody1"),
+      heroStatBody2: document.getElementById("heroStatBody2"),
+      quickstartEyebrow: document.getElementById("quickstartEyebrow"),
+      quickstartTitle: document.getElementById("quickstartTitle"),
+      quickstartBody: document.getElementById("quickstartBody"),
+      promptCardSmall: [0, 1, 2].map((index) => document.getElementById(`promptCard${index}Small`)),
+      promptCardStrong: [0, 1, 2].map((index) => document.getElementById(`promptCard${index}Strong`)),
+      promptCardBody: [0, 1, 2].map((index) => document.getElementById(`promptCard${index}Body`)),
+      curriculumTitle: document.getElementById("curriculumTitle"),
+      curriculumBody: document.getElementById("curriculumBody"),
+      curriculumLink: document.getElementById("curriculumLink"),
+      curriculumDomainsEyebrow: document.getElementById("curriculumDomainsEyebrow"),
+      courseSpotlightLoading: document.getElementById("courseSpotlightLoading"),
       heroCount: document.getElementById("heroCount"),
       loadedCount: document.getElementById("loadedCount"),
+      searchLabel: document.getElementById("searchLabel"),
       filters: document.getElementById("filters"),
       expertList: document.getElementById("expertList"),
+      directoryTitle: document.getElementById("directoryTitle"),
       searchInput: document.getElementById("searchInput"),
       detailCategory: document.getElementById("detailCategory"),
       detailAvatar: document.getElementById("detailAvatar"),
       detailName: document.getElementById("detailName"),
       detailTitle: document.getElementById("detailTitle"),
+      detailHeadingValues: document.getElementById("detailHeadingValues"),
+      detailHeadingFramework: document.getElementById("detailHeadingFramework"),
+      detailHeadingPositions: document.getElementById("detailHeadingPositions"),
       coreValues: document.getElementById("coreValues"),
       framework: document.getElementById("framework"),
       positions: document.getElementById("positions"),
       chatAvatar: document.getElementById("chatAvatar"),
       chatName: document.getElementById("chatName"),
+      chatSubtitle: document.getElementById("chatSubtitle"),
       chatSource: document.getElementById("chatSource"),
       chatLog: document.getElementById("chatLog"),
       chatForm: document.getElementById("chatForm"),
       messageInput: document.getElementById("messageInput"),
+      chatSubmit: document.getElementById("chatSubmit"),
       promptButtons: Array.from(document.querySelectorAll("[data-prompt-celeb]")),
       demoPlayer: document.getElementById("demoPlayer"),
       demoToggle: document.getElementById("demoToggle"),
@@ -2060,8 +2296,118 @@ def _build_shell() -> str:
       blueprintRail: document.getElementById("blueprintRail"),
       domainBoard: document.getElementById("domainBoard"),
       courseSpotlight: document.getElementById("courseSpotlight"),
-      featuredCourses: document.getElementById("featuredCourses")
+      featuredCourses: document.getElementById("featuredCourses"),
+      faqTitle: document.getElementById("faqTitle"),
+      faqQ: [0, 1, 2].map((index) => document.getElementById(`faqQ${index}`)),
+      faqA: [0, 1, 2].map((index) => document.getElementById(`faqA${index}`))
     };
+
+    function copy() {
+      return uiCopy[state.lang] || uiCopy.zh;
+    }
+
+    function categoryLabelFor(key) {
+      return (categoryLabels[state.lang] || categoryLabels.zh)[key] || key;
+    }
+
+    function courseMetaFor(id) {
+      return (state.courseCatalog?.thinkers || []).find((item) => item.id === id) || null;
+    }
+
+    function updateLoadedCount() {
+      els.loadedCount.textContent = copy().loadedCount(state.celebrities.length);
+    }
+
+    function updateLanguageButtons() {
+      document.body.dataset.lang = state.lang;
+      els.langButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.lang === state.lang);
+      });
+    }
+
+    function applyLanguage() {
+      const text = copy();
+      els.brandTagline.textContent = text.brandTagline;
+      els.statusLabel.textContent = text.statusLabel;
+      els.heroAccent.textContent = text.heroAccent;
+      els.heroTitle.textContent = text.heroTitle;
+      els.heroBody.textContent = text.heroBody;
+      text.proofPills.forEach((value, index) => {
+        if (els.proofPills[index]) els.proofPills[index].textContent = value;
+      });
+      els.heroActionFilm.textContent = text.heroActions[0];
+      els.heroActionChat.textContent = text.heroActions[1];
+      els.heroStatLabel0.textContent = text.heroStatLabels[0];
+      els.heroStatLabel1.textContent = text.heroStatLabels[1];
+      els.heroStatLabel2.textContent = text.heroStatLabels[2];
+      els.heroStatBody1.textContent = text.heroStatBodies[1];
+      els.heroStatBody2.textContent = text.heroStatBodies[2];
+      els.quickstartEyebrow.textContent = text.quickstartEyebrow;
+      els.quickstartTitle.textContent = text.quickstartTitle;
+      els.quickstartBody.textContent = text.quickstartBody;
+      text.prompts.forEach((item, index) => {
+        els.promptCardSmall[index].textContent = item.small;
+        els.promptCardStrong[index].textContent = item.strong;
+        els.promptCardBody[index].textContent = item.body;
+      });
+      els.curriculumTitle.textContent = text.curriculumTitle;
+      els.curriculumBody.textContent = text.curriculumBody;
+      els.curriculumLink.textContent = text.curriculumLink;
+      els.curriculumDomainsEyebrow.textContent = text.curriculumDomainsEyebrow;
+      if (els.courseSpotlightLoading) {
+        els.courseSpotlightLoading.textContent = text.courseLoading;
+      }
+      els.searchLabel.textContent = text.searchLabel;
+      els.searchInput.placeholder = text.searchPlaceholder;
+      els.directoryTitle.textContent = text.directoryTitle;
+      els.detailHeadingValues.textContent = text.detailHeadings[0];
+      els.detailHeadingFramework.textContent = text.detailHeadings[1];
+      els.detailHeadingPositions.textContent = text.detailHeadings[2];
+      els.chatSubtitle.textContent = text.chatSubtitle;
+      els.chatSubmit.textContent = text.chatSubmit;
+      els.messageInput.placeholder = text.chatPlaceholder;
+      els.faqTitle.textContent = text.faqTitle;
+      text.faq.forEach((item, index) => {
+        els.faqQ[index].textContent = item.q;
+        els.faqA[index].textContent = item.a;
+      });
+      els.demoToggle.textContent = demoState.playing ? text.demoPause : text.demoResume;
+      updateLoadedCount();
+      updateLanguageButtons();
+      renderFilters();
+      renderExpertList();
+      if (state.courseCatalog) {
+        renderCourseShowcase();
+      } else {
+        renderCourseFallback();
+      }
+      renderCourseSpotlight();
+      if (state.activeId) {
+        const profile = state.celebrities.find((item) => item.id === state.activeId);
+        if (profile) {
+          const meta = courseMetaFor(profile.id);
+          els.detailCategory.textContent = text.detailCategory(profile.category_label, profile, meta);
+          els.detailName.textContent = state.lang === "en" ? (profile.name_en || profile.name) : profile.name;
+          els.detailTitle.textContent = text.detailTitle(profile, meta);
+          els.chatName.textContent = text.chatName(profile);
+          els.chatSource.textContent = text.chatSource(profile);
+        }
+      } else {
+        els.detailCategory.textContent = text.detailCategoryDefault;
+        els.detailName.textContent = text.detailLoadingName;
+        els.detailTitle.textContent = text.detailLoadingBody;
+        els.chatName.textContent = text.detailLoadingName;
+        els.chatSource.textContent = text.chatSourcePreparing;
+      }
+    }
+
+    function setLanguage(lang) {
+      state.lang = lang === "en" ? "en" : "zh";
+      try {
+        localStorage.setItem("digital-sage-home-lang", state.lang);
+      } catch (err) {}
+      applyLanguage();
+    }
 
     function renderDemoDots() {
       els.demoDots.innerHTML = "";
@@ -2136,7 +2482,7 @@ def _build_shell() -> str:
 
     function toggleDemoPlayback() {
       demoState.playing = !demoState.playing;
-      els.demoToggle.textContent = demoState.playing ? "暂停 Demo" : "继续播放";
+      els.demoToggle.textContent = demoState.playing ? copy().demoPause : copy().demoResume;
     }
 
     function initDemo() {
@@ -2157,38 +2503,39 @@ def _build_shell() -> str:
 
     function renderCourseShowcase() {
       if (!state.courseCatalog) return;
+      const english = state.lang === "en";
 
       const stats = state.courseCatalog.stats || {};
       els.courseStats.innerHTML = `
         <article class="curriculum-stat">
           <strong>${escapeHtml(stats.thinkers || 0)}</strong>
-          <span>智者数量</span>
+          <span>${english ? "minds" : "智者数量"}</span>
         </article>
         <article class="curriculum-stat">
           <strong>${escapeHtml(stats.lessons || 0)}</strong>
-          <span>课程总数</span>
+          <span>${english ? "lessons" : "课程总数"}</span>
         </article>
         <article class="curriculum-stat">
           <strong>${escapeHtml(stats.categories || 0)}</strong>
-          <span>知识领域</span>
+          <span>${english ? "domains" : "知识领域"}</span>
         </article>
       `;
 
       els.blueprintRail.innerHTML = (state.courseCatalog.blueprint || []).map((item) => `
         <article class="blueprint-card">
-          <span class="blueprint-num">第${escapeHtml(item.number)}课</span>
-          <strong>${escapeHtml(item.title)}</strong>
-          <p>${escapeHtml(item.focus)}</p>
-          <small>${escapeHtml(item.deliverable)}</small>
+          <span class="blueprint-num">${english ? `Lesson ${escapeHtml(item.number)}` : `第${escapeHtml(item.number)}课`}</span>
+          <strong>${escapeHtml(english ? (item.title_en || item.title) : item.title)}</strong>
+          <p>${escapeHtml(english ? (item.focus_en || item.focus) : item.focus)}</p>
+          <small>${escapeHtml(english ? (item.deliverable_en || item.deliverable) : item.deliverable)}</small>
         </article>
       `).join("");
 
       els.domainBoard.innerHTML = (state.courseCatalog.categories || []).map((item) => `
         <article class="domain-chip" style="--domain-accent:${escapeHtml(item.accent)}">
           <div class="domain-count">${escapeHtml(item.count)} minds</div>
-          <strong>${escapeHtml(item.label)}</strong>
-          <p>${escapeHtml(item.theme)}</p>
-          <small>${escapeHtml(item.signal)}</small>
+          <strong>${escapeHtml(english ? (item.label_en || item.label) : item.label)}</strong>
+          <p>${escapeHtml(english ? (item.theme_en || item.theme) : item.theme)}</p>
+          <small>${escapeHtml(english ? (item.signal_en || item.signal) : item.signal)}</small>
         </article>
       `).join("");
 
@@ -2203,42 +2550,52 @@ def _build_shell() -> str:
                 : "";
             })()}
             <div>
-              <strong>${escapeHtml(item.name)}</strong>
-              <small>${escapeHtml(item.title)}</small>
+              <strong>${escapeHtml(english ? (item.name_en || item.name) : item.name)}</strong>
+              <small>${escapeHtml(english ? `${item.name} · ${item.category_label_en || item.category_label}` : item.title)}</small>
             </div>
           </div>
-          <p>${escapeHtml(item.guiding_question || item.quote || "")}</p>
+          <p>${escapeHtml(english ? (item.guiding_question_en || item.guiding_question || item.quote || "") : (item.guiding_question || item.quote || ""))}</p>
           <div class="featured-tags">${(item.tags || []).slice(0, 3).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
         </a>
       `).join("");
     }
 
     function renderCourseFallback() {
+      const english = state.lang === "en";
       els.courseStats.innerHTML = `
         <article class="curriculum-stat">
           <strong>100</strong>
-          <span>课程整理中</span>
+          <span>${english ? "curriculum loading" : "课程整理中"}</span>
         </article>
         <article class="curriculum-stat">
           <strong>10x</strong>
-          <span>统一课程弧线</span>
+          <span>${english ? "shared lesson arc" : "统一课程弧线"}</span>
         </article>
         <article class="curriculum-stat">
           <strong>8</strong>
-          <span>核心领域</span>
+          <span>${english ? "core domains" : "核心领域"}</span>
         </article>
       `;
-      els.blueprintRail.innerHTML = '<article class="blueprint-card"><strong>课程目录正在同步</strong><p>主页会在课程 catalog 发布后自动拉起完整的 Spark 2 课程看板。</p><small>当前不影响主站对话能力。</small></article>';
-      els.domainBoard.innerHTML = '<article class="domain-chip"><strong>课程数据暂未拉取</strong><p>请先从对话区或课程总目录进入。课程 catalog 同步完成后，这里会自动显示 8 大领域和重点人物。</p></article>';
-      els.courseSpotlight.innerHTML = '<div class="tiny">课程 catalog 正在同步，当前可先直接进入 <a href="/courses/">课程总目录</a>。</div>';
+      els.blueprintRail.innerHTML = english
+        ? '<article class="blueprint-card"><strong>Curriculum catalog is syncing</strong><p>The homepage will automatically render the full Spark 2 curriculum board once the catalog is available.</p><small>Chat on the main site is not affected.</small></article>'
+        : '<article class="blueprint-card"><strong>课程目录正在同步</strong><p>主页会在课程 catalog 发布后自动拉起完整的 Spark 2 课程看板。</p><small>当前不影响主站对话能力。</small></article>';
+      els.domainBoard.innerHTML = english
+        ? '<article class="domain-chip"><strong>Curriculum data not fetched yet</strong><p>Enter through the conversation workbench or the full course directory first. Domain and featured mind boards will appear here after sync.</p></article>'
+        : '<article class="domain-chip"><strong>课程数据暂未拉取</strong><p>请先从对话区或课程总目录进入。课程 catalog 同步完成后，这里会自动显示 8 大领域和重点人物。</p></article>';
+      els.courseSpotlight.innerHTML = english
+        ? '<div class="tiny">The course catalog is syncing. You can open the <a href="/courses/">full curriculum</a> now.</div>'
+        : '<div class="tiny">课程 catalog 正在同步，当前可先直接进入 <a href="/courses/">课程总目录</a>。</div>';
       els.featuredCourses.innerHTML = "";
     }
 
     function renderCourseSpotlight() {
       if (!state.courseCatalog || !state.activeId) return;
+      const english = state.lang === "en";
       const thinker = (state.courseCatalog.thinkers || []).find((item) => item.id === state.activeId);
       if (!thinker) {
-        els.courseSpotlight.innerHTML = '<div class="tiny">该人物的课程还在整理中。</div>';
+        els.courseSpotlight.innerHTML = english
+          ? `<div class="tiny">This thinker&#39;s curriculum is still being prepared.</div>`
+          : '<div class="tiny">该人物的课程还在整理中。</div>';
         return;
       }
       const celebrity = state.celebrities.find((entry) => entry.id === thinker.id);
@@ -2250,31 +2607,31 @@ def _build_shell() -> str:
           ${avatarUrl ? `<img class="spotlight-avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(thinker.name)} 头像" loading="lazy">` : ""}
           <div>
             <div class="eyebrow">Active Curriculum</div>
-            <strong>${escapeHtml(thinker.name)} 的 10 课学习路径</strong>
-            <p>${escapeHtml(thinker.category_label)} · ${escapeHtml(thinker.title)}</p>
+            <strong>${escapeHtml(english ? `${thinker.name_en || thinker.name} · 10-lesson arc` : `${thinker.name} 的 10 课学习路径`)}</strong>
+            <p>${escapeHtml(english ? `${thinker.category_label_en || thinker.category_label} · ${thinker.name}` : `${thinker.category_label} · ${thinker.title}`)}</p>
           </div>
         </div>
         <div class="spotlight-tags">${(thinker.tags || []).slice(0, 3).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
-        <p>${escapeHtml(thinker.guiding_question || thinker.quote || "")}</p>
+        <p>${escapeHtml(english ? (thinker.guiding_question_en || thinker.guiding_question || thinker.quote || "") : (thinker.guiding_question || thinker.quote || ""))}</p>
         <div class="spotlight-lessons">
           ${firstLessons.map((lesson) => `
             <article class="spotlight-lesson">
-              <small>第${escapeHtml(lesson.number)}课 · ${escapeHtml(lesson.focus || "")}</small>
-              <strong>${escapeHtml(lesson.title)}</strong>
-              <p>${escapeHtml(lesson.deliverable || lesson.subtitle || "")}</p>
+              <small>${english ? `Lesson ${escapeHtml(lesson.number)} · ${escapeHtml(lesson.focus_en || lesson.focus || "")}` : `第${escapeHtml(lesson.number)}课 · ${escapeHtml(lesson.focus || "")}`}</small>
+              <strong>${escapeHtml(english ? (lesson.title_en || lesson.title) : lesson.title)}</strong>
+              <p>${escapeHtml(english ? (lesson.deliverable_en || lesson.deliverable || lesson.subtitle_en || lesson.subtitle || "") : (lesson.deliverable || lesson.subtitle || ""))}</p>
             </article>
           `).join("")}
         </div>
         <div class="spotlight-actions">
-          <a class="primary" href="${escapeHtml(thinker.index_url)}">进入 ${escapeHtml(thinker.name)} 课程</a>
-          <a class="secondary" href="/courses/">看 100 位总目录</a>
+          <a class="primary" href="${escapeHtml(thinker.index_url)}">${english ? `Open ${escapeHtml(thinker.name_en || thinker.name)} curriculum` : `进入 ${escapeHtml(thinker.name)} 课程`}</a>
+          <a class="secondary" href="/courses/">${english ? "Browse all 100 minds" : "看 100 位总目录"}</a>
         </div>
       `;
     }
 
     function renderFilters() {
       els.filters.innerHTML = "";
-      Object.entries(categoryLabels).forEach(([key, label]) => {
+      Object.entries(categoryLabels[state.lang] || categoryLabels.zh).forEach(([key, label]) => {
         const button = document.createElement("button");
         button.className = "chip" + (state.activeCategory === key ? " active" : "");
         button.textContent = label;
@@ -2307,7 +2664,7 @@ def _build_shell() -> str:
       if (!items.length) {
         const empty = document.createElement("div");
         empty.className = "tiny";
-        empty.textContent = "没有匹配结果。";
+        empty.textContent = copy().emptySearch;
         els.expertList.appendChild(empty);
         return;
       }
@@ -2318,14 +2675,19 @@ def _build_shell() -> str:
       }
 
       items.forEach((item) => {
+        const meta = courseMetaFor(item.id);
+        const primaryName = state.lang === "en" ? (item.name_en || item.name) : item.name;
+        const secondaryLine = state.lang === "en"
+          ? `${item.name} · ${meta?.category_label_en || item.title}`
+          : `${item.name_en} · ${item.title}`;
         const card = document.createElement("button");
         card.type = "button";
         card.className = "expert-card" + (item.id === state.activeId ? " active" : "");
         card.innerHTML = `
           <img class="expert-avatar" src="${item.avatar_url}" alt="${item.name} 卡通头像" loading="lazy">
           <div class="expert-card-body">
-            <strong>${item.name}</strong>
-            <small>${item.name_en} · ${item.title}</small>
+            <strong>${primaryName}</strong>
+            <small>${secondaryLine}</small>
             <div class="tags">${item.focus_tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
           </div>
         `;
@@ -2347,16 +2709,18 @@ def _build_shell() -> str:
       renderExpertList();
       const res = await fetch(`/api/celebrities/${id}`);
       const profile = await res.json();
+      const meta = courseMetaFor(id);
+      const text = copy();
 
-      els.detailCategory.textContent = profile.category_label;
+      els.detailCategory.textContent = text.detailCategory(profile.category_label, profile, meta);
       els.detailAvatar.src = profile.avatar_url;
       els.detailAvatar.alt = `${profile.name} 卡通头像`;
-      els.detailName.textContent = profile.name;
-      els.detailTitle.textContent = `${profile.title} · ${profile.name_en}`;
+      els.detailName.textContent = state.lang === "en" ? (profile.name_en || profile.name) : profile.name;
+      els.detailTitle.textContent = text.detailTitle(profile, meta);
       els.chatAvatar.src = profile.avatar_url;
       els.chatAvatar.alt = `${profile.name} 聊天头像`;
-      els.chatName.textContent = `与 ${profile.name} 对话`;
-      els.chatSource.textContent = `方法论焦点：${profile.focus_tags.slice(0, 3).join(" / ")}`;
+      els.chatName.textContent = text.chatName(profile);
+      els.chatSource.textContent = text.chatSource(profile);
 
       const renderList = (target, values) => {
         target.innerHTML = "";
@@ -2373,7 +2737,7 @@ def _build_shell() -> str:
       renderCourseSpotlight();
 
       els.chatLog.innerHTML = "";
-      addBubble("ai", `已进入 ${profile.name} 的思考界面。你可以直接提问，我会优先沿着 ${profile.focus_tags.slice(0, 3).join("、")} 这条线索回答。`);
+      addBubble("ai", text.chatIntro(profile));
     }
 
     async function primeConversation(celebrityId, message) {
@@ -2405,7 +2769,7 @@ def _build_shell() -> str:
       }
 
       els.heroCount.textContent = String(state.celebrities.length);
-      els.loadedCount.textContent = `${state.celebrities.length} Profiles Loaded`;
+      updateLoadedCount();
       renderFilters();
       renderExpertList();
       if (state.celebrities.length) {
@@ -2435,7 +2799,7 @@ def _build_shell() -> str:
       if (!message || !state.activeId) return;
       addBubble("user", message);
       els.messageInput.value = "";
-      els.chatSource.textContent = "正在生成回答…";
+      els.chatSource.textContent = copy().chatGenerating;
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -2448,9 +2812,14 @@ def _build_shell() -> str:
       });
       const data = await res.json();
       addBubble("ai", data.response + "\\n\\n" + data.disclaimer);
-      els.chatSource.textContent = data.source === "deepseek" ? "Source: DeepSeek API" : "Source: Local fallback persona";
+      els.chatSource.textContent = data.source === "deepseek" ? copy().sourceLabelDeepseek : copy().sourceLabelFallback;
     });
 
+    els.langButtons.forEach((button) => {
+      button.addEventListener("click", () => setLanguage(button.dataset.lang));
+    });
+
+    applyLanguage();
     initDemo();
     bootstrap();
   </script>
