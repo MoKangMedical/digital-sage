@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -68,6 +68,10 @@ app.add_middleware(
 MIMO_API_BASE = os.getenv("MIMO_API_BASE", "https://api.xiaomimimo.com/v1")
 MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
 MEDIA_DIR = BASE_DIR / "media"
+COURSES_PROXY_BASE = os.getenv(
+    "COURSES_PROXY_BASE",
+    "https://mokangmedical.github.io/digital-sage-courses",
+).rstrip("/")
 
 app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
@@ -90,6 +94,36 @@ class ExpertAdviceRequest(BaseModel):
     celebrity_id: str
     situation: str
     category: str
+
+
+async def _proxy_courses_request(path: str, request: Request) -> Response:
+    normalized_path = path.lstrip("/")
+    target_url = f"{COURSES_PROXY_BASE}/{normalized_path}" if normalized_path else f"{COURSES_PROXY_BASE}/"
+
+    async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
+        upstream = await client.request(request.method, target_url)
+
+    passthrough_headers = {}
+    for header_name in (
+        "content-type",
+        "cache-control",
+        "etag",
+        "last-modified",
+        "accept-ranges",
+        "content-length",
+    ):
+        header_value = upstream.headers.get(header_name)
+        if header_value:
+            passthrough_headers[header_name] = header_value
+
+    content = b"" if request.method == "HEAD" else upstream.content
+    return Response(content=content, status_code=upstream.status_code, headers=passthrough_headers)
+
+
+@app.api_route("/courses", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/courses/{course_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
+async def proxy_courses(request: Request, course_path: str = "") -> Response:
+    return await _proxy_courses_request(course_path, request)
 
 
 def _build_fallback_response(profile: dict, message: str, topic: str) -> str:
