@@ -65,8 +65,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MIMO_API_BASE = os.getenv("MIMO_API_BASE", "https://api.xiaomimimo.com/v1")
-MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
+LLM_API_BASE = (
+    os.getenv("DEEPSEEK_API_BASE")
+    or os.getenv("LLM_API_BASE")
+    or os.getenv("MIMO_API_BASE")
+    or "https://api.deepseek.com"
+)
+LLM_API_KEY = os.getenv("DEEPSEEK_API_KEY") or os.getenv("LLM_API_KEY") or os.getenv("MIMO_API_KEY") or ""
+LLM_PRIMARY_MODEL = os.getenv("DEEPSEEK_MODEL") or os.getenv("LLM_MODEL") or "deepseek-v4-pro"
+LLM_FALLBACK_MODEL = os.getenv("DEEPSEEK_FALLBACK_MODEL", "deepseek-chat")
+LLM_PROVIDER_LABEL = os.getenv("LLM_PROVIDER_LABEL", "DeepSeek")
 MEDIA_DIR = BASE_DIR / "media"
 COURSES_PROXY_BASE = os.getenv(
     "COURSES_PROXY_BASE",
@@ -158,40 +166,47 @@ def _build_fallback_response(profile: dict, message: str, topic: str) -> str:
     return "\n\n".join([opener, "\n".join(action_lines), close])
 
 
-async def _call_mimo(profile: dict, prompt: str, fallback_message: str, topic: str) -> tuple[str, str]:
-    if not MIMO_API_KEY:
+async def _call_deepseek(profile: dict, prompt: str, fallback_message: str, topic: str) -> tuple[str, str]:
+    if not LLM_API_KEY:
         return _build_fallback_response(profile, fallback_message, topic), "fallback"
+
+    model_candidates = [LLM_PRIMARY_MODEL]
+    if LLM_FALLBACK_MODEL and LLM_FALLBACK_MODEL not in model_candidates:
+        model_candidates.append(LLM_FALLBACK_MODEL)
+
+    system_prompt = (
+        f"你是{profile['name']}，{profile['title']}。"
+        "请保持该人物公开形象中的思考方式与表达风格，"
+        "但不要声称自己真的就是本人。"
+    )
 
     try:
         async with httpx.AsyncClient(timeout=30) as client:
-            response = await client.post(
-                f"{MIMO_API_BASE}/chat/completions",
-                headers={"Authorization": f"Bearer {MIMO_API_KEY}"},
-                json={
-                    "model": "mimo-v2-pro",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": (
-                                f"你是{profile['name']}，{profile['title']}。"
-                                "请保持该人物公开形象中的思考方式与表达风格，"
-                                "但不要声称自己真的就是本人。"
-                            ),
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
-                    "temperature": 0.7,
-                    "max_tokens": 800,
-                },
-            )
-            response.raise_for_status()
-            result = response.json()
-            content = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-            if not content:
-                return _build_fallback_response(profile, fallback_message, topic), "fallback"
-            return content, "mimo"
+            for model_name in model_candidates:
+                response = await client.post(
+                    f"{LLM_API_BASE}/chat/completions",
+                    headers={"Authorization": f"Bearer {LLM_API_KEY}"},
+                    json={
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": prompt},
+                        ],
+                        "temperature": 0.7,
+                        "max_tokens": 800,
+                    },
+                )
+                if response.is_success:
+                    result = response.json()
+                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+                    if content:
+                        return content, "deepseek"
+                elif response.status_code < 500:
+                    continue
     except Exception:
-        return _build_fallback_response(profile, fallback_message, topic), "fallback"
+        pass
+
+    return _build_fallback_response(profile, fallback_message, topic), "fallback"
 
 
 def _build_shell() -> str:
@@ -1339,6 +1354,252 @@ def _build_shell() -> str:
       line-height: 1.8;
       font-size: 0.95rem;
     }
+    .curriculum {
+      display: grid;
+      gap: 18px;
+      margin: 0 0 28px;
+    }
+    .curriculum-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .curriculum-head h3 {
+      margin: 10px 0 0;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+    }
+    .curriculum-head p {
+      margin: 8px 0 0;
+      max-width: 780px;
+      color: #465467;
+      line-height: 1.8;
+    }
+    .curriculum-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.76);
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 180ms ease;
+    }
+    .curriculum-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .curriculum-panel,
+    .spotlight-panel,
+    .featured-card {
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.68));
+      border: 1px solid rgba(255,255,255,0.72);
+      box-shadow: var(--shadow);
+    }
+    .curriculum-panel,
+    .spotlight-panel {
+      padding: 22px;
+    }
+    .curriculum-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .curriculum-stat,
+    .domain-chip,
+    .blueprint-card,
+    .spotlight-lesson,
+    .featured-card {
+      border-radius: 22px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: rgba(255,255,255,0.74);
+    }
+    .curriculum-stat {
+      padding: 16px;
+    }
+    .curriculum-stat strong {
+      display: block;
+      font-size: 1.65rem;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+    }
+    .curriculum-stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .blueprint-rail {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .blueprint-card {
+      padding: 16px;
+      min-height: 100%;
+    }
+    .blueprint-card strong,
+    .domain-chip strong,
+    .spotlight-panel strong,
+    .featured-card strong {
+      display: block;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+    .blueprint-card p,
+    .domain-chip p,
+    .spotlight-panel p,
+    .featured-card p {
+      margin: 8px 0 0;
+      color: #465467;
+      line-height: 1.75;
+      font-size: 0.92rem;
+    }
+    .blueprint-card small,
+    .domain-chip small,
+    .spotlight-panel small,
+    .featured-card small {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .blueprint-num,
+    .domain-count {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .domain-board {
+      display: grid;
+      gap: 10px;
+    }
+    .domain-chip {
+      padding: 16px;
+      border-left: 4px solid var(--domain-accent, #1d4ed8);
+    }
+    .spotlight-panel {
+      display: grid;
+      gap: 14px;
+    }
+    .spotlight-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .spotlight-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 24px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: rgba(255,255,255,0.85);
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+    .spotlight-tags,
+    .featured-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .spotlight-tags span,
+    .featured-tags span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(29, 78, 216, 0.08);
+      color: var(--accent);
+      font-size: 0.78rem;
+    }
+    .spotlight-lessons {
+      display: grid;
+      gap: 10px;
+    }
+    .spotlight-lesson {
+      padding: 14px 16px;
+    }
+    .spotlight-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .spotlight-actions a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      transition: transform 180ms ease;
+    }
+    .spotlight-actions .primary {
+      background: linear-gradient(135deg, #111827, #1d4ed8);
+      color: white;
+      border-color: transparent;
+    }
+    .spotlight-actions .secondary {
+      background: rgba(255,255,255,0.78);
+      color: var(--ink);
+    }
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .featured-card {
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+    .featured-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .featured-card-top img {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: rgba(255,255,255,0.88);
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+    .featured-card:hover,
+    .curriculum-link:hover,
+    .spotlight-actions a:hover {
+      transform: translateY(-1px);
+    }
+    .featured-card:hover {
+      border-color: rgba(29, 78, 216, 0.18);
+    }
     @keyframes drift {
       0% { transform: translate3d(0, 0, 0) scale(1); }
       50% { transform: translate3d(4%, -3%, 0) scale(1.04); }
@@ -1361,11 +1622,19 @@ def _build_shell() -> str:
       .cinema,
       .hero-grid,
       .main,
+      .curriculum-shell,
+      .featured-grid,
       .detail-grid,
       .faq-grid,
       .toolbar,
       .chat-form,
       .cinema-frame {
+        grid-template-columns: 1fr;
+      }
+      .blueprint-rail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .curriculum-stats {
         grid-template-columns: 1fr;
       }
       .chat-form {
@@ -1384,6 +1653,13 @@ def _build_shell() -> str:
         flex-wrap: wrap;
       }
       .expert-card {
+        grid-template-columns: 1fr;
+      }
+      .curriculum-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .blueprint-rail {
         grid-template-columns: 1fr;
       }
       .chat-head,
@@ -1410,7 +1686,7 @@ def _build_shell() -> str:
       </div>
       <div class="status">
         <span id="loadedCount">载入中</span>
-        <span>Production Live · MIMO</span>
+        <span>Production Live · DeepSeek</span>
       </div>
     </div>
 
@@ -1424,7 +1700,7 @@ def _build_shell() -> str:
           </p>
           <div class="hero-proof">
             <span class="proof-pill">100 位长期主义智者</span>
-            <span class="proof-pill">MIMO 实时生成回答</span>
+            <span class="proof-pill">DeepSeek 实时生成回答</span>
             <span class="proof-pill">首页自带品牌成片</span>
             <span class="proof-pill">适合创业、产品、战略判断</span>
           </div>
@@ -1594,6 +1870,34 @@ def _build_shell() -> str:
       </div>
     </section>
 
+    <section class="curriculum" id="curriculum">
+      <div class="curriculum-head">
+        <div>
+          <div class="eyebrow">Spark 2 Curriculum</div>
+          <h3>把 100 位智者压成同一套 10 课系统，先看全局，再点进单人课程。</h3>
+          <p>主页和课程站共用同一份课程 catalog。你在这里看到的 10 课框架、领域分布和重点人物，都会直接链接到正式课程页，不再是孤立文案。</p>
+        </div>
+        <a class="curriculum-link" href="/courses/">进入全部课程</a>
+      </div>
+
+      <div class="curriculum-shell">
+        <div class="curriculum-panel">
+          <div class="curriculum-stats" id="courseStats"></div>
+          <div class="blueprint-rail" id="blueprintRail"></div>
+        </div>
+        <div class="curriculum-panel">
+          <div class="eyebrow">Domains</div>
+          <div class="domain-board" id="domainBoard"></div>
+        </div>
+      </div>
+
+      <div class="spotlight-panel" id="courseSpotlight">
+        <div class="tiny">课程数据载入中…</div>
+      </div>
+
+      <div class="featured-grid" id="featuredCourses"></div>
+    </section>
+
     <section class="toolbar">
       <div class="search">
         <span>搜索</span>
@@ -1690,6 +1994,7 @@ def _build_shell() -> str:
 
     const state = {
       celebrities: [],
+      courseCatalog: null,
       activeId: null,
       activeCategory: "all",
       search: ""
@@ -1750,7 +2055,12 @@ def _build_shell() -> str:
       demoOutcomeLabel: document.getElementById("demoOutcomeLabel"),
       demoOutcome: document.getElementById("demoOutcome"),
       demoSubtitle: document.getElementById("demoSubtitle"),
-      demoDots: document.getElementById("demoDots")
+      demoDots: document.getElementById("demoDots"),
+      courseStats: document.getElementById("courseStats"),
+      blueprintRail: document.getElementById("blueprintRail"),
+      domainBoard: document.getElementById("domainBoard"),
+      courseSpotlight: document.getElementById("courseSpotlight"),
+      featuredCourses: document.getElementById("featuredCourses")
     };
 
     function renderDemoDots() {
@@ -1834,6 +2144,132 @@ def _build_shell() -> str:
       setDemoScene(0);
       els.demoToggle.addEventListener("click", toggleDemoPlayback);
       demoState.frame = window.requestAnimationFrame(demoTick);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function renderCourseShowcase() {
+      if (!state.courseCatalog) return;
+
+      const stats = state.courseCatalog.stats || {};
+      els.courseStats.innerHTML = `
+        <article class="curriculum-stat">
+          <strong>${escapeHtml(stats.thinkers || 0)}</strong>
+          <span>智者数量</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>${escapeHtml(stats.lessons || 0)}</strong>
+          <span>课程总数</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>${escapeHtml(stats.categories || 0)}</strong>
+          <span>知识领域</span>
+        </article>
+      `;
+
+      els.blueprintRail.innerHTML = (state.courseCatalog.blueprint || []).map((item) => `
+        <article class="blueprint-card">
+          <span class="blueprint-num">第${escapeHtml(item.number)}课</span>
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.focus)}</p>
+          <small>${escapeHtml(item.deliverable)}</small>
+        </article>
+      `).join("");
+
+      els.domainBoard.innerHTML = (state.courseCatalog.categories || []).map((item) => `
+        <article class="domain-chip" style="--domain-accent:${escapeHtml(item.accent)}">
+          <div class="domain-count">${escapeHtml(item.count)} minds</div>
+          <strong>${escapeHtml(item.label)}</strong>
+          <p>${escapeHtml(item.theme)}</p>
+          <small>${escapeHtml(item.signal)}</small>
+        </article>
+      `).join("");
+
+      const featured = (state.courseCatalog.thinkers || []).filter((item) => item.featured).slice(0, 8);
+      els.featuredCourses.innerHTML = featured.map((item) => `
+        <a class="featured-card" href="${escapeHtml(item.index_url)}">
+          <div class="featured-card-top">
+            ${(() => {
+              const celebrity = state.celebrities.find((entry) => entry.id === item.id);
+              return celebrity?.avatar_url
+                ? `<img src="${escapeHtml(celebrity.avatar_url)}" alt="${escapeHtml(item.name)} 卡通头像" loading="lazy">`
+                : "";
+            })()}
+            <div>
+              <strong>${escapeHtml(item.name)}</strong>
+              <small>${escapeHtml(item.title)}</small>
+            </div>
+          </div>
+          <p>${escapeHtml(item.guiding_question || item.quote || "")}</p>
+          <div class="featured-tags">${(item.tags || []).slice(0, 3).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+        </a>
+      `).join("");
+    }
+
+    function renderCourseFallback() {
+      els.courseStats.innerHTML = `
+        <article class="curriculum-stat">
+          <strong>100</strong>
+          <span>课程整理中</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>10x</strong>
+          <span>统一课程弧线</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>8</strong>
+          <span>核心领域</span>
+        </article>
+      `;
+      els.blueprintRail.innerHTML = '<article class="blueprint-card"><strong>课程目录正在同步</strong><p>主页会在课程 catalog 发布后自动拉起完整的 Spark 2 课程看板。</p><small>当前不影响主站对话能力。</small></article>';
+      els.domainBoard.innerHTML = '<article class="domain-chip"><strong>课程数据暂未拉取</strong><p>请先从对话区或课程总目录进入。课程 catalog 同步完成后，这里会自动显示 8 大领域和重点人物。</p></article>';
+      els.courseSpotlight.innerHTML = '<div class="tiny">课程 catalog 正在同步，当前可先直接进入 <a href="/courses/">课程总目录</a>。</div>';
+      els.featuredCourses.innerHTML = "";
+    }
+
+    function renderCourseSpotlight() {
+      if (!state.courseCatalog || !state.activeId) return;
+      const thinker = (state.courseCatalog.thinkers || []).find((item) => item.id === state.activeId);
+      if (!thinker) {
+        els.courseSpotlight.innerHTML = '<div class="tiny">该人物的课程还在整理中。</div>';
+        return;
+      }
+      const celebrity = state.celebrities.find((entry) => entry.id === thinker.id);
+      const avatarUrl = celebrity?.avatar_url || "";
+
+      const firstLessons = (thinker.lessons || []).slice(0, 3);
+      els.courseSpotlight.innerHTML = `
+        <div class="spotlight-top">
+          ${avatarUrl ? `<img class="spotlight-avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(thinker.name)} 头像" loading="lazy">` : ""}
+          <div>
+            <div class="eyebrow">Active Curriculum</div>
+            <strong>${escapeHtml(thinker.name)} 的 10 课学习路径</strong>
+            <p>${escapeHtml(thinker.category_label)} · ${escapeHtml(thinker.title)}</p>
+          </div>
+        </div>
+        <div class="spotlight-tags">${(thinker.tags || []).slice(0, 3).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+        <p>${escapeHtml(thinker.guiding_question || thinker.quote || "")}</p>
+        <div class="spotlight-lessons">
+          ${firstLessons.map((lesson) => `
+            <article class="spotlight-lesson">
+              <small>第${escapeHtml(lesson.number)}课 · ${escapeHtml(lesson.focus || "")}</small>
+              <strong>${escapeHtml(lesson.title)}</strong>
+              <p>${escapeHtml(lesson.deliverable || lesson.subtitle || "")}</p>
+            </article>
+          `).join("")}
+        </div>
+        <div class="spotlight-actions">
+          <a class="primary" href="${escapeHtml(thinker.index_url)}">进入 ${escapeHtml(thinker.name)} 课程</a>
+          <a class="secondary" href="/courses/">看 100 位总目录</a>
+        </div>
+      `;
     }
 
     function renderFilters() {
@@ -1934,6 +2370,7 @@ def _build_shell() -> str:
       renderList(els.coreValues, profile.core_values);
       renderList(els.framework, Object.values(profile.judgment_framework.decision_framework));
       renderList(els.positions, Object.values(profile.positions));
+      renderCourseSpotlight();
 
       els.chatLog.innerHTML = "";
       addBubble("ai", `已进入 ${profile.name} 的思考界面。你可以直接提问，我会优先沿着 ${profile.focus_tags.slice(0, 3).join("、")} 这条线索回答。`);
@@ -1954,8 +2391,19 @@ def _build_shell() -> str:
     }
 
     async function bootstrap() {
-      const res = await fetch("/api/celebrities");
-      state.celebrities = await res.json();
+      const [celebRes, courseRes] = await Promise.allSettled([
+        fetch("/api/celebrities"),
+        fetch("/courses/assets/course-catalog.json"),
+      ]);
+
+      state.celebrities = celebRes.status === "fulfilled" ? await celebRes.value.json() : [];
+      if (courseRes.status === "fulfilled" && courseRes.value.ok) {
+        state.courseCatalog = await courseRes.value.json();
+        renderCourseShowcase();
+      } else {
+        renderCourseFallback();
+      }
+
       els.heroCount.textContent = String(state.celebrities.length);
       els.loadedCount.textContent = `${state.celebrities.length} Profiles Loaded`;
       renderFilters();
@@ -2000,7 +2448,7 @@ def _build_shell() -> str:
       });
       const data = await res.json();
       addBubble("ai", data.response + "\\n\\n" + data.disclaimer);
-      els.chatSource.textContent = data.source === "mimo" ? "Source: MIMO API" : "Source: Local fallback persona";
+      els.chatSource.textContent = data.source === "deepseek" ? "Source: DeepSeek API" : "Source: Local fallback persona";
     });
 
     initDemo();
@@ -2027,6 +2475,10 @@ async def health() -> dict:
         "version": "2.0.0",
         "celebrities_loaded": len(CELEBRITY_PROFILES),
         "categories": categories,
+        "llm_provider": LLM_PROVIDER_LABEL,
+        "llm_base": LLM_API_BASE,
+        "llm_primary_model": LLM_PRIMARY_MODEL,
+        "llm_fallback_model": LLM_FALLBACK_MODEL,
     }
 
 
@@ -2059,7 +2511,7 @@ async def chat_with_celebrity(req: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=404, detail="未找到该名人")
 
     prompt = build_chat_prompt(req.celebrity_id, req.message, req.topic or "general")
-    response, source = await _call_mimo(
+    response, source = await _call_deepseek(
         profile,
         prompt,
         req.message,
@@ -2084,7 +2536,7 @@ async def get_expert_advice(req: ExpertAdviceRequest) -> dict:
         f"请以 {profile['name']} 的方式，围绕 {', '.join(profile['focus_tags'][:3])} 进行分析，"
         "给出分步骤的建议、主要风险和一个最重要的下一步行动。"
     )
-    response, source = await _call_mimo(
+    response, source = await _call_deepseek(
         profile,
         prompt,
         req.situation,
@@ -2122,6 +2574,14 @@ async def get_speaking_style(celeb_id: str) -> dict:
         "celebrity": profile["name"],
         "speaking_style": profile["speaking_style"],
     }
+
+
+@app.get("/courses.html", response_class=HTMLResponse)
+async def courses_page():
+    courses_html = BASE_DIR / "docs/courses.html"
+    if courses_html.exists():
+        return courses_html.read_text(encoding="utf-8")
+    return "<h1>Course list not found</h1>"
 
 
 if __name__ == "__main__":

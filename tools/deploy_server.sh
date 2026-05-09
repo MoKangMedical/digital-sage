@@ -24,8 +24,10 @@ elif [[ -f "$ROOT_DIR/.env" ]]; then
   set +a
 fi
 
-: "${MIMO_API_KEY:?MIMO_API_KEY is required in .env.local or environment}"
-MIMO_API_BASE="${MIMO_API_BASE:-https://api.xiaomimimo.com/v1}"
+: "${DEEPSEEK_API_KEY:?DEEPSEEK_API_KEY is required in .env.local or environment}"
+DEEPSEEK_API_BASE="${DEEPSEEK_API_BASE:-https://api.deepseek.com}"
+DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-pro}"
+DEEPSEEK_FALLBACK_MODEL="${DEEPSEEK_FALLBACK_MODEL:-deepseek-chat}"
 
 echo "==> Preparing remote directories"
 ssh "${SSH_OPTS[@]}" "$HOST" "mkdir -p '$REMOTE_ROOT' '$REMOTE_APP_DIR'"
@@ -43,8 +45,10 @@ rsync -az --delete \
 
 echo "==> Writing runtime environment"
 ssh "${SSH_OPTS[@]}" "$HOST" "cat > '$REMOTE_APP_DIR/.env' <<'EOF'
-MIMO_API_BASE=$MIMO_API_BASE
-MIMO_API_KEY=$MIMO_API_KEY
+DEEPSEEK_API_BASE=$DEEPSEEK_API_BASE
+DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY
+DEEPSEEK_MODEL=$DEEPSEEK_MODEL
+DEEPSEEK_FALLBACK_MODEL=$DEEPSEEK_FALLBACK_MODEL
 EOF"
 
 echo "==> Installing runtime dependencies and service"
