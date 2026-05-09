@@ -109,8 +109,6 @@ async def _proxy_courses_request(path: str, request: Request) -> Response:
         "cache-control",
         "etag",
         "last-modified",
-        "accept-ranges",
-        "content-length",
     ):
         header_value = upstream.headers.get(header_name)
         if header_value:
