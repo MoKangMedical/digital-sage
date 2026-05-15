@@ -221,6 +221,9 @@ def _build_shell() -> str:
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-title" content="Digital Sage">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%230f172a'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='Arial,sans-serif' font-size='24' fill='white'%3EDS%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
   <link rel="canonical" href="https://www.digitalsage.cloud/">
   <link rel="preload" as="image" href="/media/demo/digital-sage-film-poster.jpg">
   <meta property="og:type" content="website">
@@ -293,25 +296,29 @@ def _build_shell() -> str:
   </script>
   <style>
     :root {
-      --bg: #f3f5f8;
-      --ink: #111827;
-      --muted: #5f6b7a;
-      --line: rgba(17, 24, 39, 0.08);
-      --card: rgba(255, 255, 255, 0.72);
-      --accent: #0f172a;
-      --accent-soft: #dbe7ff;
-      --shadow: 0 24px 60px rgba(17, 24, 39, 0.08);
+      --bg: #08080b;
+      --bg2: #101014;
+      --bg3: #18181d;
+      --ink: #fafafa;
+      --muted: #a1a1aa;
+      --line: rgba(245, 217, 138, 0.13);
+      --card: rgba(28, 28, 34, 0.92);
+      --accent: #e2b64f;
+      --accent-soft: rgba(226, 182, 79, 0.13);
+      --gold: #e2b64f;
+      --gold-2: #f5d98a;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
       --radius: 28px;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
+      font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(123, 176, 255, 0.32), transparent 32%),
-        radial-gradient(circle at top right, rgba(255, 210, 150, 0.28), transparent 28%),
-        linear-gradient(180deg, #f7f9fc 0%, #eef2f7 48%, #f6f8fb 100%);
+        radial-gradient(circle at 18% 8%, rgba(226, 182, 79, 0.14), transparent 28%),
+        radial-gradient(circle at 82% 16%, rgba(94, 78, 44, 0.24), transparent 22%),
+        linear-gradient(180deg, #050506 0%, var(--bg) 42%, #0d0d10 100%);
       min-height: 100vh;
     }
     .page {
@@ -1629,6 +1636,166 @@ def _build_shell() -> str:
     .featured-card:hover {
       border-color: rgba(29, 78, 216, 0.18);
     }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.72), transparent 75%);
+    }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 10px 0;
+      background: rgba(8, 8, 11, 0.72);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+    .brand h1,
+    .hero-copy h2,
+    .quickstart-copy h3,
+    .film-copy h3,
+    .cinema-copy h3,
+    .curriculum-head h3,
+    .detail-title h3,
+    .faq h3 {
+      font-family: "Noto Serif SC", serif;
+    }
+    .brand-mark {
+      color: #17130a;
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      box-shadow: 0 18px 48px rgba(226, 182, 79, 0.18);
+    }
+    .brand p,
+    .status,
+    .hero-copy p,
+    .quickstart-copy p,
+    .film-copy p,
+    .cinema-copy p,
+    .curriculum-head p,
+    .blueprint-card p,
+    .domain-chip p,
+    .spotlight-panel p,
+    .featured-card p,
+    .prompt-card span,
+    .film-stat span,
+    .cinema-point span,
+    .tiny {
+      color: var(--muted);
+    }
+    .hero,
+    .hero-stats,
+    .prompt-card,
+    .film-shell,
+    .curriculum-panel,
+    .spotlight-panel,
+    .featured-card,
+    .faq-item,
+    .search,
+    .chat,
+    .profile-detail,
+    .expert-card,
+    .quickstart-grid .prompt-card {
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 82% 14%, rgba(226, 182, 79, 0.12), transparent 28%),
+        linear-gradient(145deg, rgba(28, 28, 34, 0.96), rgba(12, 12, 15, 0.96));
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      min-height: 620px;
+      display: grid;
+      align-items: center;
+    }
+    .hero::after {
+      background:
+        linear-gradient(115deg, transparent 0 38%, rgba(226, 182, 79, 0.06) 39% 41%, transparent 42%),
+        radial-gradient(circle at 50% 110%, rgba(226, 182, 79, 0.16), transparent 36%);
+    }
+    .hero-copy h2 {
+      color: var(--ink);
+      font-weight: 900;
+    }
+    .hero-copy h2 span,
+    .eyebrow,
+    .stat-label,
+    .prompt-card small,
+    .blueprint-num,
+    .domain-count {
+      color: var(--gold-2);
+    }
+    .hero-proof .proof-pill,
+    .lang-toggle,
+    .curriculum-link,
+    .hero-link.secondary,
+    .spotlight-actions .secondary,
+    .spotlight-tags span,
+    .featured-tags span {
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.045);
+    }
+    .hero-link.primary,
+    .lang-button.active,
+    .spotlight-actions .primary {
+      color: #17130a;
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      border-color: transparent;
+    }
+    .lang-button,
+    .hero-link.secondary,
+    .curriculum-link,
+    .spotlight-actions .secondary {
+      color: var(--muted);
+    }
+    .stat-value,
+    .curriculum-stat strong {
+      color: var(--gold-2);
+    }
+    .curriculum-stat,
+    .domain-chip,
+    .blueprint-card,
+    .spotlight-lesson,
+    .featured-card,
+    .faq-item {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.045);
+    }
+    .blueprint-card strong,
+    .domain-chip strong,
+    .spotlight-panel strong,
+    .featured-card strong,
+    .prompt-card strong,
+    .film-caption strong,
+    .cinema-point strong,
+    .brand h1 {
+      color: var(--ink);
+    }
+    .domain-chip {
+      border-left-color: var(--domain-accent, var(--gold));
+    }
+    .film-screen,
+    .cinema-player {
+      border: 1px solid rgba(245, 217, 138, 0.13);
+    }
+    .film-caption,
+    .film-stat,
+    .cinema-point {
+      border-color: var(--line);
+      color: var(--muted);
+    }
+    .search input,
+    textarea,
+    select {
+      color: var(--ink);
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.06);
+    }
     @keyframes drift {
       0% { transform: translate3d(0, 0, 0) scale(1); }
       50% { transform: translate3d(4%, -3%, 0) scale(1.04); }
@@ -1907,8 +2074,8 @@ def _build_shell() -> str:
       <div class="curriculum-head">
         <div>
           <div class="eyebrow">Spark 2 Curriculum</div>
-          <h3 id="curriculumTitle">把 100 位智者压成同一套 10 课系统，先看全局，再点进单人课程。</h3>
-          <p id="curriculumBody">主页和课程站共用同一份课程 catalog。你在这里看到的 10 课框架、领域分布和重点人物，都会直接链接到正式课程页，不再是孤立文案。</p>
+          <h3 id="curriculumTitle">学院式课程地图：100 位智者，每人 10 课，先听课再进入结构化训练。</h3>
+          <p id="curriculumBody">主页和课程站共用同一份课程 catalog。这里先用 Spark 2 看见全局、领域和重点人物，点进课程页后会看到统一的深色讲义、课程音频、案例、书单和 7 天训练。</p>
         </div>
         <a class="curriculum-link" id="curriculumLink" href="/courses/">进入全部课程</a>
       </div>
@@ -2069,8 +2236,8 @@ def _build_shell() -> str:
             body: "适合 CEO、产品负责人、项目 owner 做组织收敛和方向统一。"
           }
         ],
-        curriculumTitle: "把 100 位智者压成同一套 10 课系统，先看全局，再点进单人课程。",
-        curriculumBody: "主页和课程站共用同一份课程 catalog。你在这里看到的 10 课框架、领域分布和重点人物，都会直接链接到正式课程页，不再是孤立文案。",
+        curriculumTitle: "学院式课程地图：100 位智者，每人 10 课，先听课再进入结构化训练。",
+        curriculumBody: "主页和课程站共用同一份课程 catalog。这里先用 Spark 2 看见全局、领域和重点人物，点进课程页后会看到统一的深色讲义、课程音频、案例、书单和 7 天训练。",
         curriculumLink: "进入全部课程",
         curriculumDomainsEyebrow: "Domains",
         courseLoading: "课程数据载入中…",
@@ -2143,8 +2310,8 @@ def _build_shell() -> str:
             body: "Best for CEOs, product leads, and project owners who need operating alignment."
           }
         ],
-        curriculumTitle: "Compress 100 minds into one common 10-lesson system, then move from the big map into any individual curriculum.",
-        curriculumBody: "The homepage and the course site share the same curriculum catalog. The 10-lesson arc, domain map, and featured minds here all link directly into the production course pages.",
+        curriculumTitle: "An academy-style curriculum map: 100 minds, 10 lessons each, audio first, structured practice next.",
+        curriculumBody: "The homepage and the course site share the same catalog. Use the Spark 2 board to see the full map, then open each course for the dark lecture layout, audio narration, cases, reference shelf, and 7-day drills.",
         curriculumLink: "Open full curriculum",
         curriculumDomainsEyebrow: "Domains",
         courseLoading: "Loading curriculum data…",
