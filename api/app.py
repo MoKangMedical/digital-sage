@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
 from typing import Optional
+from uuid import uuid4
 
 import httpx
 from fastapi import FastAPI, HTTPException, Request
@@ -115,6 +116,16 @@ class GrowthLeadRequest(BaseModel):
     budget: Optional[str] = None
 
 
+class OrderRequest(BaseModel):
+    plan_id: str
+    name: str
+    contact: str
+    sage_id: Optional[str] = None
+    channel: str = "checkout"
+    use_case: str
+    payment_method: str = "manual"
+
+
 GROWTH_CAMPAIGN_PACK = {
     "funnel": [
         {
@@ -143,12 +154,12 @@ GROWTH_CAMPAIGN_PACK = {
         },
     ],
     "pricing": [
-        {"name": "文字试用", "price": "¥0", "unit": "3 次对话", "best_for": "冷启动获客与首次体验"},
-        {"name": "10 分钟语音", "price": "¥19", "unit": "单次", "best_for": "快速拆一个具体问题"},
-        {"name": "20 分钟语音", "price": "¥39", "unit": "单次", "best_for": "完整梳理一个经营/职业判断"},
-        {"name": "30 分钟视频", "price": "¥69", "unit": "单次", "best_for": "带数字人视频形象的深度咨询"},
-        {"name": "60 分钟战略局", "price": "¥129", "unit": "单次", "best_for": "多智者联合分析、形成行动清单"},
-        {"name": "记忆订阅", "price": "¥59/月", "unit": "3 位智者", "best_for": "长期复盘、课程进度和个人知识库"},
+        {"id": "trial_text", "name": "文字试用", "price": "¥0", "amount_cny": 0, "unit": "3 次对话", "best_for": "冷启动获客与首次体验"},
+        {"id": "voice_10", "name": "10 分钟语音", "price": "¥19", "amount_cny": 19, "unit": "单次", "best_for": "快速拆一个具体问题"},
+        {"id": "voice_20", "name": "20 分钟语音", "price": "¥39", "amount_cny": 39, "unit": "单次", "best_for": "完整梳理一个经营/职业判断"},
+        {"id": "video_30", "name": "30 分钟视频", "price": "¥69", "amount_cny": 69, "unit": "单次", "best_for": "带数字人视频形象的深度咨询"},
+        {"id": "strategy_60", "name": "60 分钟战略局", "price": "¥129", "amount_cny": 129, "unit": "单次", "best_for": "多智者联合分析、形成行动清单"},
+        {"id": "memory_subscription", "name": "记忆订阅", "price": "¥59/月", "amount_cny": 59, "unit": "3 位智者", "best_for": "长期复盘、课程进度和个人知识库"},
     ],
     "xiaohongshu": [
         {
@@ -221,36 +232,42 @@ GROWTH_CAMPAIGN_PACK = {
     ],
     "digital_humans": [
         {
+            "id": "buffett",
             "sage": "沃伦·巴菲特",
             "avatar_direction": "银发、圆框眼镜、温和但克制的投资家形象，背景为深色书房与财报光幕。",
             "opening": "如果现金流只够六个月，我不会先问增长，我会先问你真正能活下来的核心业务是什么。",
             "use_case": "企业现金流、投资、长期主义、价格与价值。",
         },
         {
+            "id": "steve_jobs",
             "sage": "史蒂夫·乔布斯",
             "avatar_direction": "黑色高领、极简舞台、产品轮廓线和白色聚光灯。",
             "opening": "别告诉我你能做什么，告诉我用户会记住什么。伟大的产品首先是一次删减。",
             "use_case": "产品定位、品牌、体验设计、发布会式表达。",
         },
         {
+            "id": "confucius",
             "sage": "孔子",
             "avatar_direction": "温润长者、竹简、礼序空间，避免神化，强调秩序与关系。",
             "opening": "先正名。你真正困住的，可能不是选择，而是责任、角色和关系没有被讲清楚。",
             "use_case": "组织治理、家庭关系、团队伦理、长期修身。",
         },
         {
+            "id": "laozi",
             "sage": "老子",
             "avatar_direction": "留白山水、慢节奏镜头、浅金线条，表达顺势和边界。",
             "opening": "越用力的地方，越要问是不是逆势。先看水往哪里流，再决定你该不该动。",
             "use_case": "战略取舍、压力管理、顺势而为、反脆弱节奏。",
         },
         {
+            "id": "alan_turing",
             "sage": "艾伦·图灵",
             "avatar_direction": "复古计算机、矩阵光点、冷静逻辑感，适合系统问题拆解。",
             "opening": "把情绪先放在一边。我们把问题写成输入、规则、状态和输出。",
             "use_case": "系统设计、AI、自动化、复杂问题建模。",
         },
         {
+            "id": "zhongnanshan",
             "sage": "钟南山",
             "avatar_direction": "医学会议室、证据卡片、稳重正直的公共卫生专家形象。",
             "opening": "先排危险，再看证据。判断不能只看愿望，要看风险和可验证事实。",
@@ -267,6 +284,10 @@ GROWTH_CAMPAIGN_PACK = {
         {"day": "D7", "channel": "全渠道", "asset": "直播/社群转化", "topic": "免费帮 10 个用户做一次智者判断"},
     ],
 }
+
+
+PRICING_PLANS = {item["id"]: item for item in GROWTH_CAMPAIGN_PACK["pricing"]}
+DIGITAL_HUMANS_BY_ID = {item["id"]: item for item in GROWTH_CAMPAIGN_PACK["digital_humans"]}
 
 
 async def _proxy_courses_request(path: str, request: Request) -> Response:
@@ -3194,6 +3215,7 @@ def _build_growth_shell() -> str:
             f"<h3>{escape(item['name'])}</h3>"
             f"<strong>{escape(item['price'])}</strong>"
             f"<p>{escape(item['best_for'])}</p>"
+            f"<a class=\"pill primary\" href=\"/checkout?plan={escape(item['id'])}&utm_source=growth&utm_medium=pricing&utm_campaign=digital_sage_launch\">开始下单</a>"
             "</article>"
         )
         for item in pack["pricing"]
@@ -3236,6 +3258,7 @@ def _build_growth_shell() -> str:
             f"<p><b>视觉：</b>{escape(item['avatar_direction'])}</p>"
             f"<blockquote>{escape(item['opening'])}</blockquote>"
             f"<p><b>主打场景：</b>{escape(item['use_case'])}</p>"
+            f"<p><a class=\"pill\" href=\"/api/digital-human-poster/{escape(item['id'])}.svg\" target=\"_blank\">打开竖屏海报</a></p>"
             f"<button data-copy=\"{escape(item['sage'] + chr(10) + item['avatar_direction'] + chr(10) + item['opening'] + chr(10) + item['use_case'])}\">复制数字人设定</button>"
             "</article>"
         )
@@ -3514,6 +3537,173 @@ def _build_growth_shell() -> str:
 </html>"""
 
 
+def _build_checkout_shell() -> str:
+    plan_options = "".join(
+        f'<option value="{escape(plan["id"])}">{escape(plan["name"])} · {escape(plan["price"])} · {escape(plan["unit"])}</option>'
+        for plan in GROWTH_CAMPAIGN_PACK["pricing"]
+    )
+    sage_options = "".join(
+        f'<option value="{escape(item["id"])}">{escape(item["sage"])} · {escape(item["use_case"])}</option>'
+        for item in GROWTH_CAMPAIGN_PACK["digital_humans"]
+    )
+    pricing_cards = "".join(
+        (
+            '<article class="plan-card">'
+            f"<span>{escape(plan['unit'])}</span>"
+            f"<h3>{escape(plan['name'])}</h3>"
+            f"<strong>{escape(plan['price'])}</strong>"
+            f"<p>{escape(plan['best_for'])}</p>"
+            f"<button type=\"button\" data-plan=\"{escape(plan['id'])}\">选择这个套餐</button>"
+            "</article>"
+        )
+        for plan in GROWTH_CAMPAIGN_PACK["pricing"]
+    )
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Sage 下单预约</title>
+  <meta name="description" content="预约 Digital Sage 智者文字、语音、视频和记忆订阅服务。">
+  <link rel="canonical" href="https://www.digitalsage.cloud/checkout">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {{ --bg:#08080b; --card:rgba(28,28,34,.94); --ink:#fafafa; --muted:#a1a1aa; --line:rgba(245,217,138,.14); --gold:#e2b64f; --gold2:#f5d98a; --shadow:0 28px 80px rgba(0,0,0,.36); }}
+    * {{ box-sizing: border-box; }}
+    body {{ margin:0; color:var(--ink); font-family:Inter,"PingFang SC",sans-serif; background:radial-gradient(circle at 18% 8%,rgba(226,182,79,.16),transparent 28%),linear-gradient(180deg,#050506 0%,var(--bg) 48%,#0d0d10 100%); }}
+    a {{ color:var(--gold2); text-decoration:none; }}
+    .page {{ width:min(1180px,calc(100vw - 32px)); margin:0 auto; padding:24px 0 64px; }}
+    .nav {{ display:flex; justify-content:space-between; gap:12px; align-items:center; padding-bottom:24px; }}
+    .pill, button {{ min-height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.045); color:var(--ink); font:inherit; cursor:pointer; }}
+    button,.primary {{ color:#17130a; border:0; background:linear-gradient(135deg,var(--gold2),var(--gold)); font-weight:800; }}
+    .hero,.panel,.plan-card {{ border:1px solid var(--line); border-radius:28px; background:var(--card); box-shadow:var(--shadow); }}
+    .hero {{ padding:54px 28px; text-align:center; }}
+    h1,h2,h3 {{ font-family:"Noto Serif SC",serif; }}
+    h1 {{ max-width:860px; margin:12px auto; font-size:clamp(2.5rem,6vw,5rem); line-height:1.04; letter-spacing:-.05em; }}
+    p {{ color:var(--muted); line-height:1.8; }}
+    .eyebrow,.meta {{ color:var(--gold2); font-size:.78rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }}
+    .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-top:22px; }}
+    .plan-card {{ padding:20px; }}
+    .plan-card span {{ color:var(--gold2); font-size:.8rem; font-weight:800; }}
+    .plan-card strong {{ display:block; margin:12px 0; color:var(--gold2); font-size:2rem; }}
+    .checkout {{ display:grid; grid-template-columns:minmax(280px,.75fr) minmax(0,1.25fr); gap:18px; margin-top:28px; }}
+    .panel {{ padding:22px; }}
+    form {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }}
+    label {{ display:grid; gap:7px; color:var(--gold2); font-size:.78rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }}
+    input,select,textarea {{ width:100%; min-height:44px; border:1px solid var(--line); border-radius:14px; color:var(--ink); background:rgba(255,255,255,.06); padding:10px 12px; font:inherit; outline:none; }}
+    textarea {{ min-height:116px; resize:vertical; }}
+    .span-2 {{ grid-column:1 / -1; }}
+    .result {{ min-height:78px; padding:16px; border:1px solid var(--line); border-radius:18px; color:var(--gold2); background:rgba(255,255,255,.045); }}
+    @media (max-width:800px) {{ .nav,.checkout {{ grid-template-columns:1fr; flex-direction:column; align-items:flex-start; }} form {{ grid-template-columns:1fr; }} }}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <strong>Digital Sage Checkout</strong>
+      <div><a class="pill" href="/">首页</a> <a class="pill" href="/growth">增长控制台</a> <a class="pill" href="/api/pricing">价格 API</a></div>
+    </nav>
+    <header class="hero">
+      <div class="eyebrow">Order Funnel</div>
+      <h1>预约一次智者文字、语音、视频或记忆订阅服务。</h1>
+      <p>当前版本先完成真实订单记录和人工跟进，订单会写入服务器 <code>data/orders.jsonl</code>。后续可把同一订单号接入 Stripe、Creem、微信支付或 CRM。</p>
+    </header>
+    <section class="grid">{pricing_cards}</section>
+    <section class="checkout">
+      <div class="panel">
+        <div class="eyebrow">How it works</div>
+        <h2>商业闭环</h2>
+        <p>1. 用户从小红书/抖音/数字人视频进入官网。<br>2. 免费文字试用建立信任。<br>3. 下单预约语音/视频/战略局。<br>4. 通话后沉淀为记忆订阅和课程复购。</p>
+        <div class="result" id="result">提交后这里会显示订单号和下一步付款/跟进方式。</div>
+      </div>
+      <div class="panel">
+        <form id="orderForm">
+          <label>套餐<select name="plan_id" id="planSelect">{plan_options}</select></label>
+          <label>智者<select name="sage_id">{sage_options}</select></label>
+          <label>姓名 / 昵称<input name="name" required placeholder="例如：张总 / Lucy"></label>
+          <label>联系方式<input name="contact" required placeholder="微信、手机号或邮箱"></label>
+          <label>来源渠道<select name="channel"><option value="xiaohongshu">小红书</option><option value="douyin">抖音</option><option value="digital-human">数字人视频</option><option value="direct">直接访问</option></select></label>
+          <label>支付方式<select name="payment_method"><option value="manual">人工确认</option><option value="stripe_prepare">Stripe 准备位</option><option value="creem_prepare">Creem 准备位</option><option value="wechat_prepare">微信支付准备位</option></select></label>
+          <label class="span-2">这次想解决的问题<textarea name="use_case" required placeholder="例如：现金流只够 6 个月，我应该先保利润、客户还是团队？"></textarea></label>
+          <button type="submit">提交订单</button>
+        </form>
+      </div>
+    </section>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const initialPlan = params.get("plan");
+    if (initialPlan) document.getElementById("planSelect").value = initialPlan;
+    document.querySelectorAll("[data-plan]").forEach((button) => {{
+      button.addEventListener("click", () => {{
+        document.getElementById("planSelect").value = button.dataset.plan;
+        document.getElementById("orderForm").scrollIntoView({{ behavior: "smooth", block: "center" }});
+      }});
+    }});
+    document.getElementById("orderForm").addEventListener("submit", async (event) => {{
+      event.preventDefault();
+      const result = document.getElementById("result");
+      result.textContent = "订单提交中...";
+      const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const res = await fetch("/api/orders", {{ method:"POST", headers:{{ "Content-Type":"application/json" }}, body:JSON.stringify(payload) }});
+      const data = await res.json();
+      if (!res.ok) {{ result.textContent = data.detail || "订单失败"; return; }}
+      result.innerHTML = `订单已创建：<b>${{data.order_id}}</b><br>状态：${{data.status}}<br>${{data.next_step}}`;
+      event.currentTarget.reset();
+    }});
+  </script>
+</body>
+</html>"""
+
+
+def _utm_url(path: str, source: str, medium: str, campaign: str = "digital_sage_launch") -> str:
+    return f"https://www.digitalsage.cloud{path}?utm_source={source}&utm_medium={medium}&utm_campaign={campaign}"
+
+
+def _render_digital_human_poster(sage_id: str, item: dict) -> str:
+    sage = escape(item["sage"])
+    opening = escape(item["opening"])
+    use_case = escape(item["use_case"])
+    avatar_href = f"https://www.digitalsage.cloud/api/avatar/{escape(sage_id)}.svg"
+    checkout_href = escape(_utm_url("/checkout", f"digital_human_{sage_id}", "poster"))
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <radialGradient id="g" cx="25%" cy="15%" r="90%">
+      <stop offset="0%" stop-color="#4a3715"/>
+      <stop offset="45%" stop-color="#111116"/>
+      <stop offset="100%" stop-color="#050506"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#f5d98a"/>
+      <stop offset="1" stop-color="#e2b64f"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="26" stdDeviation="32" flood-color="#000" flood-opacity=".45"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#g)"/>
+  <circle cx="880" cy="210" r="260" fill="#e2b64f" opacity=".10"/>
+  <circle cx="170" cy="1650" r="360" fill="#f5d98a" opacity=".08"/>
+  <text x="80" y="120" fill="#f5d98a" font-family="Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="7">DIGITAL SAGE</text>
+  <text x="80" y="210" fill="#fafafa" font-family="PingFang SC, Noto Serif SC, serif" font-size="76" font-weight="800">{sage}</text>
+  <text x="80" y="292" fill="#a1a1aa" font-family="PingFang SC, Arial, sans-serif" font-size="34">你的随身智者分身</text>
+  <rect x="150" y="360" width="780" height="780" rx="80" fill="rgba(255,255,255,.06)" stroke="#e2b64f" stroke-opacity=".24" filter="url(#shadow)"/>
+  <image href="{avatar_href}" x="240" y="430" width="600" height="600" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="80" y="1210" width="920" height="360" rx="42" fill="rgba(255,255,255,.07)" stroke="#e2b64f" stroke-opacity=".22"/>
+  <foreignObject x="126" y="1260" width="828" height="260">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: PingFang SC, Arial, sans-serif; color:#fafafa; font-size:44px; line-height:1.45; font-weight:700;">“{opening}”</div>
+  </foreignObject>
+  <foreignObject x="126" y="1588" width="828" height="130">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: PingFang SC, Arial, sans-serif; color:#a1a1aa; font-size:30px; line-height:1.5;">适合：{use_case}</div>
+  </foreignObject>
+  <rect x="80" y="1760" width="920" height="82" rx="41" fill="url(#gold)"/>
+  <text x="540" y="1813" text-anchor="middle" fill="#17130a" font-family="PingFang SC, Arial, sans-serif" font-size="34" font-weight="800">扫码/搜索 Digital Sage，预约一次智者通话</text>
+  <text x="540" y="1880" text-anchor="middle" fill="#71717a" font-family="Arial, sans-serif" font-size="24">{checkout_href}</text>
+</svg>"""
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index() -> str:
     return _build_shell()
@@ -3522,6 +3712,11 @@ async def index() -> str:
 @app.get("/growth", response_class=HTMLResponse)
 async def growth_console() -> str:
     return _build_growth_shell()
+
+
+@app.get("/checkout", response_class=HTMLResponse)
+async def checkout_page() -> str:
+    return _build_checkout_shell()
 
 
 @app.get("/health")
@@ -3646,6 +3841,53 @@ async def get_growth_campaigns() -> dict:
     }
 
 
+@app.get("/api/pricing")
+async def get_pricing() -> dict:
+    return {
+        "currency": "CNY",
+        "plans": [
+            {
+                **plan,
+                "checkout_url": f"/checkout?plan={plan['id']}",
+                "utm_checkout_url": _utm_url("/checkout", "pricing_api", "direct", "digital_sage_launch"),
+            }
+            for plan in GROWTH_CAMPAIGN_PACK["pricing"]
+        ],
+    }
+
+
+@app.get("/api/social-assets")
+async def get_social_assets() -> dict:
+    return {
+        "utm_links": {
+            "xiaohongshu_home": _utm_url("/", "xiaohongshu", "social"),
+            "xiaohongshu_checkout": _utm_url("/checkout", "xiaohongshu", "social"),
+            "douyin_home": _utm_url("/", "douyin", "short_video"),
+            "douyin_checkout": _utm_url("/checkout", "douyin", "short_video"),
+            "digital_human_checkout": _utm_url("/checkout", "digital_human", "poster"),
+        },
+        "xiaohongshu": GROWTH_CAMPAIGN_PACK["xiaohongshu"],
+        "douyin": GROWTH_CAMPAIGN_PACK["douyin"],
+        "digital_human_posters": [
+            {
+                "sage": item["sage"],
+                "id": item["id"],
+                "poster_url": f"/api/digital-human-poster/{item['id']}.svg",
+                "checkout_url": _utm_url("/checkout", f"digital_human_{item['id']}", "poster"),
+            }
+            for item in GROWTH_CAMPAIGN_PACK["digital_humans"]
+        ],
+    }
+
+
+@app.get("/api/digital-human-poster/{sage_id}.svg")
+async def get_digital_human_poster(sage_id: str) -> Response:
+    item = DIGITAL_HUMANS_BY_ID.get(sage_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="未找到该数字人宣传素材")
+    return Response(content=_render_digital_human_poster(sage_id, item), media_type="image/svg+xml")
+
+
 @app.post("/api/growth-leads")
 async def create_growth_lead(req: GrowthLeadRequest) -> dict:
     name = req.name.strip()
@@ -3672,6 +3914,52 @@ async def create_growth_lead(req: GrowthLeadRequest) -> dict:
         "ok": True,
         "lead_id": f"lead-{int(datetime.now(timezone.utc).timestamp())}",
         "next_step": "人工跟进或接入支付下单页",
+    }
+
+
+@app.post("/api/orders")
+async def create_order(req: OrderRequest) -> dict:
+    plan = PRICING_PLANS.get(req.plan_id)
+    if not plan:
+        raise HTTPException(status_code=400, detail="未知套餐")
+
+    name = req.name.strip()
+    contact = req.contact.strip()
+    use_case = req.use_case.strip()
+    if not name or not contact or not use_case:
+        raise HTTPException(status_code=400, detail="name, contact and use_case are required")
+
+    sage_id = (req.sage_id or "").strip()
+    if sage_id and sage_id not in CELEBRITY_PROFILES:
+        raise HTTPException(status_code=400, detail="未知智者")
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    order_id = f"ds-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{uuid4().hex[:8]}"
+    order = {
+        "order_id": order_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "plan_id": plan["id"],
+        "plan_name": plan["name"],
+        "amount_cny": plan["amount_cny"],
+        "name": name,
+        "contact": contact,
+        "sage_id": sage_id,
+        "sage_name": CELEBRITY_PROFILES.get(sage_id, {}).get("name", ""),
+        "channel": req.channel.strip() or "checkout",
+        "use_case": use_case,
+        "payment_method": req.payment_method.strip() or "manual",
+        "status": "pending_payment",
+    }
+    with (DATA_DIR / "orders.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(order, ensure_ascii=False) + "\n")
+
+    return {
+        "ok": True,
+        "order_id": order_id,
+        "status": "pending_payment",
+        "amount_cny": plan["amount_cny"],
+        "plan": plan["name"],
+        "next_step": "已记录订单。当前为人工确认/支付准备位，下一步接 Stripe、Creem、微信支付或客服通知。",
     }
 
 
