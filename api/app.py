@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
 from typing import Optional
@@ -77,6 +78,7 @@ LLM_PRIMARY_MODEL = os.getenv("DEEPSEEK_MODEL") or os.getenv("LLM_MODEL") or "de
 LLM_FALLBACK_MODEL = os.getenv("DEEPSEEK_FALLBACK_MODEL", "deepseek-chat")
 LLM_PROVIDER_LABEL = os.getenv("LLM_PROVIDER_LABEL", "DeepSeek")
 MEDIA_DIR = BASE_DIR / "media"
+DATA_DIR = BASE_DIR / "data"
 COURSES_PROXY_BASE = os.getenv(
     "COURSES_PROXY_BASE",
     "https://mokangmedical.github.io/digital-sage-courses",
@@ -103,6 +105,14 @@ class ExpertAdviceRequest(BaseModel):
     celebrity_id: str
     situation: str
     category: str
+
+
+class GrowthLeadRequest(BaseModel):
+    name: str
+    contact: str
+    channel: str = "growth-page"
+    need: str
+    budget: Optional[str] = None
 
 
 GROWTH_CAMPAIGN_PACK = {
@@ -3328,6 +3338,33 @@ def _build_growth_shell() -> str:
     .price-card strong {{ display: block; margin: 12px 0; color: var(--gold2); font-size: 2rem; }}
     .cta-line {{ margin: -10px 0 14px; padding: 0 20px 18px; color: var(--gold2); }}
     blockquote {{ margin: 12px 0; padding-left: 14px; border-left: 3px solid var(--gold); color: var(--ink); line-height: 1.8; }}
+    .lead-box {{
+      display: grid;
+      grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr);
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }}
+    .lead-box p {{ color: var(--muted); line-height: 1.8; }}
+    .lead-form {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }}
+    .lead-form label {{ display: grid; gap: 7px; color: var(--gold2); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }}
+    .lead-form input, .lead-form textarea, .lead-form select {{
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+    }}
+    .lead-form textarea {{ min-height: 108px; resize: vertical; }}
+    .span-2 {{ grid-column: 1 / -1; }}
+    .lead-status {{ min-height: 24px; color: var(--gold2); font-weight: 800; }}
     table {{ width: 100%; border-collapse: collapse; }}
     th, td {{ padding: 14px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }}
     th {{ color: var(--gold2); }}
@@ -3335,6 +3372,7 @@ def _build_growth_shell() -> str:
     .toast {{ position: fixed; right: 18px; bottom: 18px; display: none; padding: 12px 14px; border-radius: 14px; color: #17130a; background: var(--gold2); font-weight: 800; }}
     @media (max-width: 760px) {{
       .nav, .section-head {{ align-items: flex-start; flex-direction: column; }}
+      .lead-box, .lead-form {{ grid-template-columns: 1fr; }}
       .hero {{ min-height: auto; }}
     }}
   </style>
@@ -3416,6 +3454,32 @@ def _build_growth_shell() -> str:
         </table>
       </div>
     </section>
+
+    <section id="lead">
+      <div class="lead-box">
+        <div>
+          <div class="eyebrow">Lead Capture</div>
+          <h2>让用户留下第一个付费意向</h2>
+          <p>这个表单会把预约需求写入服务器的 <code>data/growth_leads.jsonl</code>。先用它验证“谁愿意为智者通话付费”，后续再接 Stripe、Creem、微信或 CRM。</p>
+        </div>
+        <form class="lead-form" id="leadForm">
+          <label>姓名 / 昵称<input name="name" required placeholder="例如：张总 / Lucy"></label>
+          <label>联系方式<input name="contact" required placeholder="微信、手机号或邮箱"></label>
+          <label>来源渠道
+            <select name="channel">
+              <option value="xiaohongshu">小红书</option>
+              <option value="douyin">抖音</option>
+              <option value="digital-human">数字人视频</option>
+              <option value="growth-page">官网增长页</option>
+            </select>
+          </label>
+          <label>意向预算<input name="budget" placeholder="如：20 分钟语音 / 60 分钟战略局"></label>
+          <label class="span-2">想解决的问题<textarea name="need" required placeholder="写下你希望哪位智者帮你拆的问题"></textarea></label>
+          <div class="lead-status" id="leadStatus"></div>
+          <button type="submit">提交预约意向</button>
+        </form>
+      </div>
+    </section>
   </div>
   <div class="toast" id="toast">已复制</div>
   <script>
@@ -3426,6 +3490,24 @@ def _build_growth_shell() -> str:
         toast.style.display = "block";
         window.setTimeout(() => toast.style.display = "none", 1200);
       }});
+    }});
+    const leadForm = document.getElementById("leadForm");
+    const leadStatus = document.getElementById("leadStatus");
+    leadForm.addEventListener("submit", async (event) => {{
+      event.preventDefault();
+      leadStatus.textContent = "提交中...";
+      const payload = Object.fromEntries(new FormData(leadForm).entries());
+      const res = await fetch("/api/growth-leads", {{
+        method: "POST",
+        headers: {{ "Content-Type": "application/json" }},
+        body: JSON.stringify(payload)
+      }});
+      if (!res.ok) {{
+        leadStatus.textContent = "提交失败，请稍后重试";
+        return;
+      }}
+      leadStatus.textContent = "已收到，下一步可以进入付费预约";
+      leadForm.reset();
     }});
   </script>
 </body>
@@ -3561,6 +3643,35 @@ async def get_growth_campaigns() -> dict:
         "domain": "https://www.digitalsage.cloud",
         "status": "launch-ready",
         "campaign_pack": GROWTH_CAMPAIGN_PACK,
+    }
+
+
+@app.post("/api/growth-leads")
+async def create_growth_lead(req: GrowthLeadRequest) -> dict:
+    name = req.name.strip()
+    contact = req.contact.strip()
+    need = req.need.strip()
+    if not name or not contact or not need:
+        raise HTTPException(status_code=400, detail="name, contact and need are required")
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    lead = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "name": name,
+        "contact": contact,
+        "channel": req.channel.strip() or "growth-page",
+        "need": need,
+        "budget": (req.budget or "").strip(),
+        "status": "new",
+    }
+    lead_path = DATA_DIR / "growth_leads.jsonl"
+    with lead_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(lead, ensure_ascii=False) + "\n")
+
+    return {
+        "ok": True,
+        "lead_id": f"lead-{int(datetime.now(timezone.utc).timestamp())}",
+        "next_step": "人工跟进或接入支付下单页",
     }
 
 

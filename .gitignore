@@ -8,3 +8,4 @@ media/demo/_build/
 *.pem
 *_secret*
 credentials.json
+data/*.jsonl
