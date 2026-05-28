@@ -46,6 +46,16 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_MODEL: ${{ secrets.DEEPSEEK_MODEL }}
           DEEPSEEK_FALLBACK_MODEL: ${{ secrets.DEEPSEEK_FALLBACK_MODEL }}
+          PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_CURRENCY: ${{ secrets.STRIPE_CURRENCY }}
+          CREEM_API_BASE: ${{ secrets.CREEM_API_BASE }}
+          CREEM_API_KEY: ${{ secrets.CREEM_API_KEY }}
+          CREEM_PRODUCT_VOICE_10: ${{ secrets.CREEM_PRODUCT_VOICE_10 }}
+          CREEM_PRODUCT_VOICE_20: ${{ secrets.CREEM_PRODUCT_VOICE_20 }}
+          CREEM_PRODUCT_VIDEO_30: ${{ secrets.CREEM_PRODUCT_VIDEO_30 }}
+          CREEM_PRODUCT_STRATEGY_60: ${{ secrets.CREEM_PRODUCT_STRATEGY_60 }}
+          CREEM_PRODUCT_MEMORY_SUBSCRIPTION: ${{ secrets.CREEM_PRODUCT_MEMORY_SUBSCRIPTION }}
         run: |
           test -n "$DEPLOY_HOST"
           test -n "$DEPLOY_USER"
@@ -56,4 +66,14 @@ jobs:
           DEEPSEEK_API_KEY="$DEEPSEEK_API_KEY" \
           DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-pro}" \
           DEEPSEEK_FALLBACK_MODEL="${DEEPSEEK_FALLBACK_MODEL:-deepseek-chat}" \
+          PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-https://www.digitalsage.cloud}" \
+          STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" \
+          STRIPE_CURRENCY="${STRIPE_CURRENCY:-cny}" \
+          CREEM_API_BASE="${CREEM_API_BASE:-https://api.creem.io}" \
+          CREEM_API_KEY="$CREEM_API_KEY" \
+          CREEM_PRODUCT_VOICE_10="$CREEM_PRODUCT_VOICE_10" \
+          CREEM_PRODUCT_VOICE_20="$CREEM_PRODUCT_VOICE_20" \
+          CREEM_PRODUCT_VIDEO_30="$CREEM_PRODUCT_VIDEO_30" \
+          CREEM_PRODUCT_STRATEGY_60="$CREEM_PRODUCT_STRATEGY_60" \
+          CREEM_PRODUCT_MEMORY_SUBSCRIPTION="$CREEM_PRODUCT_MEMORY_SUBSCRIPTION" \
           ./tools/deploy_server.sh

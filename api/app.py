@@ -84,6 +84,12 @@ COURSES_PROXY_BASE = os.getenv(
     "COURSES_PROXY_BASE",
     "https://mokangmedical.github.io/digital-sage-courses",
 ).rstrip("/")
+PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://www.digitalsage.cloud").rstrip("/")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_API_VERSION = os.getenv("STRIPE_API_VERSION", "2026-02-25.clover")
+STRIPE_CURRENCY = os.getenv("STRIPE_CURRENCY", "cny").lower()
+CREEM_API_KEY = os.getenv("CREEM_API_KEY", "")
+CREEM_API_BASE = os.getenv("CREEM_API_BASE", "https://api.creem.io").rstrip("/")
 
 app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
@@ -3625,7 +3631,7 @@ def _build_checkout_shell() -> str:
           <label>姓名 / 昵称<input name="name" required placeholder="例如：张总 / Lucy"></label>
           <label>联系方式<input name="contact" required placeholder="微信、手机号或邮箱"></label>
           <label>来源渠道<select name="channel"><option value="xiaohongshu">小红书</option><option value="douyin">抖音</option><option value="digital-human">数字人视频</option><option value="direct">直接访问</option></select></label>
-          <label>支付方式<select name="payment_method"><option value="manual">人工确认</option><option value="stripe_prepare">Stripe 准备位</option><option value="creem_prepare">Creem 准备位</option><option value="wechat_prepare">微信支付准备位</option></select></label>
+          <label>支付方式<select name="payment_method"><option value="auto">自动创建收款链接</option><option value="stripe">Stripe Checkout</option><option value="creem">Creem Checkout</option><option value="manual">人工确认/微信</option></select></label>
           <label class="span-2">这次想解决的问题<textarea name="use_case" required placeholder="例如：现金流只够 6 个月，我应该先保利润、客户还是团队？"></textarea></label>
           <button type="submit">提交订单</button>
         </form>
@@ -3650,7 +3656,8 @@ def _build_checkout_shell() -> str:
       const res = await fetch("/api/orders", {{ method:"POST", headers:{{ "Content-Type":"application/json" }}, body:JSON.stringify(payload) }});
       const data = await res.json();
       if (!res.ok) {{ result.textContent = data.detail || "订单失败"; return; }}
-      result.innerHTML = `订单已创建：<b>${{data.order_id}}</b><br>状态：${{data.status}}<br>${{data.next_step}}`;
+      const payButton = data.checkout_url ? `<br><br><a class="pill primary" href="${{data.checkout_url}}">前往支付</a>` : "";
+      result.innerHTML = `订单已创建：<b>${{data.order_id}}</b><br>状态：${{data.status}}<br>${{data.next_step}}${{payButton}}`;
       event.currentTarget.reset();
     }});
   </script>
@@ -3659,7 +3666,147 @@ def _build_checkout_shell() -> str:
 
 
 def _utm_url(path: str, source: str, medium: str, campaign: str = "digital_sage_launch") -> str:
-    return f"https://www.digitalsage.cloud{path}?utm_source={source}&utm_medium={medium}&utm_campaign={campaign}"
+    return f"{PUBLIC_BASE_URL}{path}?utm_source={source}&utm_medium={medium}&utm_campaign={campaign}"
+
+
+def _order_success_url(order_id: str) -> str:
+    return f"{PUBLIC_BASE_URL}/checkout?order={order_id}&status=success"
+
+
+def _order_cancel_url(order_id: str) -> str:
+    return f"{PUBLIC_BASE_URL}/checkout?order={order_id}&status=cancelled"
+
+
+def _safe_checkout_result(result: dict) -> dict:
+    return {
+        "provider": result.get("provider", "manual"),
+        "ok": bool(result.get("ok")),
+        "reason": result.get("reason", ""),
+    }
+
+
+async def _create_stripe_checkout(order: dict, plan: dict) -> dict:
+    if not STRIPE_SECRET_KEY:
+        return {"provider": "stripe", "ok": False, "reason": "missing_stripe_secret_key"}
+
+    mode = "subscription" if plan["id"] == "memory_subscription" else "payment"
+    data = {
+        "mode": mode,
+        "success_url": _order_success_url(order["order_id"]),
+        "cancel_url": _order_cancel_url(order["order_id"]),
+        "client_reference_id": order["order_id"],
+        "metadata[order_id]": order["order_id"],
+        "metadata[plan_id]": plan["id"],
+        "metadata[channel]": order["channel"],
+        "metadata[sage_id]": order.get("sage_id", ""),
+        "line_items[0][quantity]": "1",
+        "line_items[0][price_data][currency]": STRIPE_CURRENCY,
+        "line_items[0][price_data][unit_amount]": str(int(plan["amount_cny"]) * 100),
+        "line_items[0][price_data][product_data][name]": f"Digital Sage - {plan['name']}",
+        "line_items[0][price_data][product_data][description]": plan["best_for"],
+    }
+    if mode == "subscription":
+        data["line_items[0][price_data][recurring][interval]"] = "month"
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
+                "https://api.stripe.com/v1/checkout/sessions",
+                data=data,
+                auth=(STRIPE_SECRET_KEY, ""),
+                headers={"Stripe-Version": STRIPE_API_VERSION},
+            )
+        if response.status_code >= 400:
+            return {
+                "provider": "stripe",
+                "ok": False,
+                "reason": f"stripe_http_{response.status_code}",
+            }
+        payload = response.json()
+        return {
+            "provider": "stripe",
+            "ok": True,
+            "session_id": payload.get("id", ""),
+            "checkout_url": payload.get("url", ""),
+        }
+    except httpx.HTTPError as exc:
+        return {"provider": "stripe", "ok": False, "reason": f"stripe_network_{exc.__class__.__name__}"}
+
+
+def _creem_product_env(plan_id: str) -> str:
+    return f"CREEM_PRODUCT_{plan_id.upper()}"
+
+
+async def _create_creem_checkout(order: dict, plan: dict) -> dict:
+    if not CREEM_API_KEY:
+        return {"provider": "creem", "ok": False, "reason": "missing_creem_api_key"}
+
+    product_id = os.getenv(_creem_product_env(plan["id"]), "")
+    if not product_id:
+        return {"provider": "creem", "ok": False, "reason": f"missing_{_creem_product_env(plan['id']).lower()}"}
+
+    payload = {
+        "product_id": product_id,
+        "request_id": order["order_id"],
+        "units": 1,
+        "success_url": _order_success_url(order["order_id"]),
+        "metadata": {
+            "order_id": order["order_id"],
+            "plan_id": plan["id"],
+            "channel": order["channel"],
+            "sage_id": order.get("sage_id", ""),
+        },
+    }
+    if "@" in order["contact"]:
+        payload["customer"] = {"email": order["contact"]}
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
+                f"{CREEM_API_BASE}/v1/checkouts",
+                json=payload,
+                headers={"x-api-key": CREEM_API_KEY, "Content-Type": "application/json"},
+            )
+        if response.status_code >= 400:
+            return {
+                "provider": "creem",
+                "ok": False,
+                "reason": f"creem_http_{response.status_code}",
+            }
+        data = response.json()
+        return {
+            "provider": "creem",
+            "ok": True,
+            "session_id": data.get("id", ""),
+            "checkout_url": data.get("checkout_url", ""),
+        }
+    except httpx.HTTPError as exc:
+        return {"provider": "creem", "ok": False, "reason": f"creem_network_{exc.__class__.__name__}"}
+
+
+async def _create_payment_checkout(order: dict, plan: dict, requested_method: str) -> dict:
+    if int(plan["amount_cny"]) <= 0:
+        return {"provider": "free", "ok": True, "reason": "free_trial"}
+
+    method = (requested_method or "auto").strip().lower()
+    if method in {"stripe", "stripe_checkout", "stripe_prepare"}:
+        return await _create_stripe_checkout(order, plan)
+    if method in {"creem", "creem_checkout", "creem_prepare"}:
+        return await _create_creem_checkout(order, plan)
+    if method == "auto":
+        stripe_result = await _create_stripe_checkout(order, plan)
+        if stripe_result.get("ok") and stripe_result.get("checkout_url"):
+            return stripe_result
+        creem_result = await _create_creem_checkout(order, plan)
+        if creem_result.get("ok") and creem_result.get("checkout_url"):
+            return creem_result
+        return {
+            "provider": "manual",
+            "ok": False,
+            "reason": f"{stripe_result.get('reason', 'stripe_unavailable')};{creem_result.get('reason', 'creem_unavailable')}",
+        }
+
+    return {"provider": "manual", "ok": False, "reason": "manual_followup"}
 
 
 def _render_digital_human_poster(sage_id: str, item: dict) -> str:
@@ -3950,16 +4097,38 @@ async def create_order(req: OrderRequest) -> dict:
         "payment_method": req.payment_method.strip() or "manual",
         "status": "pending_payment",
     }
+    checkout = await _create_payment_checkout(order, plan, req.payment_method)
+    checkout_url = checkout.get("checkout_url", "")
+    if checkout.get("provider") == "free":
+        order["status"] = "free_confirmed"
+    elif checkout.get("ok") and checkout_url:
+        order["status"] = "checkout_created"
+    else:
+        order["status"] = "pending_payment"
+    order["checkout_provider"] = checkout.get("provider", "manual")
+    order["checkout_url"] = checkout_url
+    order["checkout_session_id"] = checkout.get("session_id", "")
+    order["checkout_result"] = _safe_checkout_result(checkout)
+
     with (DATA_DIR / "orders.jsonl").open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(order, ensure_ascii=False) + "\n")
+
+    if checkout_url:
+        next_step = "已创建收款链接，请点击前往支付。支付完成后系统会保留订单号，后续可接 webhook 自动确认。"
+    elif order["status"] == "free_confirmed":
+        next_step = "免费文字试用已确认。下一步请选择一位智者开始体验，再引导到语音或视频服务。"
+    else:
+        next_step = "已记录订单。当前未配置可用收款密钥或选择人工确认，请通过微信/客服跟进，或在服务器配置 Stripe/Creem 后自动创建收款链接。"
 
     return {
         "ok": True,
         "order_id": order_id,
-        "status": "pending_payment",
+        "status": order["status"],
         "amount_cny": plan["amount_cny"],
         "plan": plan["name"],
-        "next_step": "已记录订单。当前为人工确认/支付准备位，下一步接 Stripe、Creem、微信支付或客服通知。",
+        "checkout_provider": order["checkout_provider"],
+        "checkout_url": checkout_url,
+        "next_step": next_step,
     }
 
 
