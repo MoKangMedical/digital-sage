@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+from html import escape
 from pathlib import Path
 from typing import Optional
 
@@ -102,6 +103,160 @@ class ExpertAdviceRequest(BaseModel):
     celebrity_id: str
     situation: str
     category: str
+
+
+GROWTH_CAMPAIGN_PACK = {
+    "funnel": [
+        {
+            "stage": "1. 种草认知",
+            "goal": "让用户知道这不是普通聊天机器人，而是 100 位智者的判断系统。",
+            "channels": ["小红书", "抖音", "数字人短视频"],
+            "cta": "先看 15 秒数字人短片，再进入免费文字试用。",
+        },
+        {
+            "stage": "2. 免费试用",
+            "goal": "用 1 个真实问题触发对话，证明产品能把复杂问题拆清楚。",
+            "channels": ["首页对话区", "课程页", "私域二维码"],
+            "cta": "选择一位智者，输入当前最难的一个判断。",
+        },
+        {
+            "stage": "3. 付费通话",
+            "goal": "把文本体验升级为 10/20/30/60 分钟语音或视频咨询。",
+            "channels": ["订单页", "微信/Stripe/Creem 准备位", "电话桥接"],
+            "cta": "预约一次 20 分钟智者分身通话。",
+        },
+        {
+            "stage": "4. 记忆订阅",
+            "goal": "沉淀用户长期问题、偏好、复盘记录，形成持续订阅现金流。",
+            "channels": ["记忆库", "课程进度", "月度复盘报告"],
+            "cta": "订阅 3 位常用智者，建立你的长期判断委员会。",
+        },
+    ],
+    "pricing": [
+        {"name": "文字试用", "price": "¥0", "unit": "3 次对话", "best_for": "冷启动获客与首次体验"},
+        {"name": "10 分钟语音", "price": "¥19", "unit": "单次", "best_for": "快速拆一个具体问题"},
+        {"name": "20 分钟语音", "price": "¥39", "unit": "单次", "best_for": "完整梳理一个经营/职业判断"},
+        {"name": "30 分钟视频", "price": "¥69", "unit": "单次", "best_for": "带数字人视频形象的深度咨询"},
+        {"name": "60 分钟战略局", "price": "¥129", "unit": "单次", "best_for": "多智者联合分析、形成行动清单"},
+        {"name": "记忆订阅", "price": "¥59/月", "unit": "3 位智者", "best_for": "长期复盘、课程进度和个人知识库"},
+    ],
+    "xiaohongshu": [
+        {
+            "title": "我让巴菲特、乔布斯、孔子一起帮我拆一个问题",
+            "cover": "一个问题，100 位智者怎么回答？",
+            "hook": "当你一个人做决定时，最缺的不是鸡汤，而是能把局面拆开的脑力。",
+            "body": "Digital Sage 把 100 位智者做成可对话的判断界面。你可以问巴菲特现金流，问乔布斯产品取舍，问孔子关系与秩序，问图灵系统设计。先免费试一次文字对话，再决定是否进入语音/视频通话。",
+            "tags": ["#AI工具", "#创业决策", "#知识付费", "#数字人", "#个人成长"],
+            "cta": "评论区留下你最想问的智者，我把问题做成下一条案例。",
+        },
+        {
+            "title": "如果你有一个重大决定，先别急着问朋友",
+            "cover": "重大决定前，先问 3 个智者",
+            "hook": "朋友会安慰你，智者会逼你看清变量。",
+            "body": "我用 Digital Sage 做了一个三智者判断法：巴菲特看现金流，德鲁克看组织责任，老子看顺势与边界。一个复杂问题先经过三套思路，再形成行动清单。",
+            "tags": ["#决策模型", "#AI分身", "#商业思维", "#打工人成长"],
+            "cta": "保存这条，下次卡住时直接用三智者提问法。",
+        },
+        {
+            "title": "100 位智者 × 1000 门课程，我把它做成了一个知识宇宙",
+            "cover": "100 位智者的 1000 门课",
+            "hook": "不是名人语录合集，而是一套可以听、可以学、可以对话的系统。",
+            "body": "每位智者都有 10 门课：总览、三大核心概念、判断框架、案例、工具箱、价值系统、方法论和行动整合。每课都有语音导读，适合通勤时先听，再进入页面学习。",
+            "tags": ["#在线课程", "#AI学习", "#知识宇宙", "#终身学习"],
+            "cta": "主页可以直接进课程目录，先从巴菲特/孔子/乔布斯开始。",
+        },
+    ],
+    "douyin": [
+        {
+            "title": "15 秒：凌晨两点的创业者",
+            "duration": "15s",
+            "hook": "现金流只够 4 个月，你会问谁？",
+            "shots": [
+                "0-3s：创业者盯着现金流表，字幕：只够 4 个月。",
+                "3-7s：屏幕弹出巴菲特、德鲁克、乔布斯三个数字人。",
+                "7-12s：三位智者给出不同判断维度：现金流、组织、产品。",
+                "12-15s：产品页出现行动清单，CTA：来问你的第一位智者。",
+            ],
+            "voiceover": "真正让人失眠的不是难题，是没有人一起承担判断。Digital Sage，让 100 位智者陪你把复杂问题看清一层。",
+            "cta": "搜索 Digital Sage，免费问一次。",
+        },
+        {
+            "title": "30 秒：同一个问题，三种世界级思路",
+            "duration": "30s",
+            "hook": "同一个问题，巴菲特、乔布斯、孔子会怎么拆？",
+            "shots": [
+                "0-5s：用户输入问题：我要不要砍掉一条产品线？",
+                "5-13s：巴菲特回答：先看长期现金流和护城河。",
+                "13-20s：乔布斯回答：砍到只剩用户真正记得的东西。",
+                "20-26s：孔子回答：先正名，明确责任、关系和秩序。",
+                "26-30s：系统汇总为 3 条行动建议。",
+            ],
+            "voiceover": "你不需要一个万能答案，你需要不同大脑帮你看见盲区。Digital Sage，把世界级判断变成一次对话。",
+            "cta": "点进主页，选择你的智者。",
+        },
+        {
+            "title": "60 秒：数字人课程入口",
+            "duration": "60s",
+            "hook": "如果巴菲特有一套 10 节课，会从哪里讲起？",
+            "shots": [
+                "0-8s：展示 100 位智者宫殿和课程总目录。",
+                "8-22s：打开巴菲特课程：总览、价值投资、复利、护城河。",
+                "22-36s：播放课程音频导读，字幕同步显示关键句。",
+                "36-50s：切到数字人对话：用户问现金流，巴菲特分身回答。",
+                "50-60s：展示付费路径：文字试用、语音、视频、记忆订阅。",
+            ],
+            "voiceover": "课程负责建立框架，对话负责解决当下问题，记忆订阅负责长期复盘。Digital Sage，不只是聊天，是你的智者委员会。",
+            "cta": "从一门免费课程开始。",
+        },
+    ],
+    "digital_humans": [
+        {
+            "sage": "沃伦·巴菲特",
+            "avatar_direction": "银发、圆框眼镜、温和但克制的投资家形象，背景为深色书房与财报光幕。",
+            "opening": "如果现金流只够六个月，我不会先问增长，我会先问你真正能活下来的核心业务是什么。",
+            "use_case": "企业现金流、投资、长期主义、价格与价值。",
+        },
+        {
+            "sage": "史蒂夫·乔布斯",
+            "avatar_direction": "黑色高领、极简舞台、产品轮廓线和白色聚光灯。",
+            "opening": "别告诉我你能做什么，告诉我用户会记住什么。伟大的产品首先是一次删减。",
+            "use_case": "产品定位、品牌、体验设计、发布会式表达。",
+        },
+        {
+            "sage": "孔子",
+            "avatar_direction": "温润长者、竹简、礼序空间，避免神化，强调秩序与关系。",
+            "opening": "先正名。你真正困住的，可能不是选择，而是责任、角色和关系没有被讲清楚。",
+            "use_case": "组织治理、家庭关系、团队伦理、长期修身。",
+        },
+        {
+            "sage": "老子",
+            "avatar_direction": "留白山水、慢节奏镜头、浅金线条，表达顺势和边界。",
+            "opening": "越用力的地方，越要问是不是逆势。先看水往哪里流，再决定你该不该动。",
+            "use_case": "战略取舍、压力管理、顺势而为、反脆弱节奏。",
+        },
+        {
+            "sage": "艾伦·图灵",
+            "avatar_direction": "复古计算机、矩阵光点、冷静逻辑感，适合系统问题拆解。",
+            "opening": "把情绪先放在一边。我们把问题写成输入、规则、状态和输出。",
+            "use_case": "系统设计、AI、自动化、复杂问题建模。",
+        },
+        {
+            "sage": "钟南山",
+            "avatar_direction": "医学会议室、证据卡片、稳重正直的公共卫生专家形象。",
+            "opening": "先排危险，再看证据。判断不能只看愿望，要看风险和可验证事实。",
+            "use_case": "健康决策、风险沟通、公共卫生、循证判断。",
+        },
+    ],
+    "calendar": [
+        {"day": "D1", "channel": "小红书", "asset": "产品故事笔记", "topic": "一个重大决定前，先问 3 位智者"},
+        {"day": "D2", "channel": "抖音", "asset": "15 秒短视频", "topic": "现金流只够 4 个月，你会问谁？"},
+        {"day": "D3", "channel": "小红书", "asset": "课程种草", "topic": "100 位智者 × 1000 门课程"},
+        {"day": "D4", "channel": "抖音", "asset": "数字人对话", "topic": "巴菲特、乔布斯、孔子回答同一问题"},
+        {"day": "D5", "channel": "小红书", "asset": "案例复盘", "topic": "我用三智者法拆了一次产品取舍"},
+        {"day": "D6", "channel": "抖音", "asset": "课程导流", "topic": "如果巴菲特开一套 10 节课"},
+        {"day": "D7", "channel": "全渠道", "asset": "直播/社群转化", "topic": "免费帮 10 个用户做一次智者判断"},
+    ],
+}
 
 
 async def _proxy_courses_request(path: str, request: Request) -> Response:
@@ -375,6 +530,19 @@ def _build_shell() -> str:
       border-radius: 999px;
       background: rgba(15, 23, 42, 0.06);
       border: 1px solid rgba(17, 24, 39, 0.08);
+    }
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.045);
+      text-decoration: none;
+      font-size: 0.88rem;
     }
     .lang-button {
       border: none;
@@ -1881,6 +2049,7 @@ def _build_shell() -> str:
         </div>
       </div>
       <div class="status">
+        <a class="nav-pill" href="/growth">增长落地</a>
         <span id="loadedCount">载入中</span>
         <span id="statusLabel">Production Live · DeepSeek</span>
         <div class="lang-toggle" id="langToggle">
@@ -2995,9 +3164,282 @@ def _build_shell() -> str:
     return shell.replace("__DEMO_SCENES_JSON__", json.dumps(DEMO_SCENES, ensure_ascii=False))
 
 
+def _build_growth_shell() -> str:
+    pack = GROWTH_CAMPAIGN_PACK
+
+    def card(title: str, body: str, meta: str = "", class_name: str = "card") -> str:
+        meta_html = f'<p class="meta">{escape(meta)}</p>' if meta else ""
+        return (
+            f'<article class="{class_name}">'
+            f"<h3>{escape(title)}</h3>"
+            f"{meta_html}"
+            f"<p>{escape(body)}</p>"
+            "</article>"
+        )
+
+    pricing_cards = "".join(
+        (
+            '<article class="price-card">'
+            f"<span>{escape(item['unit'])}</span>"
+            f"<h3>{escape(item['name'])}</h3>"
+            f"<strong>{escape(item['price'])}</strong>"
+            f"<p>{escape(item['best_for'])}</p>"
+            "</article>"
+        )
+        for item in pack["pricing"]
+    )
+    funnel_cards = "".join(
+        card(item["stage"], item["goal"], " / ".join(item["channels"]), "card funnel-card")
+        + f'<div class="cta-line">{escape(item["cta"])}</div>'
+        for item in pack["funnel"]
+    )
+    xhs_cards = "".join(
+        (
+            '<article class="script-card">'
+            f"<div class=\"platform\">小红书</div><h3>{escape(item['title'])}</h3>"
+            f"<p><b>封面：</b>{escape(item['cover'])}</p>"
+            f"<p><b>开头：</b>{escape(item['hook'])}</p>"
+            f"<p>{escape(item['body'])}</p>"
+            f"<p class=\"tags\">{escape(' '.join(item['tags']))}</p>"
+            f"<button data-copy=\"{escape(item['title'] + chr(10) + item['hook'] + chr(10) + item['body'] + chr(10) + ' '.join(item['tags']) + chr(10) + item['cta'])}\">复制笔记</button>"
+            "</article>"
+        )
+        for item in pack["xiaohongshu"]
+    )
+    douyin_cards = "".join(
+        (
+            '<article class="script-card">'
+            f"<div class=\"platform\">抖音 · {escape(item['duration'])}</div><h3>{escape(item['title'])}</h3>"
+            f"<p><b>前 3 秒：</b>{escape(item['hook'])}</p>"
+            f"<ol>{''.join(f'<li>{escape(shot)}</li>' for shot in item['shots'])}</ol>"
+            f"<p><b>旁白：</b>{escape(item['voiceover'])}</p>"
+            f"<p><b>CTA：</b>{escape(item['cta'])}</p>"
+            f"<button data-copy=\"{escape(item['title'] + chr(10) + item['hook'] + chr(10) + item['voiceover'] + chr(10) + item['cta'])}\">复制脚本</button>"
+            "</article>"
+        )
+        for item in pack["douyin"]
+    )
+    human_cards = "".join(
+        (
+            '<article class="human-card">'
+            f"<h3>{escape(item['sage'])}</h3>"
+            f"<p><b>视觉：</b>{escape(item['avatar_direction'])}</p>"
+            f"<blockquote>{escape(item['opening'])}</blockquote>"
+            f"<p><b>主打场景：</b>{escape(item['use_case'])}</p>"
+            f"<button data-copy=\"{escape(item['sage'] + chr(10) + item['avatar_direction'] + chr(10) + item['opening'] + chr(10) + item['use_case'])}\">复制数字人设定</button>"
+            "</article>"
+        )
+        for item in pack["digital_humans"]
+    )
+    calendar_rows = "".join(
+        (
+            "<tr>"
+            f"<td>{escape(item['day'])}</td>"
+            f"<td>{escape(item['channel'])}</td>"
+            f"<td>{escape(item['asset'])}</td>"
+            f"<td>{escape(item['topic'])}</td>"
+            "</tr>"
+        )
+        for item in pack["calendar"]
+    )
+
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Sage 增长落地控制台</title>
+  <meta name="description" content="Digital Sage 的商业模式、小红书、抖音和数字人宣传控制台。">
+  <link rel="canonical" href="https://www.digitalsage.cloud/growth">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {{
+      --bg: #08080b;
+      --card: rgba(28, 28, 34, 0.94);
+      --ink: #fafafa;
+      --muted: #a1a1aa;
+      --line: rgba(245, 217, 138, 0.14);
+      --gold: #e2b64f;
+      --gold2: #f5d98a;
+      --shadow: 0 28px 80px rgba(0,0,0,.36);
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at 16% 8%, rgba(226,182,79,.16), transparent 28%),
+        radial-gradient(circle at 84% 18%, rgba(94,78,44,.24), transparent 24%),
+        linear-gradient(180deg, #050506 0%, var(--bg) 44%, #0d0d10 100%);
+    }}
+    a {{ color: var(--gold2); text-decoration: none; }}
+    .page {{ width: min(1240px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 64px; }}
+    .nav {{ display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0 24px; }}
+    .nav strong {{ letter-spacing: .14em; text-transform: uppercase; }}
+    .nav-links {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+    .pill, button {{
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255,255,255,.045);
+      font: inherit;
+      cursor: pointer;
+    }}
+    button {{ color: #17130a; background: linear-gradient(135deg, var(--gold2), var(--gold)); border: 0; font-weight: 800; }}
+    .hero {{
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 56px 28px;
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 70% 18%, rgba(245,217,138,.13), transparent 30%),
+        linear-gradient(145deg, rgba(24,24,29,.98), rgba(12,12,15,.96));
+      box-shadow: var(--shadow);
+    }}
+    .eyebrow {{ color: var(--gold2); font-size: .78rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }}
+    h1, h2, h3 {{ font-family: "Noto Serif SC", serif; }}
+    h1 {{ max-width: 920px; margin: 16px auto; font-size: clamp(2.7rem, 7vw, 5.8rem); line-height: 1.02; letter-spacing: -.06em; }}
+    .hero p {{ max-width: 820px; margin: 0 auto; color: var(--muted); line-height: 1.85; font-size: 1.05rem; }}
+    .hero-actions {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 28px; }}
+    .primary {{ color: #17130a; background: linear-gradient(135deg, var(--gold2), var(--gold)); }}
+    section {{ margin-top: 28px; }}
+    .section-head {{ display: flex; justify-content: space-between; gap: 16px; align-items: end; margin-bottom: 14px; }}
+    .section-head h2 {{ margin: 8px 0 0; font-size: clamp(1.7rem, 3vw, 2.7rem); }}
+    .section-head p {{ color: var(--muted); line-height: 1.75; max-width: 620px; }}
+    .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }}
+    .card, .price-card, .script-card, .human-card, .table-card {{
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }}
+    .card h3, .price-card h3, .script-card h3, .human-card h3 {{ margin: 0 0 10px; font-size: 1.22rem; }}
+    .card p, .price-card p, .script-card p, .human-card p, li {{ color: var(--muted); line-height: 1.72; }}
+    .meta, .platform, .price-card span, .tags {{ color: var(--gold2); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }}
+    .price-card strong {{ display: block; margin: 12px 0; color: var(--gold2); font-size: 2rem; }}
+    .cta-line {{ margin: -10px 0 14px; padding: 0 20px 18px; color: var(--gold2); }}
+    blockquote {{ margin: 12px 0; padding-left: 14px; border-left: 3px solid var(--gold); color: var(--ink); line-height: 1.8; }}
+    table {{ width: 100%; border-collapse: collapse; }}
+    th, td {{ padding: 14px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }}
+    th {{ color: var(--gold2); }}
+    td {{ color: var(--muted); }}
+    .toast {{ position: fixed; right: 18px; bottom: 18px; display: none; padding: 12px 14px; border-radius: 14px; color: #17130a; background: var(--gold2); font-weight: 800; }}
+    @media (max-width: 760px) {{
+      .nav, .section-head {{ align-items: flex-start; flex-direction: column; }}
+      .hero {{ min-height: auto; }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <strong>Digital Sage Growth</strong>
+      <div class="nav-links">
+        <a class="pill" href="/">主站首页</a>
+        <a class="pill" href="/courses/">课程总目录</a>
+        <a class="pill" href="/api/growth-campaigns">JSON 数据</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Launch Console</div>
+        <h1>实际落地：把 100 位智者做成可收费、可传播、可复用的增长飞轮。</h1>
+        <p>这不是一份静态方案，而是上线可访问的增长控制台：收费模型、转化漏斗、小红书笔记、抖音短视频、数字人分身脚本、7 天冷启动排期都已经结构化，可以直接复制执行。</p>
+        <div class="hero-actions">
+          <a class="pill primary" href="#pricing">查看收费模型</a>
+          <a class="pill" href="#xiaohongshu">复制小红书笔记</a>
+          <a class="pill" href="#douyin">复制抖音脚本</a>
+          <a class="pill" href="#digital-human">数字人宣传</a>
+        </div>
+      </div>
+    </header>
+
+    <section id="pricing">
+      <div class="section-head">
+        <div><div class="eyebrow">Business Model</div><h2>现金流设计</h2></div>
+        <p>先用免费文字试用降低门槛，再把用户导向语音、视频和记忆订阅。价格用于冷启动验证，后续可按转化率调整。</p>
+      </div>
+      <div class="grid">{pricing_cards}</div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">Funnel</div><h2>从内容种草到付费通话</h2></div>
+        <p>每条内容都只服务一个目的：让用户带着真实问题进入产品，而不是只看完一个 AI 概念。</p>
+      </div>
+      <div class="grid">{funnel_cards}</div>
+    </section>
+
+    <section id="xiaohongshu">
+      <div class="section-head">
+        <div><div class="eyebrow">Xiaohongshu</div><h2>小红书种草笔记</h2></div>
+        <p>小红书主打信任与收藏，内容要像真实使用体验，避免硬广腔。每条都保留封面、开头、正文、标签和 CTA。</p>
+      </div>
+      <div class="grid">{xhs_cards}</div>
+    </section>
+
+    <section id="douyin">
+      <div class="section-head">
+        <div><div class="eyebrow">Douyin</div><h2>抖音短视频脚本</h2></div>
+        <p>抖音主打强钩子与高密度信息，前 3 秒必须出现冲突、问题或反差，再快速展示产品如何产生答案。</p>
+      </div>
+      <div class="grid">{douyin_cards}</div>
+    </section>
+
+    <section id="digital-human">
+      <div class="section-head">
+        <div><div class="eyebrow">Digital Human</div><h2>数字人分身宣传</h2></div>
+        <p>每个数字人都绑定一个高频问题场景，方便后续接入视频生成、直播切片、电话桥接和课程导流。</p>
+      </div>
+      <div class="grid">{human_cards}</div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">7-Day Launch</div><h2>冷启动排期</h2></div>
+        <p>先跑一周，观察点击、收藏、私信、免费试用、付费预约五个指标。不要一开始就追求全渠道完美。</p>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>日期</th><th>渠道</th><th>素材</th><th>主题</th></tr></thead>
+          <tbody>{calendar_rows}</tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <div class="toast" id="toast">已复制</div>
+  <script>
+    const toast = document.getElementById("toast");
+    document.querySelectorAll("[data-copy]").forEach((button) => {{
+      button.addEventListener("click", async () => {{
+        await navigator.clipboard.writeText(button.dataset.copy || "");
+        toast.style.display = "block";
+        window.setTimeout(() => toast.style.display = "none", 1200);
+      }});
+    }});
+  </script>
+</body>
+</html>"""
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index() -> str:
     return _build_shell()
+
+
+@app.get("/growth", response_class=HTMLResponse)
+async def growth_console() -> str:
+    return _build_growth_shell()
 
 
 @app.get("/health")
@@ -3109,6 +3551,16 @@ async def get_speaking_style(celeb_id: str) -> dict:
     return {
         "celebrity": profile["name"],
         "speaking_style": profile["speaking_style"],
+    }
+
+
+@app.get("/api/growth-campaigns")
+async def get_growth_campaigns() -> dict:
+    return {
+        "product": "Digital Sage",
+        "domain": "https://www.digitalsage.cloud",
+        "status": "launch-ready",
+        "campaign_pack": GROWTH_CAMPAIGN_PACK,
     }
 
 
