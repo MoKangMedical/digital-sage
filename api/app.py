@@ -8,11 +8,14 @@ from __future__ import annotations
 import json
 import os
 import sys
+from datetime import datetime, timezone
+from html import escape
 from pathlib import Path
 from typing import Optional
+from uuid import uuid4
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -65,9 +68,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MIMO_API_BASE = os.getenv("MIMO_API_BASE", "https://api.xiaomimimo.com/v1")
-MIMO_API_KEY = os.getenv("MIMO_API_KEY", "")
+LLM_API_BASE = (
+    os.getenv("DEEPSEEK_API_BASE")
+    or os.getenv("LLM_API_BASE")
+    or os.getenv("MIMO_API_BASE")
+    or "https://api.deepseek.com"
+)
+LLM_API_KEY = os.getenv("DEEPSEEK_API_KEY") or os.getenv("LLM_API_KEY") or os.getenv("MIMO_API_KEY") or ""
+LLM_PRIMARY_MODEL = os.getenv("DEEPSEEK_MODEL") or os.getenv("LLM_MODEL") or "deepseek-v4-pro"
+LLM_FALLBACK_MODEL = os.getenv("DEEPSEEK_FALLBACK_MODEL", "deepseek-chat")
+LLM_PROVIDER_LABEL = os.getenv("LLM_PROVIDER_LABEL", "DeepSeek")
 MEDIA_DIR = BASE_DIR / "media"
+DATA_DIR = BASE_DIR / "data"
+COURSES_PROXY_BASE = os.getenv(
+    "COURSES_PROXY_BASE",
+    "https://mokangmedical.github.io/digital-sage-courses",
+).rstrip("/")
+PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://www.digitalsage.cloud").rstrip("/")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_API_VERSION = os.getenv("STRIPE_API_VERSION", "2026-02-25.clover")
+STRIPE_CURRENCY = os.getenv("STRIPE_CURRENCY", "cny").lower()
+CREEM_API_KEY = os.getenv("CREEM_API_KEY", "")
+CREEM_API_BASE = os.getenv("CREEM_API_BASE", "https://api.creem.io").rstrip("/")
 
 app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
@@ -90,6 +112,216 @@ class ExpertAdviceRequest(BaseModel):
     celebrity_id: str
     situation: str
     category: str
+
+
+class GrowthLeadRequest(BaseModel):
+    name: str
+    contact: str
+    channel: str = "growth-page"
+    need: str
+    budget: Optional[str] = None
+
+
+class OrderRequest(BaseModel):
+    plan_id: str
+    name: str
+    contact: str
+    sage_id: Optional[str] = None
+    channel: str = "checkout"
+    use_case: str
+    payment_method: str = "manual"
+
+
+GROWTH_CAMPAIGN_PACK = {
+    "funnel": [
+        {
+            "stage": "1. 种草认知",
+            "goal": "让用户知道这不是普通聊天机器人，而是 100 位智者的判断系统。",
+            "channels": ["小红书", "抖音", "数字人短视频"],
+            "cta": "先看 15 秒数字人短片，再进入免费文字试用。",
+        },
+        {
+            "stage": "2. 免费试用",
+            "goal": "用 1 个真实问题触发对话，证明产品能把复杂问题拆清楚。",
+            "channels": ["首页对话区", "课程页", "私域二维码"],
+            "cta": "选择一位智者，输入当前最难的一个判断。",
+        },
+        {
+            "stage": "3. 付费通话",
+            "goal": "把文本体验升级为 10/20/30/60 分钟语音或视频咨询。",
+            "channels": ["订单页", "微信/Stripe/Creem 准备位", "电话桥接"],
+            "cta": "预约一次 20 分钟智者分身通话。",
+        },
+        {
+            "stage": "4. 记忆订阅",
+            "goal": "沉淀用户长期问题、偏好、复盘记录，形成持续订阅现金流。",
+            "channels": ["记忆库", "课程进度", "月度复盘报告"],
+            "cta": "订阅 3 位常用智者，建立你的长期判断委员会。",
+        },
+    ],
+    "pricing": [
+        {"id": "trial_text", "name": "文字试用", "price": "¥0", "amount_cny": 0, "unit": "3 次对话", "best_for": "冷启动获客与首次体验"},
+        {"id": "voice_10", "name": "10 分钟语音", "price": "¥19", "amount_cny": 19, "unit": "单次", "best_for": "快速拆一个具体问题"},
+        {"id": "voice_20", "name": "20 分钟语音", "price": "¥39", "amount_cny": 39, "unit": "单次", "best_for": "完整梳理一个经营/职业判断"},
+        {"id": "video_30", "name": "30 分钟视频", "price": "¥69", "amount_cny": 69, "unit": "单次", "best_for": "带数字人视频形象的深度咨询"},
+        {"id": "strategy_60", "name": "60 分钟战略局", "price": "¥129", "amount_cny": 129, "unit": "单次", "best_for": "多智者联合分析、形成行动清单"},
+        {"id": "memory_subscription", "name": "记忆订阅", "price": "¥59/月", "amount_cny": 59, "unit": "3 位智者", "best_for": "长期复盘、课程进度和个人知识库"},
+    ],
+    "xiaohongshu": [
+        {
+            "title": "我让巴菲特、乔布斯、孔子一起帮我拆一个问题",
+            "cover": "一个问题，100 位智者怎么回答？",
+            "hook": "当你一个人做决定时，最缺的不是鸡汤，而是能把局面拆开的脑力。",
+            "body": "Digital Sage 把 100 位智者做成可对话的判断界面。你可以问巴菲特现金流，问乔布斯产品取舍，问孔子关系与秩序，问图灵系统设计。先免费试一次文字对话，再决定是否进入语音/视频通话。",
+            "tags": ["#AI工具", "#创业决策", "#知识付费", "#数字人", "#个人成长"],
+            "cta": "评论区留下你最想问的智者，我把问题做成下一条案例。",
+        },
+        {
+            "title": "如果你有一个重大决定，先别急着问朋友",
+            "cover": "重大决定前，先问 3 个智者",
+            "hook": "朋友会安慰你，智者会逼你看清变量。",
+            "body": "我用 Digital Sage 做了一个三智者判断法：巴菲特看现金流，德鲁克看组织责任，老子看顺势与边界。一个复杂问题先经过三套思路，再形成行动清单。",
+            "tags": ["#决策模型", "#AI分身", "#商业思维", "#打工人成长"],
+            "cta": "保存这条，下次卡住时直接用三智者提问法。",
+        },
+        {
+            "title": "100 位智者 × 1000 门课程，我把它做成了一个知识宇宙",
+            "cover": "100 位智者的 1000 门课",
+            "hook": "不是名人语录合集，而是一套可以听、可以学、可以对话的系统。",
+            "body": "每位智者都有 10 门课：总览、三大核心概念、判断框架、案例、工具箱、价值系统、方法论和行动整合。每课都有语音导读，适合通勤时先听，再进入页面学习。",
+            "tags": ["#在线课程", "#AI学习", "#知识宇宙", "#终身学习"],
+            "cta": "主页可以直接进课程目录，先从巴菲特/孔子/乔布斯开始。",
+        },
+    ],
+    "douyin": [
+        {
+            "title": "15 秒：凌晨两点的创业者",
+            "duration": "15s",
+            "hook": "现金流只够 4 个月，你会问谁？",
+            "shots": [
+                "0-3s：创业者盯着现金流表，字幕：只够 4 个月。",
+                "3-7s：屏幕弹出巴菲特、德鲁克、乔布斯三个数字人。",
+                "7-12s：三位智者给出不同判断维度：现金流、组织、产品。",
+                "12-15s：产品页出现行动清单，CTA：来问你的第一位智者。",
+            ],
+            "voiceover": "真正让人失眠的不是难题，是没有人一起承担判断。Digital Sage，让 100 位智者陪你把复杂问题看清一层。",
+            "cta": "搜索 Digital Sage，免费问一次。",
+        },
+        {
+            "title": "30 秒：同一个问题，三种世界级思路",
+            "duration": "30s",
+            "hook": "同一个问题，巴菲特、乔布斯、孔子会怎么拆？",
+            "shots": [
+                "0-5s：用户输入问题：我要不要砍掉一条产品线？",
+                "5-13s：巴菲特回答：先看长期现金流和护城河。",
+                "13-20s：乔布斯回答：砍到只剩用户真正记得的东西。",
+                "20-26s：孔子回答：先正名，明确责任、关系和秩序。",
+                "26-30s：系统汇总为 3 条行动建议。",
+            ],
+            "voiceover": "你不需要一个万能答案，你需要不同大脑帮你看见盲区。Digital Sage，把世界级判断变成一次对话。",
+            "cta": "点进主页，选择你的智者。",
+        },
+        {
+            "title": "60 秒：数字人课程入口",
+            "duration": "60s",
+            "hook": "如果巴菲特有一套 10 节课，会从哪里讲起？",
+            "shots": [
+                "0-8s：展示 100 位智者宫殿和课程总目录。",
+                "8-22s：打开巴菲特课程：总览、价值投资、复利、护城河。",
+                "22-36s：播放课程音频导读，字幕同步显示关键句。",
+                "36-50s：切到数字人对话：用户问现金流，巴菲特分身回答。",
+                "50-60s：展示付费路径：文字试用、语音、视频、记忆订阅。",
+            ],
+            "voiceover": "课程负责建立框架，对话负责解决当下问题，记忆订阅负责长期复盘。Digital Sage，不只是聊天，是你的智者委员会。",
+            "cta": "从一门免费课程开始。",
+        },
+    ],
+    "digital_humans": [
+        {
+            "id": "buffett",
+            "sage": "沃伦·巴菲特",
+            "avatar_direction": "银发、圆框眼镜、温和但克制的投资家形象，背景为深色书房与财报光幕。",
+            "opening": "如果现金流只够六个月，我不会先问增长，我会先问你真正能活下来的核心业务是什么。",
+            "use_case": "企业现金流、投资、长期主义、价格与价值。",
+        },
+        {
+            "id": "steve_jobs",
+            "sage": "史蒂夫·乔布斯",
+            "avatar_direction": "黑色高领、极简舞台、产品轮廓线和白色聚光灯。",
+            "opening": "别告诉我你能做什么，告诉我用户会记住什么。伟大的产品首先是一次删减。",
+            "use_case": "产品定位、品牌、体验设计、发布会式表达。",
+        },
+        {
+            "id": "confucius",
+            "sage": "孔子",
+            "avatar_direction": "温润长者、竹简、礼序空间，避免神化，强调秩序与关系。",
+            "opening": "先正名。你真正困住的，可能不是选择，而是责任、角色和关系没有被讲清楚。",
+            "use_case": "组织治理、家庭关系、团队伦理、长期修身。",
+        },
+        {
+            "id": "laozi",
+            "sage": "老子",
+            "avatar_direction": "留白山水、慢节奏镜头、浅金线条，表达顺势和边界。",
+            "opening": "越用力的地方，越要问是不是逆势。先看水往哪里流，再决定你该不该动。",
+            "use_case": "战略取舍、压力管理、顺势而为、反脆弱节奏。",
+        },
+        {
+            "id": "alan_turing",
+            "sage": "艾伦·图灵",
+            "avatar_direction": "复古计算机、矩阵光点、冷静逻辑感，适合系统问题拆解。",
+            "opening": "把情绪先放在一边。我们把问题写成输入、规则、状态和输出。",
+            "use_case": "系统设计、AI、自动化、复杂问题建模。",
+        },
+        {
+            "id": "zhongnanshan",
+            "sage": "钟南山",
+            "avatar_direction": "医学会议室、证据卡片、稳重正直的公共卫生专家形象。",
+            "opening": "先排危险，再看证据。判断不能只看愿望，要看风险和可验证事实。",
+            "use_case": "健康决策、风险沟通、公共卫生、循证判断。",
+        },
+    ],
+    "calendar": [
+        {"day": "D1", "channel": "小红书", "asset": "产品故事笔记", "topic": "一个重大决定前，先问 3 位智者"},
+        {"day": "D2", "channel": "抖音", "asset": "15 秒短视频", "topic": "现金流只够 4 个月，你会问谁？"},
+        {"day": "D3", "channel": "小红书", "asset": "课程种草", "topic": "100 位智者 × 1000 门课程"},
+        {"day": "D4", "channel": "抖音", "asset": "数字人对话", "topic": "巴菲特、乔布斯、孔子回答同一问题"},
+        {"day": "D5", "channel": "小红书", "asset": "案例复盘", "topic": "我用三智者法拆了一次产品取舍"},
+        {"day": "D6", "channel": "抖音", "asset": "课程导流", "topic": "如果巴菲特开一套 10 节课"},
+        {"day": "D7", "channel": "全渠道", "asset": "直播/社群转化", "topic": "免费帮 10 个用户做一次智者判断"},
+    ],
+}
+
+
+PRICING_PLANS = {item["id"]: item for item in GROWTH_CAMPAIGN_PACK["pricing"]}
+DIGITAL_HUMANS_BY_ID = {item["id"]: item for item in GROWTH_CAMPAIGN_PACK["digital_humans"]}
+
+
+async def _proxy_courses_request(path: str, request: Request) -> Response:
+    normalized_path = path.lstrip("/")
+    target_url = f"{COURSES_PROXY_BASE}/{normalized_path}" if normalized_path else f"{COURSES_PROXY_BASE}/"
+
+    async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
+        upstream = await client.request(request.method, target_url)
+
+    passthrough_headers = {}
+    for header_name in (
+        "content-type",
+        "cache-control",
+        "etag",
+        "last-modified",
+    ):
+        header_value = upstream.headers.get(header_name)
+        if header_value:
+            passthrough_headers[header_name] = header_value
+
+    content = b"" if request.method == "HEAD" else upstream.content
+    return Response(content=content, status_code=upstream.status_code, headers=passthrough_headers)
+
+
+@app.api_route("/courses", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/courses/{course_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
+async def proxy_courses(request: Request, course_path: str = "") -> Response:
+    return await _proxy_courses_request(course_path, request)
 
 
 def _build_fallback_response(profile: dict, message: str, topic: str) -> str:
@@ -126,40 +358,47 @@ def _build_fallback_response(profile: dict, message: str, topic: str) -> str:
     return "\n\n".join([opener, "\n".join(action_lines), close])
 
 
-async def _call_mimo(profile: dict, prompt: str, fallback_message: str, topic: str) -> tuple[str, str]:
-    if not MIMO_API_KEY:
+async def _call_deepseek(profile: dict, prompt: str, fallback_message: str, topic: str) -> tuple[str, str]:
+    if not LLM_API_KEY:
         return _build_fallback_response(profile, fallback_message, topic), "fallback"
+
+    model_candidates = [LLM_PRIMARY_MODEL]
+    if LLM_FALLBACK_MODEL and LLM_FALLBACK_MODEL not in model_candidates:
+        model_candidates.append(LLM_FALLBACK_MODEL)
+
+    system_prompt = (
+        f"你是{profile['name']}，{profile['title']}。"
+        "请保持该人物公开形象中的思考方式与表达风格，"
+        "但不要声称自己真的就是本人。"
+    )
 
     try:
         async with httpx.AsyncClient(timeout=30) as client:
-            response = await client.post(
-                f"{MIMO_API_BASE}/chat/completions",
-                headers={"Authorization": f"Bearer {MIMO_API_KEY}"},
-                json={
-                    "model": "mimo-v2-pro",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": (
-                                f"你是{profile['name']}，{profile['title']}。"
-                                "请保持该人物公开形象中的思考方式与表达风格，"
-                                "但不要声称自己真的就是本人。"
-                            ),
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
-                    "temperature": 0.7,
-                    "max_tokens": 800,
-                },
-            )
-            response.raise_for_status()
-            result = response.json()
-            content = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-            if not content:
-                return _build_fallback_response(profile, fallback_message, topic), "fallback"
-            return content, "mimo"
+            for model_name in model_candidates:
+                response = await client.post(
+                    f"{LLM_API_BASE}/chat/completions",
+                    headers={"Authorization": f"Bearer {LLM_API_KEY}"},
+                    json={
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": prompt},
+                        ],
+                        "temperature": 0.7,
+                        "max_tokens": 800,
+                    },
+                )
+                if response.is_success:
+                    result = response.json()
+                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+                    if content:
+                        return content, "deepseek"
+                elif response.status_code < 500:
+                    continue
     except Exception:
-        return _build_fallback_response(profile, fallback_message, topic), "fallback"
+        pass
+
+    return _build_fallback_response(profile, fallback_message, topic), "fallback"
 
 
 def _build_shell() -> str:
@@ -174,6 +413,9 @@ def _build_shell() -> str:
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-title" content="Digital Sage">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%230f172a'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='Arial,sans-serif' font-size='24' fill='white'%3EDS%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
   <link rel="canonical" href="https://www.digitalsage.cloud/">
   <link rel="preload" as="image" href="/media/demo/digital-sage-film-poster.jpg">
   <meta property="og:type" content="website">
@@ -246,25 +488,29 @@ def _build_shell() -> str:
   </script>
   <style>
     :root {
-      --bg: #f3f5f8;
-      --ink: #111827;
-      --muted: #5f6b7a;
-      --line: rgba(17, 24, 39, 0.08);
-      --card: rgba(255, 255, 255, 0.72);
-      --accent: #0f172a;
-      --accent-soft: #dbe7ff;
-      --shadow: 0 24px 60px rgba(17, 24, 39, 0.08);
+      --bg: #08080b;
+      --bg2: #101014;
+      --bg3: #18181d;
+      --ink: #fafafa;
+      --muted: #a1a1aa;
+      --line: rgba(245, 217, 138, 0.13);
+      --card: rgba(28, 28, 34, 0.92);
+      --accent: #e2b64f;
+      --accent-soft: rgba(226, 182, 79, 0.13);
+      --gold: #e2b64f;
+      --gold-2: #f5d98a;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
       --radius: 28px;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
+      font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(123, 176, 255, 0.32), transparent 32%),
-        radial-gradient(circle at top right, rgba(255, 210, 150, 0.28), transparent 28%),
-        linear-gradient(180deg, #f7f9fc 0%, #eef2f7 48%, #f6f8fb 100%);
+        radial-gradient(circle at 18% 8%, rgba(226, 182, 79, 0.14), transparent 28%),
+        radial-gradient(circle at 82% 16%, rgba(94, 78, 44, 0.24), transparent 22%),
+        linear-gradient(180deg, #050506 0%, var(--bg) 42%, #0d0d10 100%);
       min-height: 100vh;
     }
     .page {
@@ -307,9 +553,51 @@ def _build_shell() -> str:
     }
     .status {
       display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       gap: 12px;
       color: var(--muted);
       font-size: 0.94rem;
+    }
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(17, 24, 39, 0.08);
+    }
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.045);
+      text-decoration: none;
+      font-size: 0.88rem;
+    }
+    .lang-button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      font: inherit;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+    .lang-button.active {
+      background: linear-gradient(135deg, #111827, #1d4ed8);
+      color: white;
+    }
+    .lang-button:hover {
+      transform: translateY(-1px);
     }
     .hero {
       border-radius: 36px;
@@ -1307,6 +1595,412 @@ def _build_shell() -> str:
       line-height: 1.8;
       font-size: 0.95rem;
     }
+    .curriculum {
+      display: grid;
+      gap: 18px;
+      margin: 0 0 28px;
+    }
+    .curriculum-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .curriculum-head h3 {
+      margin: 10px 0 0;
+      font-size: clamp(2rem, 3vw, 3rem);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+    }
+    .curriculum-head p {
+      margin: 8px 0 0;
+      max-width: 780px;
+      color: #465467;
+      line-height: 1.8;
+    }
+    .curriculum-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.76);
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 180ms ease;
+    }
+    .curriculum-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .curriculum-panel,
+    .spotlight-panel,
+    .featured-card {
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.68));
+      border: 1px solid rgba(255,255,255,0.72);
+      box-shadow: var(--shadow);
+    }
+    .curriculum-panel,
+    .spotlight-panel {
+      padding: 22px;
+    }
+    .curriculum-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .curriculum-stat,
+    .domain-chip,
+    .blueprint-card,
+    .spotlight-lesson,
+    .featured-card {
+      border-radius: 22px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: rgba(255,255,255,0.74);
+    }
+    .curriculum-stat {
+      padding: 16px;
+    }
+    .curriculum-stat strong {
+      display: block;
+      font-size: 1.65rem;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+    }
+    .curriculum-stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .blueprint-rail {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .blueprint-card {
+      padding: 16px;
+      min-height: 100%;
+    }
+    .blueprint-card strong,
+    .domain-chip strong,
+    .spotlight-panel strong,
+    .featured-card strong {
+      display: block;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+    .blueprint-card p,
+    .domain-chip p,
+    .spotlight-panel p,
+    .featured-card p {
+      margin: 8px 0 0;
+      color: #465467;
+      line-height: 1.75;
+      font-size: 0.92rem;
+    }
+    .blueprint-card small,
+    .domain-chip small,
+    .spotlight-panel small,
+    .featured-card small {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .blueprint-num,
+    .domain-count {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .domain-board {
+      display: grid;
+      gap: 10px;
+    }
+    .domain-chip {
+      padding: 16px;
+      border-left: 4px solid var(--domain-accent, #1d4ed8);
+    }
+    .spotlight-panel {
+      display: grid;
+      gap: 14px;
+    }
+    .spotlight-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .spotlight-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 24px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: rgba(255,255,255,0.85);
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+    .spotlight-tags,
+    .featured-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .spotlight-tags span,
+    .featured-tags span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(29, 78, 216, 0.08);
+      color: var(--accent);
+      font-size: 0.78rem;
+    }
+    .spotlight-lessons {
+      display: grid;
+      gap: 10px;
+    }
+    .spotlight-lesson {
+      padding: 14px 16px;
+    }
+    .spotlight-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .spotlight-actions a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      transition: transform 180ms ease;
+    }
+    .spotlight-actions .primary {
+      background: linear-gradient(135deg, #111827, #1d4ed8);
+      color: white;
+      border-color: transparent;
+    }
+    .spotlight-actions .secondary {
+      background: rgba(255,255,255,0.78);
+      color: var(--ink);
+    }
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .featured-card {
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+    .featured-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .featured-card-top img {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: rgba(255,255,255,0.88);
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+    .featured-card:hover,
+    .curriculum-link:hover,
+    .spotlight-actions a:hover {
+      transform: translateY(-1px);
+    }
+    .featured-card:hover {
+      border-color: rgba(29, 78, 216, 0.18);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.72), transparent 75%);
+    }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 10px 0;
+      background: rgba(8, 8, 11, 0.72);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+    .brand h1,
+    .hero-copy h2,
+    .quickstart-copy h3,
+    .film-copy h3,
+    .cinema-copy h3,
+    .curriculum-head h3,
+    .detail-title h3,
+    .faq h3 {
+      font-family: "Noto Serif SC", serif;
+    }
+    .brand-mark {
+      color: #17130a;
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      box-shadow: 0 18px 48px rgba(226, 182, 79, 0.18);
+    }
+    .brand p,
+    .status,
+    .hero-copy p,
+    .quickstart-copy p,
+    .film-copy p,
+    .cinema-copy p,
+    .curriculum-head p,
+    .blueprint-card p,
+    .domain-chip p,
+    .spotlight-panel p,
+    .featured-card p,
+    .prompt-card span,
+    .film-stat span,
+    .cinema-point span,
+    .tiny {
+      color: var(--muted);
+    }
+    .hero,
+    .hero-stats,
+    .prompt-card,
+    .film-shell,
+    .curriculum-panel,
+    .spotlight-panel,
+    .featured-card,
+    .faq-item,
+    .search,
+    .chat,
+    .profile-detail,
+    .expert-card,
+    .quickstart-grid .prompt-card {
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 82% 14%, rgba(226, 182, 79, 0.12), transparent 28%),
+        linear-gradient(145deg, rgba(28, 28, 34, 0.96), rgba(12, 12, 15, 0.96));
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      min-height: 620px;
+      display: grid;
+      align-items: center;
+    }
+    .hero::after {
+      background:
+        linear-gradient(115deg, transparent 0 38%, rgba(226, 182, 79, 0.06) 39% 41%, transparent 42%),
+        radial-gradient(circle at 50% 110%, rgba(226, 182, 79, 0.16), transparent 36%);
+    }
+    .hero-copy h2 {
+      color: var(--ink);
+      font-weight: 900;
+    }
+    .hero-copy h2 span,
+    .eyebrow,
+    .stat-label,
+    .prompt-card small,
+    .blueprint-num,
+    .domain-count {
+      color: var(--gold-2);
+    }
+    .hero-proof .proof-pill,
+    .lang-toggle,
+    .curriculum-link,
+    .hero-link.secondary,
+    .spotlight-actions .secondary,
+    .spotlight-tags span,
+    .featured-tags span {
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.045);
+    }
+    .hero-link.primary,
+    .lang-button.active,
+    .spotlight-actions .primary {
+      color: #17130a;
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      border-color: transparent;
+    }
+    .lang-button,
+    .hero-link.secondary,
+    .curriculum-link,
+    .spotlight-actions .secondary {
+      color: var(--muted);
+    }
+    .stat-value,
+    .curriculum-stat strong {
+      color: var(--gold-2);
+    }
+    .curriculum-stat,
+    .domain-chip,
+    .blueprint-card,
+    .spotlight-lesson,
+    .featured-card,
+    .faq-item {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.045);
+    }
+    .blueprint-card strong,
+    .domain-chip strong,
+    .spotlight-panel strong,
+    .featured-card strong,
+    .prompt-card strong,
+    .film-caption strong,
+    .cinema-point strong,
+    .brand h1 {
+      color: var(--ink);
+    }
+    .domain-chip {
+      border-left-color: var(--domain-accent, var(--gold));
+    }
+    .film-screen,
+    .cinema-player {
+      border: 1px solid rgba(245, 217, 138, 0.13);
+    }
+    .film-caption,
+    .film-stat,
+    .cinema-point {
+      border-color: var(--line);
+      color: var(--muted);
+    }
+    .search input,
+    textarea,
+    select {
+      color: var(--ink);
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.06);
+    }
     @keyframes drift {
       0% { transform: translate3d(0, 0, 0) scale(1); }
       50% { transform: translate3d(4%, -3%, 0) scale(1.04); }
@@ -1329,11 +2023,19 @@ def _build_shell() -> str:
       .cinema,
       .hero-grid,
       .main,
+      .curriculum-shell,
+      .featured-grid,
       .detail-grid,
       .faq-grid,
       .toolbar,
       .chat-form,
       .cinema-frame {
+        grid-template-columns: 1fr;
+      }
+      .blueprint-rail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .curriculum-stats {
         grid-template-columns: 1fr;
       }
       .chat-form {
@@ -1354,6 +2056,13 @@ def _build_shell() -> str:
       .expert-card {
         grid-template-columns: 1fr;
       }
+      .curriculum-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .blueprint-rail {
+        grid-template-columns: 1fr;
+      }
       .chat-head,
       .chat-title {
         align-items: flex-start;
@@ -1366,53 +2075,58 @@ def _build_shell() -> str:
     }
   </style>
 </head>
-<body>
+<body data-lang="zh">
   <div class="page">
     <div class="nav">
       <div class="brand">
         <div class="brand-mark">智</div>
         <div>
           <h1>Digital Sage</h1>
-          <p>与全球最聪明的 100 个大脑对话</p>
+          <p id="brandTagline">与全球最聪明的 100 个大脑对话</p>
         </div>
       </div>
       <div class="status">
+        <a class="nav-pill" href="/growth">增长落地</a>
         <span id="loadedCount">载入中</span>
-        <span>Production Live · MIMO</span>
+        <span id="statusLabel">Production Live · DeepSeek</span>
+        <div class="lang-toggle" id="langToggle">
+          <button type="button" class="lang-button active" data-lang="zh">中文</button>
+          <button type="button" class="lang-button" data-lang="en">EN</button>
+        </div>
       </div>
     </div>
 
     <section class="hero">
       <div class="hero-grid">
         <div class="hero-copy">
-          <h2><span>Thought Interface</span>智者</h2>
-          <p>
+          <h2><span id="heroAccent">Thought Interface</span><span id="heroTitle">智者</span></h2>
+          <p id="heroBody">
             把巴菲特、乔布斯、图灵、钟南山、孔子等 100 位人物的公开立场、长期方法论和表达风格，
             整理成一个可对话的判断界面。你不是来玩随机角色扮演，而是来借世界级思路把复杂问题看清一层。
           </p>
           <div class="hero-proof">
-            <span class="proof-pill">100 位长期主义智者</span>
-            <span class="proof-pill">MIMO 实时生成回答</span>
-            <span class="proof-pill">首页自带品牌成片</span>
-            <span class="proof-pill">适合创业、产品、战略判断</span>
+            <span class="proof-pill" id="proofPill0">100 位长期主义智者</span>
+            <span class="proof-pill" id="proofPill1">DeepSeek 实时生成回答</span>
+            <span class="proof-pill" id="proofPill2">首页自带品牌成片</span>
+            <span class="proof-pill" id="proofPill3">适合创业、产品、战略判断</span>
           </div>
           <div class="hero-actions">
-            <a class="hero-link primary" href="#filmDemo">观看成片 Demo</a>
-            <a class="hero-link secondary" href="#conversationWorkbench">直接开始对话</a>
+            <a class="hero-link primary" id="heroActionFilm" href="#filmDemo">观看成片 Demo</a>
+            <a class="hero-link secondary" id="heroActionChat" href="#conversationWorkbench">直接开始对话</a>
           </div>
         </div>
         <div class="hero-stats">
           <div>
-            <div class="stat-label">人物总数</div>
+            <div class="stat-label" id="heroStatLabel0">人物总数</div>
             <div class="stat-value" id="heroCount">100</div>
           </div>
           <div>
-            <div class="stat-label">覆盖领域</div>
-            <div class="tiny">商业 / 科技 / 科学 / 医学 / 思想 / 文化 / 治理 / 设计</div>
+            <div class="stat-label" id="heroStatLabel1">覆盖领域</div>
+            <div class="tiny" id="heroStatBody1">商业 / 科技 / 科学 / 医学 / 思想 / 文化 / 治理 / 设计</div>
           </div>
           <div>
-            <div class="stat-label">体验方式</div>
-            <div class="tiny">先看成片，再点典型问题，一键切到对应智者开始对话</div>
+            <div class="stat-label" id="heroStatLabel2">体验方式</div>
+            <div class="tiny" id="heroStatBody2">先看成片，再点典型问题，一键切到对应智者开始对话</div>
           </div>
         </div>
       </div>
@@ -1420,28 +2134,28 @@ def _build_shell() -> str:
 
     <section class="quickstart" id="quickStart">
       <div class="quickstart-copy">
-        <div class="eyebrow">Quick Start</div>
-        <h3>第一次打开，不必先研究。直接带着一个真实问题进入产品。</h3>
-        <p>
+        <div class="eyebrow" id="quickstartEyebrow">Quick Start</div>
+        <h3 id="quickstartTitle">第一次打开，不必先研究。直接带着一个真实问题进入产品。</h3>
+        <p id="quickstartBody">
           下面三条是最容易感受到产品价值的入口。点击后会自动切换到对应人物，
           并把问题填进对话框，适合首访、演示和转发给团队成员试用。
         </p>
       </div>
       <div class="quickstart-grid">
-        <button class="prompt-card" type="button" data-prompt-celeb="sam_altman" data-prompt-text="如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？">
-          <small>创业 / 增长</small>
-          <strong>用山姆·奥特曼的视角，看全球化产品从 0 到 1。</strong>
-          <span>适合创业者、增长负责人、出海团队先快速试一次真实对话。</span>
+        <button class="prompt-card" id="promptCard0" type="button" data-prompt-celeb="sam_altman" data-prompt-text="如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？">
+          <small id="promptCard0Small">创业 / 增长</small>
+          <strong id="promptCard0Strong">用山姆·奥特曼的视角，看全球化产品从 0 到 1。</strong>
+          <span id="promptCard0Body">适合创业者、增长负责人、出海团队先快速试一次真实对话。</span>
         </button>
-        <button class="prompt-card" type="button" data-prompt-celeb="buffett" data-prompt-text="现金流只够 6 个月，我应该先守住利润、客户还是团队？">
-          <small>经营 / 决策</small>
-          <strong>用巴菲特的视角，先拆清企业生死线应该守什么。</strong>
-          <span>适合经营压力、融资窗口、裁撤与聚焦等高压判断场景。</span>
+        <button class="prompt-card" id="promptCard1" type="button" data-prompt-celeb="buffett" data-prompt-text="现金流只够 6 个月，我应该先守住利润、客户还是团队？">
+          <small id="promptCard1Small">经营 / 决策</small>
+          <strong id="promptCard1Strong">用巴菲特的视角，先拆清企业生死线应该守什么。</strong>
+          <span id="promptCard1Body">适合经营压力、融资窗口、裁撤与聚焦等高压判断场景。</span>
         </button>
-        <button class="prompt-card" type="button" data-prompt-celeb="peter_drucker" data-prompt-text="如果团队目标很散，明天开始我该先改哪三个管理动作？">
-          <small>管理 / 组织</small>
-          <strong>用德鲁克的视角，把模糊管理问题收敛成明天就能执行的动作。</strong>
-          <span>适合 CEO、产品负责人、项目 owner 做组织收敛和方向统一。</span>
+        <button class="prompt-card" id="promptCard2" type="button" data-prompt-celeb="peter_drucker" data-prompt-text="如果团队目标很散，明天开始我该先改哪三个管理动作？">
+          <small id="promptCard2Small">管理 / 组织</small>
+          <strong id="promptCard2Strong">用德鲁克的视角，把模糊管理问题收敛成明天就能执行的动作。</strong>
+          <span id="promptCard2Body">适合 CEO、产品负责人、项目 owner 做组织收敛和方向统一。</span>
         </button>
       </div>
     </section>
@@ -1562,9 +2276,37 @@ def _build_shell() -> str:
       </div>
     </section>
 
+    <section class="curriculum" id="curriculum">
+      <div class="curriculum-head">
+        <div>
+          <div class="eyebrow">Spark 2 Curriculum</div>
+          <h3 id="curriculumTitle">学院式课程地图：100 位智者，每人 10 课，先听课再进入结构化训练。</h3>
+          <p id="curriculumBody">主页和课程站共用同一份课程 catalog。这里先用 Spark 2 看见全局、领域和重点人物，点进课程页后会看到统一的深色讲义、课程音频、案例、书单和 7 天训练。</p>
+        </div>
+        <a class="curriculum-link" id="curriculumLink" href="/courses/">进入全部课程</a>
+      </div>
+
+      <div class="curriculum-shell">
+        <div class="curriculum-panel">
+          <div class="curriculum-stats" id="courseStats"></div>
+          <div class="blueprint-rail" id="blueprintRail"></div>
+        </div>
+        <div class="curriculum-panel">
+          <div class="eyebrow" id="curriculumDomainsEyebrow">Domains</div>
+          <div class="domain-board" id="domainBoard"></div>
+        </div>
+      </div>
+
+      <div class="spotlight-panel" id="courseSpotlight">
+        <div class="tiny" id="courseSpotlightLoading">课程数据载入中…</div>
+      </div>
+
+      <div class="featured-grid" id="featuredCourses"></div>
+    </section>
+
     <section class="toolbar">
       <div class="search">
-        <span>搜索</span>
+        <span id="searchLabel">搜索</span>
         <input id="searchInput" placeholder="输入中文名、英文名或领域关键词">
       </div>
       <div class="filters" id="filters"></div>
@@ -1572,7 +2314,7 @@ def _build_shell() -> str:
 
     <section class="main">
       <aside class="panel">
-        <h3>Expert Directory</h3>
+        <h3 id="directoryTitle">Expert Directory</h3>
         <div class="expert-list" id="expertList"></div>
       </aside>
 
@@ -1590,15 +2332,15 @@ def _build_shell() -> str:
 
         <section class="detail-grid">
           <article class="detail">
-            <h5>核心价值</h5>
+            <h5 id="detailHeadingValues">核心价值</h5>
             <ul id="coreValues"></ul>
           </article>
           <article class="detail">
-            <h5>判断框架</h5>
+            <h5 id="detailHeadingFramework">判断框架</h5>
             <ul id="framework"></ul>
           </article>
           <article class="detail">
-            <h5>重点立场</h5>
+            <h5 id="detailHeadingPositions">重点立场</h5>
             <ul id="positions"></ul>
           </article>
         </section>
@@ -1609,7 +2351,7 @@ def _build_shell() -> str:
               <img class="chat-avatar" id="chatAvatar" alt="聊天头像">
               <div>
                 <strong id="chatName">正在连接</strong>
-                <div class="tiny">基于公开资料的 AI 模拟回答</div>
+                <div class="tiny" id="chatSubtitle">基于公开资料的 AI 模拟回答</div>
               </div>
             </div>
             <div class="tiny" id="chatSource">准备中</div>
@@ -1617,7 +2359,7 @@ def _build_shell() -> str:
           <div class="chat-log" id="chatLog"></div>
           <form class="chat-form" id="chatForm">
             <textarea id="messageInput" placeholder="例如：如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？"></textarea>
-            <button class="submit" type="submit">开始对话</button>
+            <button class="submit" id="chatSubmit" type="submit">开始对话</button>
           </form>
         </section>
       </div>
@@ -1625,19 +2367,19 @@ def _build_shell() -> str:
 
     <section class="faq-section" id="faq">
       <div class="eyebrow">FAQ</div>
-      <h3>它不是泛泛聊天工具，而是一个为高价值判断设计的认知界面。</h3>
+      <h3 id="faqTitle">它不是泛泛聊天工具，而是一个为高价值判断设计的认知界面。</h3>
       <div class="faq-grid">
         <article class="faq-item">
-          <h4>这是不是简单的名人角色扮演？</h4>
-          <p>不是。Digital Sage 优先围绕人物公开资料、长期立场、判断框架和表达风格来组织回答，重点是帮助你比较不同思路，而不是追求像不像。</p>
+          <h4 id="faqQ0">这是不是简单的名人角色扮演？</h4>
+          <p id="faqA0">不是。Digital Sage 优先围绕人物公开资料、长期立场、判断框架和表达风格来组织回答，重点是帮助你比较不同思路，而不是追求像不像。</p>
         </article>
         <article class="faq-item">
-          <h4>第一次体验，最推荐从哪里开始？</h4>
-          <p>先看首页成片，再点上面的典型问题入口。它会自动切到对应智者，把问题填进输入框，让你在 1 分钟内感受到产品价值。</p>
+          <h4 id="faqQ1">第一次体验，最推荐从哪里开始？</h4>
+          <p id="faqA1">先看首页成片，再点上面的典型问题入口。它会自动切到对应智者，把问题填进输入框，让你在 1 分钟内感受到产品价值。</p>
         </article>
         <article class="faq-item">
-          <h4>它最适合哪些场景？</h4>
-          <p>最适合创业决策、产品方向、战略判断、研究框架梳理，以及那些不能只靠情绪和直觉做决定的关键节点。</p>
+          <h4 id="faqQ2">它最适合哪些场景？</h4>
+          <p id="faqA2">最适合创业决策、产品方向、战略判断、研究框架梳理，以及那些不能只靠情绪和直觉做决定的关键节点。</p>
         </article>
       </div>
     </section>
@@ -1645,22 +2387,194 @@ def _build_shell() -> str:
 
   <script>
     const categoryLabels = {
-      all: "全部",
-      business: "商业",
-      technology: "科技",
-      science: "科学",
-      medical: "医学",
-      philosophy: "思想",
-      culture: "文化",
-      policy: "治理",
-      design: "设计"
+      zh: {
+        all: "全部",
+        business: "商业",
+        technology: "科技",
+        science: "科学",
+        medical: "医学",
+        philosophy: "思想",
+        culture: "文化",
+        policy: "治理",
+        design: "设计"
+      },
+      en: {
+        all: "All",
+        business: "Business",
+        technology: "Technology",
+        science: "Science",
+        medical: "Medical",
+        philosophy: "Philosophy",
+        culture: "Culture",
+        policy: "Governance",
+        design: "Design"
+      }
+    };
+
+    const uiCopy = {
+      zh: {
+        brandTagline: "与全球最聪明的 100 个大脑对话",
+        statusLabel: "Production Live · DeepSeek",
+        heroAccent: "Thought Interface",
+        heroTitle: "智者",
+        heroBody: "把巴菲特、乔布斯、图灵、钟南山、孔子等 100 位人物的公开立场、长期方法论和表达风格，整理成一个可对话的判断界面。你不是来玩随机角色扮演，而是来借世界级思路把复杂问题看清一层。",
+        proofPills: ["100 位长期主义智者", "DeepSeek 实时生成回答", "首页自带品牌成片", "适合创业、产品、战略判断"],
+        heroActions: ["观看成片 Demo", "直接开始对话"],
+        heroStatLabels: ["人物总数", "覆盖领域", "体验方式"],
+        heroStatBodies: ["", "商业 / 科技 / 科学 / 医学 / 思想 / 文化 / 治理 / 设计", "先看成片，再点典型问题，一键切到对应智者开始对话"],
+        quickstartEyebrow: "Quick Start",
+        quickstartTitle: "第一次打开，不必先研究。直接带着一个真实问题进入产品。",
+        quickstartBody: "下面三条是最容易感受到产品价值的入口。点击后会自动切换到对应人物，并把问题填进对话框，适合首访、演示和转发给团队成员试用。",
+        prompts: [
+          {
+            small: "创业 / 增长",
+            strong: "用山姆·奥特曼的视角，看全球化产品从 0 到 1。",
+            body: "适合创业者、增长负责人、出海团队先快速试一次真实对话。"
+          },
+          {
+            small: "经营 / 决策",
+            strong: "用巴菲特的视角，先拆清企业生死线应该守什么。",
+            body: "适合经营压力、融资窗口、裁撤与聚焦等高压判断场景。"
+          },
+          {
+            small: "管理 / 组织",
+            strong: "用德鲁克的视角，把模糊管理问题收敛成明天就能执行的动作。",
+            body: "适合 CEO、产品负责人、项目 owner 做组织收敛和方向统一。"
+          }
+        ],
+        curriculumTitle: "学院式课程地图：100 位智者，每人 10 课，先听课再进入结构化训练。",
+        curriculumBody: "主页和课程站共用同一份课程 catalog。这里先用 Spark 2 看见全局、领域和重点人物，点进课程页后会看到统一的深色讲义、课程音频、案例、书单和 7 天训练。",
+        curriculumLink: "进入全部课程",
+        curriculumDomainsEyebrow: "Domains",
+        courseLoading: "课程数据载入中…",
+        searchLabel: "搜索",
+        searchPlaceholder: "输入中文名、英文名或领域关键词",
+        directoryTitle: "Expert Directory",
+        detailCategoryDefault: "人物档案",
+        detailLoadingName: "载入中",
+        detailLoadingBody: "请稍候，正在加载 100 位智者档案。",
+        detailHeadings: ["核心价值", "判断框架", "重点立场"],
+        chatSubtitle: "基于公开资料的 AI 模拟回答",
+        chatSourcePreparing: "准备中",
+        chatPlaceholder: "例如：如果我要从 0 到 1 做一个全球化产品，你会先看哪三个变量？",
+        chatSubmit: "开始对话",
+        faqTitle: "它不是泛泛聊天工具，而是一个为高价值判断设计的认知界面。",
+        faq: [
+          {
+            q: "这是不是简单的名人角色扮演？",
+            a: "不是。Digital Sage 优先围绕人物公开资料、长期立场、判断框架和表达风格来组织回答，重点是帮助你比较不同思路，而不是追求像不像。"
+          },
+          {
+            q: "第一次体验，最推荐从哪里开始？",
+            a: "先看首页成片，再点上面的典型问题入口。它会自动切到对应智者，把问题填进输入框，让你在 1 分钟内感受到产品价值。"
+          },
+          {
+            q: "它最适合哪些场景？",
+            a: "最适合创业决策、产品方向、战略判断、研究框架梳理，以及那些不能只靠情绪和直觉做决定的关键节点。"
+          }
+        ],
+        emptySearch: "没有匹配结果。",
+        chatGenerating: "正在生成回答…",
+        demoPause: "暂停 Demo",
+        demoResume: "继续播放",
+        loadedCount: (count) => `已载入 ${count} 位智者`,
+        detailCategory: (labelZh) => labelZh,
+        detailTitle: (profile) => `${profile.title} · ${profile.name_en}`,
+        chatName: (profile) => `与 ${profile.name} 对话`,
+        chatSource: (profile) => `方法论焦点：${profile.focus_tags.slice(0, 3).join(" / ")}`,
+        chatIntro: (profile) => `已进入 ${profile.name} 的思考界面。你可以直接提问，我会优先沿着 ${profile.focus_tags.slice(0, 3).join("、")} 这条线索回答。`,
+        sourceLabelDeepseek: "Source: DeepSeek API",
+        sourceLabelFallback: "Source: Local fallback persona"
+      },
+      en: {
+        brandTagline: "Talk with 100 of the world's sharpest minds",
+        statusLabel: "Production Live · DeepSeek",
+        heroAccent: "Thought Interface",
+        heroTitle: "Digital Sage",
+        heroBody: "Digital Sage turns the public positions, long-term methods, and speaking patterns of 100 iconic thinkers into a conversational judgment interface. This is not random role-play. It is a way to borrow world-class reasoning when the problem in front of you is still unclear.",
+        proofPills: ["100 long-horizon minds", "DeepSeek-generated live answers", "Built-in brand film on the homepage", "Designed for strategy, product, and founder decisions"],
+        heroActions: ["Watch the demo film", "Start a live session"],
+        heroStatLabels: ["Profiles", "Coverage", "Experience"],
+        heroStatBodies: ["", "Business / Technology / Science / Medicine / Philosophy / Culture / Governance / Design", "Watch the film, tap a real prompt, and jump directly into the matched mind."],
+        quickstartEyebrow: "Quick Start",
+        quickstartTitle: "Do not study the interface first. Enter with a real decision.",
+        quickstartBody: "These three prompts are the fastest way to feel the product. Each click switches to the right mind and pre-fills the question so a first-time visitor can understand the value in under a minute.",
+        prompts: [
+          {
+            small: "Founders / Growth",
+            strong: "Use Sam Altman's lens to inspect a 0-to-1 global product.",
+            body: "Best for founders, growth leads, and outbound teams who want one real conversation first."
+          },
+          {
+            small: "Operating / Decisions",
+            strong: "Use Buffett's lens to decide what must be protected first.",
+            body: "Best for cash pressure, financing windows, layoffs, and focus decisions under stress."
+          },
+          {
+            small: "Management / Organization",
+            strong: "Use Drucker's lens to turn vague management pain into next-day actions.",
+            body: "Best for CEOs, product leads, and project owners who need operating alignment."
+          }
+        ],
+        curriculumTitle: "An academy-style curriculum map: 100 minds, 10 lessons each, audio first, structured practice next.",
+        curriculumBody: "The homepage and the course site share the same catalog. Use the Spark 2 board to see the full map, then open each course for the dark lecture layout, audio narration, cases, reference shelf, and 7-day drills.",
+        curriculumLink: "Open full curriculum",
+        curriculumDomainsEyebrow: "Domains",
+        courseLoading: "Loading curriculum data…",
+        searchLabel: "Search",
+        searchPlaceholder: "Search by Chinese name, English name, or domain keyword",
+        directoryTitle: "Expert Directory",
+        detailCategoryDefault: "Profile",
+        detailLoadingName: "Loading",
+        detailLoadingBody: "Loading the 100-mind profile layer.",
+        detailHeadings: ["Core Values", "Judgment Framework", "Core Positions"],
+        chatSubtitle: "AI simulation grounded in public materials",
+        chatSourcePreparing: "Preparing",
+        chatPlaceholder: "Example: If I am building a global product from zero, which three variables would you inspect first?",
+        chatSubmit: "Start session",
+        faqTitle: "This is not a generic chat toy. It is a reasoning surface for high-value decisions.",
+        faq: [
+          {
+            q: "Is this just celebrity role-play?",
+            a: "No. Digital Sage organizes replies around public materials, long-term positions, judgment order, and speaking style. The goal is to compare reasoning systems, not to imitate a face."
+          },
+          {
+            q: "Where should a first-time visitor start?",
+            a: "Watch the film first, then tap one of the live prompts. The product will switch to the right mind, prefill the question, and make the value obvious quickly."
+          },
+          {
+            q: "What is it best suited for?",
+            a: "Founder decisions, product direction, strategic judgment, and research framing, especially when intuition alone is too expensive."
+          }
+        ],
+        emptySearch: "No matching profiles.",
+        chatGenerating: "Generating answer…",
+        demoPause: "Pause demo",
+        demoResume: "Resume demo",
+        loadedCount: (count) => `${count} profiles loaded`,
+        detailCategory: (labelZh, profile, meta) => meta?.category_label_en || labelZh,
+        detailTitle: (profile, meta) => `${profile.name} · ${meta?.category_label_en || profile.title}`,
+        chatName: (profile) => `Talk with ${profile.name_en || profile.name}`,
+        chatSource: (profile) => `Method focus: ${profile.focus_tags.slice(0, 3).join(" / ")}`,
+        chatIntro: (profile) => `You are now inside ${profile.name_en || profile.name}'s reasoning interface. Ask directly and the answer will start from ${profile.focus_tags.slice(0, 3).join(", ")} first.`,
+        sourceLabelDeepseek: "Source: DeepSeek API",
+        sourceLabelFallback: "Source: Local fallback persona"
+      }
     };
 
     const state = {
       celebrities: [],
+      courseCatalog: null,
       activeId: null,
       activeCategory: "all",
-      search: ""
+      search: "",
+      lang: (() => {
+        try {
+          return localStorage.getItem("digital-sage-home-lang") || "zh";
+        } catch (err) {
+          return "zh";
+        }
+      })()
     };
 
     const demoScenes = __DEMO_SCENES_JSON__.map((scene) => ({
@@ -1683,24 +2597,56 @@ def _build_shell() -> str:
     };
 
     const els = {
+      brandTagline: document.getElementById("brandTagline"),
+      statusLabel: document.getElementById("statusLabel"),
+      langButtons: Array.from(document.querySelectorAll(".lang-button[data-lang]")),
+      heroAccent: document.getElementById("heroAccent"),
+      heroTitle: document.getElementById("heroTitle"),
+      heroBody: document.getElementById("heroBody"),
+      proofPills: [0, 1, 2, 3].map((index) => document.getElementById(`proofPill${index}`)),
+      heroActionFilm: document.getElementById("heroActionFilm"),
+      heroActionChat: document.getElementById("heroActionChat"),
+      heroStatLabel0: document.getElementById("heroStatLabel0"),
+      heroStatLabel1: document.getElementById("heroStatLabel1"),
+      heroStatLabel2: document.getElementById("heroStatLabel2"),
+      heroStatBody1: document.getElementById("heroStatBody1"),
+      heroStatBody2: document.getElementById("heroStatBody2"),
+      quickstartEyebrow: document.getElementById("quickstartEyebrow"),
+      quickstartTitle: document.getElementById("quickstartTitle"),
+      quickstartBody: document.getElementById("quickstartBody"),
+      promptCardSmall: [0, 1, 2].map((index) => document.getElementById(`promptCard${index}Small`)),
+      promptCardStrong: [0, 1, 2].map((index) => document.getElementById(`promptCard${index}Strong`)),
+      promptCardBody: [0, 1, 2].map((index) => document.getElementById(`promptCard${index}Body`)),
+      curriculumTitle: document.getElementById("curriculumTitle"),
+      curriculumBody: document.getElementById("curriculumBody"),
+      curriculumLink: document.getElementById("curriculumLink"),
+      curriculumDomainsEyebrow: document.getElementById("curriculumDomainsEyebrow"),
+      courseSpotlightLoading: document.getElementById("courseSpotlightLoading"),
       heroCount: document.getElementById("heroCount"),
       loadedCount: document.getElementById("loadedCount"),
+      searchLabel: document.getElementById("searchLabel"),
       filters: document.getElementById("filters"),
       expertList: document.getElementById("expertList"),
+      directoryTitle: document.getElementById("directoryTitle"),
       searchInput: document.getElementById("searchInput"),
       detailCategory: document.getElementById("detailCategory"),
       detailAvatar: document.getElementById("detailAvatar"),
       detailName: document.getElementById("detailName"),
       detailTitle: document.getElementById("detailTitle"),
+      detailHeadingValues: document.getElementById("detailHeadingValues"),
+      detailHeadingFramework: document.getElementById("detailHeadingFramework"),
+      detailHeadingPositions: document.getElementById("detailHeadingPositions"),
       coreValues: document.getElementById("coreValues"),
       framework: document.getElementById("framework"),
       positions: document.getElementById("positions"),
       chatAvatar: document.getElementById("chatAvatar"),
       chatName: document.getElementById("chatName"),
+      chatSubtitle: document.getElementById("chatSubtitle"),
       chatSource: document.getElementById("chatSource"),
       chatLog: document.getElementById("chatLog"),
       chatForm: document.getElementById("chatForm"),
       messageInput: document.getElementById("messageInput"),
+      chatSubmit: document.getElementById("chatSubmit"),
       promptButtons: Array.from(document.querySelectorAll("[data-prompt-celeb]")),
       demoPlayer: document.getElementById("demoPlayer"),
       demoToggle: document.getElementById("demoToggle"),
@@ -1718,8 +2664,123 @@ def _build_shell() -> str:
       demoOutcomeLabel: document.getElementById("demoOutcomeLabel"),
       demoOutcome: document.getElementById("demoOutcome"),
       demoSubtitle: document.getElementById("demoSubtitle"),
-      demoDots: document.getElementById("demoDots")
+      demoDots: document.getElementById("demoDots"),
+      courseStats: document.getElementById("courseStats"),
+      blueprintRail: document.getElementById("blueprintRail"),
+      domainBoard: document.getElementById("domainBoard"),
+      courseSpotlight: document.getElementById("courseSpotlight"),
+      featuredCourses: document.getElementById("featuredCourses"),
+      faqTitle: document.getElementById("faqTitle"),
+      faqQ: [0, 1, 2].map((index) => document.getElementById(`faqQ${index}`)),
+      faqA: [0, 1, 2].map((index) => document.getElementById(`faqA${index}`))
     };
+
+    function copy() {
+      return uiCopy[state.lang] || uiCopy.zh;
+    }
+
+    function categoryLabelFor(key) {
+      return (categoryLabels[state.lang] || categoryLabels.zh)[key] || key;
+    }
+
+    function courseMetaFor(id) {
+      return (state.courseCatalog?.thinkers || []).find((item) => item.id === id) || null;
+    }
+
+    function updateLoadedCount() {
+      els.loadedCount.textContent = copy().loadedCount(state.celebrities.length);
+    }
+
+    function updateLanguageButtons() {
+      document.body.dataset.lang = state.lang;
+      els.langButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.lang === state.lang);
+      });
+    }
+
+    function applyLanguage() {
+      const text = copy();
+      els.brandTagline.textContent = text.brandTagline;
+      els.statusLabel.textContent = text.statusLabel;
+      els.heroAccent.textContent = text.heroAccent;
+      els.heroTitle.textContent = text.heroTitle;
+      els.heroBody.textContent = text.heroBody;
+      text.proofPills.forEach((value, index) => {
+        if (els.proofPills[index]) els.proofPills[index].textContent = value;
+      });
+      els.heroActionFilm.textContent = text.heroActions[0];
+      els.heroActionChat.textContent = text.heroActions[1];
+      els.heroStatLabel0.textContent = text.heroStatLabels[0];
+      els.heroStatLabel1.textContent = text.heroStatLabels[1];
+      els.heroStatLabel2.textContent = text.heroStatLabels[2];
+      els.heroStatBody1.textContent = text.heroStatBodies[1];
+      els.heroStatBody2.textContent = text.heroStatBodies[2];
+      els.quickstartEyebrow.textContent = text.quickstartEyebrow;
+      els.quickstartTitle.textContent = text.quickstartTitle;
+      els.quickstartBody.textContent = text.quickstartBody;
+      text.prompts.forEach((item, index) => {
+        els.promptCardSmall[index].textContent = item.small;
+        els.promptCardStrong[index].textContent = item.strong;
+        els.promptCardBody[index].textContent = item.body;
+      });
+      els.curriculumTitle.textContent = text.curriculumTitle;
+      els.curriculumBody.textContent = text.curriculumBody;
+      els.curriculumLink.textContent = text.curriculumLink;
+      els.curriculumDomainsEyebrow.textContent = text.curriculumDomainsEyebrow;
+      if (els.courseSpotlightLoading) {
+        els.courseSpotlightLoading.textContent = text.courseLoading;
+      }
+      els.searchLabel.textContent = text.searchLabel;
+      els.searchInput.placeholder = text.searchPlaceholder;
+      els.directoryTitle.textContent = text.directoryTitle;
+      els.detailHeadingValues.textContent = text.detailHeadings[0];
+      els.detailHeadingFramework.textContent = text.detailHeadings[1];
+      els.detailHeadingPositions.textContent = text.detailHeadings[2];
+      els.chatSubtitle.textContent = text.chatSubtitle;
+      els.chatSubmit.textContent = text.chatSubmit;
+      els.messageInput.placeholder = text.chatPlaceholder;
+      els.faqTitle.textContent = text.faqTitle;
+      text.faq.forEach((item, index) => {
+        els.faqQ[index].textContent = item.q;
+        els.faqA[index].textContent = item.a;
+      });
+      els.demoToggle.textContent = demoState.playing ? text.demoPause : text.demoResume;
+      updateLoadedCount();
+      updateLanguageButtons();
+      renderFilters();
+      renderExpertList();
+      if (state.courseCatalog) {
+        renderCourseShowcase();
+      } else {
+        renderCourseFallback();
+      }
+      renderCourseSpotlight();
+      if (state.activeId) {
+        const profile = state.celebrities.find((item) => item.id === state.activeId);
+        if (profile) {
+          const meta = courseMetaFor(profile.id);
+          els.detailCategory.textContent = text.detailCategory(profile.category_label, profile, meta);
+          els.detailName.textContent = state.lang === "en" ? (profile.name_en || profile.name) : profile.name;
+          els.detailTitle.textContent = text.detailTitle(profile, meta);
+          els.chatName.textContent = text.chatName(profile);
+          els.chatSource.textContent = text.chatSource(profile);
+        }
+      } else {
+        els.detailCategory.textContent = text.detailCategoryDefault;
+        els.detailName.textContent = text.detailLoadingName;
+        els.detailTitle.textContent = text.detailLoadingBody;
+        els.chatName.textContent = text.detailLoadingName;
+        els.chatSource.textContent = text.chatSourcePreparing;
+      }
+    }
+
+    function setLanguage(lang) {
+      state.lang = lang === "en" ? "en" : "zh";
+      try {
+        localStorage.setItem("digital-sage-home-lang", state.lang);
+      } catch (err) {}
+      applyLanguage();
+    }
 
     function renderDemoDots() {
       els.demoDots.innerHTML = "";
@@ -1794,7 +2855,7 @@ def _build_shell() -> str:
 
     function toggleDemoPlayback() {
       demoState.playing = !demoState.playing;
-      els.demoToggle.textContent = demoState.playing ? "暂停 Demo" : "继续播放";
+      els.demoToggle.textContent = demoState.playing ? copy().demoPause : copy().demoResume;
     }
 
     function initDemo() {
@@ -1804,9 +2865,146 @@ def _build_shell() -> str:
       demoState.frame = window.requestAnimationFrame(demoTick);
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function renderCourseShowcase() {
+      if (!state.courseCatalog) return;
+      const english = state.lang === "en";
+
+      const stats = state.courseCatalog.stats || {};
+      els.courseStats.innerHTML = `
+        <article class="curriculum-stat">
+          <strong>${escapeHtml(stats.thinkers || 0)}</strong>
+          <span>${english ? "minds" : "智者数量"}</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>${escapeHtml(stats.lessons || 0)}</strong>
+          <span>${english ? "lessons" : "课程总数"}</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>${escapeHtml(stats.categories || 0)}</strong>
+          <span>${english ? "domains" : "知识领域"}</span>
+        </article>
+      `;
+
+      els.blueprintRail.innerHTML = (state.courseCatalog.blueprint || []).map((item) => `
+        <article class="blueprint-card">
+          <span class="blueprint-num">${english ? `Lesson ${escapeHtml(item.number)}` : `第${escapeHtml(item.number)}课`}</span>
+          <strong>${escapeHtml(english ? (item.title_en || item.title) : item.title)}</strong>
+          <p>${escapeHtml(english ? (item.focus_en || item.focus) : item.focus)}</p>
+          <small>${escapeHtml(english ? (item.deliverable_en || item.deliverable) : item.deliverable)}</small>
+        </article>
+      `).join("");
+
+      els.domainBoard.innerHTML = (state.courseCatalog.categories || []).map((item) => `
+        <article class="domain-chip" style="--domain-accent:${escapeHtml(item.accent)}">
+          <div class="domain-count">${escapeHtml(item.count)} minds</div>
+          <strong>${escapeHtml(english ? (item.label_en || item.label) : item.label)}</strong>
+          <p>${escapeHtml(english ? (item.theme_en || item.theme) : item.theme)}</p>
+          <small>${escapeHtml(english ? (item.signal_en || item.signal) : item.signal)}</small>
+        </article>
+      `).join("");
+
+      const featured = (state.courseCatalog.thinkers || []).filter((item) => item.featured).slice(0, 8);
+      els.featuredCourses.innerHTML = featured.map((item) => `
+        <a class="featured-card" href="${escapeHtml(item.index_url)}">
+          <div class="featured-card-top">
+            ${(() => {
+              const celebrity = state.celebrities.find((entry) => entry.id === item.id);
+              return celebrity?.avatar_url
+                ? `<img src="${escapeHtml(celebrity.avatar_url)}" alt="${escapeHtml(item.name)} 卡通头像" loading="lazy">`
+                : "";
+            })()}
+            <div>
+              <strong>${escapeHtml(english ? (item.name_en || item.name) : item.name)}</strong>
+              <small>${escapeHtml(english ? `${item.name} · ${item.category_label_en || item.category_label}` : item.title)}</small>
+            </div>
+          </div>
+          <p>${escapeHtml(english ? (item.guiding_question_en || item.guiding_question || item.quote || "") : (item.guiding_question || item.quote || ""))}</p>
+          <div class="featured-tags">${(item.tags || []).slice(0, 3).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+        </a>
+      `).join("");
+    }
+
+    function renderCourseFallback() {
+      const english = state.lang === "en";
+      els.courseStats.innerHTML = `
+        <article class="curriculum-stat">
+          <strong>100</strong>
+          <span>${english ? "curriculum loading" : "课程整理中"}</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>10x</strong>
+          <span>${english ? "shared lesson arc" : "统一课程弧线"}</span>
+        </article>
+        <article class="curriculum-stat">
+          <strong>8</strong>
+          <span>${english ? "core domains" : "核心领域"}</span>
+        </article>
+      `;
+      els.blueprintRail.innerHTML = english
+        ? '<article class="blueprint-card"><strong>Curriculum catalog is syncing</strong><p>The homepage will automatically render the full Spark 2 curriculum board once the catalog is available.</p><small>Chat on the main site is not affected.</small></article>'
+        : '<article class="blueprint-card"><strong>课程目录正在同步</strong><p>主页会在课程 catalog 发布后自动拉起完整的 Spark 2 课程看板。</p><small>当前不影响主站对话能力。</small></article>';
+      els.domainBoard.innerHTML = english
+        ? '<article class="domain-chip"><strong>Curriculum data not fetched yet</strong><p>Enter through the conversation workbench or the full course directory first. Domain and featured mind boards will appear here after sync.</p></article>'
+        : '<article class="domain-chip"><strong>课程数据暂未拉取</strong><p>请先从对话区或课程总目录进入。课程 catalog 同步完成后，这里会自动显示 8 大领域和重点人物。</p></article>';
+      els.courseSpotlight.innerHTML = english
+        ? '<div class="tiny">The course catalog is syncing. You can open the <a href="/courses/">full curriculum</a> now.</div>'
+        : '<div class="tiny">课程 catalog 正在同步，当前可先直接进入 <a href="/courses/">课程总目录</a>。</div>';
+      els.featuredCourses.innerHTML = "";
+    }
+
+    function renderCourseSpotlight() {
+      if (!state.courseCatalog || !state.activeId) return;
+      const english = state.lang === "en";
+      const thinker = (state.courseCatalog.thinkers || []).find((item) => item.id === state.activeId);
+      if (!thinker) {
+        els.courseSpotlight.innerHTML = english
+          ? `<div class="tiny">This thinker&#39;s curriculum is still being prepared.</div>`
+          : '<div class="tiny">该人物的课程还在整理中。</div>';
+        return;
+      }
+      const celebrity = state.celebrities.find((entry) => entry.id === thinker.id);
+      const avatarUrl = celebrity?.avatar_url || "";
+
+      const firstLessons = (thinker.lessons || []).slice(0, 3);
+      els.courseSpotlight.innerHTML = `
+        <div class="spotlight-top">
+          ${avatarUrl ? `<img class="spotlight-avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(thinker.name)} 头像" loading="lazy">` : ""}
+          <div>
+            <div class="eyebrow">Active Curriculum</div>
+            <strong>${escapeHtml(english ? `${thinker.name_en || thinker.name} · 10-lesson arc` : `${thinker.name} 的 10 课学习路径`)}</strong>
+            <p>${escapeHtml(english ? `${thinker.category_label_en || thinker.category_label} · ${thinker.name}` : `${thinker.category_label} · ${thinker.title}`)}</p>
+          </div>
+        </div>
+        <div class="spotlight-tags">${(thinker.tags || []).slice(0, 3).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+        <p>${escapeHtml(english ? (thinker.guiding_question_en || thinker.guiding_question || thinker.quote || "") : (thinker.guiding_question || thinker.quote || ""))}</p>
+        <div class="spotlight-lessons">
+          ${firstLessons.map((lesson) => `
+            <article class="spotlight-lesson">
+              <small>${english ? `Lesson ${escapeHtml(lesson.number)} · ${escapeHtml(lesson.focus_en || lesson.focus || "")}` : `第${escapeHtml(lesson.number)}课 · ${escapeHtml(lesson.focus || "")}`}</small>
+              <strong>${escapeHtml(english ? (lesson.title_en || lesson.title) : lesson.title)}</strong>
+              <p>${escapeHtml(english ? (lesson.deliverable_en || lesson.deliverable || lesson.subtitle_en || lesson.subtitle || "") : (lesson.deliverable || lesson.subtitle || ""))}</p>
+            </article>
+          `).join("")}
+        </div>
+        <div class="spotlight-actions">
+          <a class="primary" href="${escapeHtml(thinker.index_url)}">${english ? `Open ${escapeHtml(thinker.name_en || thinker.name)} curriculum` : `进入 ${escapeHtml(thinker.name)} 课程`}</a>
+          <a class="secondary" href="/courses/">${english ? "Browse all 100 minds" : "看 100 位总目录"}</a>
+        </div>
+      `;
+    }
+
     function renderFilters() {
       els.filters.innerHTML = "";
-      Object.entries(categoryLabels).forEach(([key, label]) => {
+      Object.entries(categoryLabels[state.lang] || categoryLabels.zh).forEach(([key, label]) => {
         const button = document.createElement("button");
         button.className = "chip" + (state.activeCategory === key ? " active" : "");
         button.textContent = label;
@@ -1839,7 +3037,7 @@ def _build_shell() -> str:
       if (!items.length) {
         const empty = document.createElement("div");
         empty.className = "tiny";
-        empty.textContent = "没有匹配结果。";
+        empty.textContent = copy().emptySearch;
         els.expertList.appendChild(empty);
         return;
       }
@@ -1850,14 +3048,19 @@ def _build_shell() -> str:
       }
 
       items.forEach((item) => {
+        const meta = courseMetaFor(item.id);
+        const primaryName = state.lang === "en" ? (item.name_en || item.name) : item.name;
+        const secondaryLine = state.lang === "en"
+          ? `${item.name} · ${meta?.category_label_en || item.title}`
+          : `${item.name_en} · ${item.title}`;
         const card = document.createElement("button");
         card.type = "button";
         card.className = "expert-card" + (item.id === state.activeId ? " active" : "");
         card.innerHTML = `
           <img class="expert-avatar" src="${item.avatar_url}" alt="${item.name} 卡通头像" loading="lazy">
           <div class="expert-card-body">
-            <strong>${item.name}</strong>
-            <small>${item.name_en} · ${item.title}</small>
+            <strong>${primaryName}</strong>
+            <small>${secondaryLine}</small>
             <div class="tags">${item.focus_tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
           </div>
         `;
@@ -1879,16 +3082,18 @@ def _build_shell() -> str:
       renderExpertList();
       const res = await fetch(`/api/celebrities/${id}`);
       const profile = await res.json();
+      const meta = courseMetaFor(id);
+      const text = copy();
 
-      els.detailCategory.textContent = profile.category_label;
+      els.detailCategory.textContent = text.detailCategory(profile.category_label, profile, meta);
       els.detailAvatar.src = profile.avatar_url;
       els.detailAvatar.alt = `${profile.name} 卡通头像`;
-      els.detailName.textContent = profile.name;
-      els.detailTitle.textContent = `${profile.title} · ${profile.name_en}`;
+      els.detailName.textContent = state.lang === "en" ? (profile.name_en || profile.name) : profile.name;
+      els.detailTitle.textContent = text.detailTitle(profile, meta);
       els.chatAvatar.src = profile.avatar_url;
       els.chatAvatar.alt = `${profile.name} 聊天头像`;
-      els.chatName.textContent = `与 ${profile.name} 对话`;
-      els.chatSource.textContent = `方法论焦点：${profile.focus_tags.slice(0, 3).join(" / ")}`;
+      els.chatName.textContent = text.chatName(profile);
+      els.chatSource.textContent = text.chatSource(profile);
 
       const renderList = (target, values) => {
         target.innerHTML = "";
@@ -1902,9 +3107,10 @@ def _build_shell() -> str:
       renderList(els.coreValues, profile.core_values);
       renderList(els.framework, Object.values(profile.judgment_framework.decision_framework));
       renderList(els.positions, Object.values(profile.positions));
+      renderCourseSpotlight();
 
       els.chatLog.innerHTML = "";
-      addBubble("ai", `已进入 ${profile.name} 的思考界面。你可以直接提问，我会优先沿着 ${profile.focus_tags.slice(0, 3).join("、")} 这条线索回答。`);
+      addBubble("ai", text.chatIntro(profile));
     }
 
     async function primeConversation(celebrityId, message) {
@@ -1922,10 +3128,21 @@ def _build_shell() -> str:
     }
 
     async function bootstrap() {
-      const res = await fetch("/api/celebrities");
-      state.celebrities = await res.json();
+      const [celebRes, courseRes] = await Promise.allSettled([
+        fetch("/api/celebrities"),
+        fetch("/courses/assets/course-catalog.json"),
+      ]);
+
+      state.celebrities = celebRes.status === "fulfilled" ? await celebRes.value.json() : [];
+      if (courseRes.status === "fulfilled" && courseRes.value.ok) {
+        state.courseCatalog = await courseRes.value.json();
+        renderCourseShowcase();
+      } else {
+        renderCourseFallback();
+      }
+
       els.heroCount.textContent = String(state.celebrities.length);
-      els.loadedCount.textContent = `${state.celebrities.length} Profiles Loaded`;
+      updateLoadedCount();
       renderFilters();
       renderExpertList();
       if (state.celebrities.length) {
@@ -1955,7 +3172,7 @@ def _build_shell() -> str:
       if (!message || !state.activeId) return;
       addBubble("user", message);
       els.messageInput.value = "";
-      els.chatSource.textContent = "正在生成回答…";
+      els.chatSource.textContent = copy().chatGenerating;
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -1968,9 +3185,14 @@ def _build_shell() -> str:
       });
       const data = await res.json();
       addBubble("ai", data.response + "\\n\\n" + data.disclaimer);
-      els.chatSource.textContent = data.source === "mimo" ? "Source: MIMO API" : "Source: Local fallback persona";
+      els.chatSource.textContent = data.source === "deepseek" ? copy().sourceLabelDeepseek : copy().sourceLabelFallback;
     });
 
+    els.langButtons.forEach((button) => {
+      button.addEventListener("click", () => setLanguage(button.dataset.lang));
+    });
+
+    applyLanguage();
     initDemo();
     bootstrap();
   </script>
@@ -1979,9 +3201,669 @@ def _build_shell() -> str:
     return shell.replace("__DEMO_SCENES_JSON__", json.dumps(DEMO_SCENES, ensure_ascii=False))
 
 
+def _build_growth_shell() -> str:
+    pack = GROWTH_CAMPAIGN_PACK
+
+    def card(title: str, body: str, meta: str = "", class_name: str = "card") -> str:
+        meta_html = f'<p class="meta">{escape(meta)}</p>' if meta else ""
+        return (
+            f'<article class="{class_name}">'
+            f"<h3>{escape(title)}</h3>"
+            f"{meta_html}"
+            f"<p>{escape(body)}</p>"
+            "</article>"
+        )
+
+    pricing_cards = "".join(
+        (
+            '<article class="price-card">'
+            f"<span>{escape(item['unit'])}</span>"
+            f"<h3>{escape(item['name'])}</h3>"
+            f"<strong>{escape(item['price'])}</strong>"
+            f"<p>{escape(item['best_for'])}</p>"
+            f"<a class=\"pill primary\" href=\"/checkout?plan={escape(item['id'])}&utm_source=growth&utm_medium=pricing&utm_campaign=digital_sage_launch\">开始下单</a>"
+            "</article>"
+        )
+        for item in pack["pricing"]
+    )
+    funnel_cards = "".join(
+        card(item["stage"], item["goal"], " / ".join(item["channels"]), "card funnel-card")
+        + f'<div class="cta-line">{escape(item["cta"])}</div>'
+        for item in pack["funnel"]
+    )
+    xhs_cards = "".join(
+        (
+            '<article class="script-card">'
+            f"<div class=\"platform\">小红书</div><h3>{escape(item['title'])}</h3>"
+            f"<p><b>封面：</b>{escape(item['cover'])}</p>"
+            f"<p><b>开头：</b>{escape(item['hook'])}</p>"
+            f"<p>{escape(item['body'])}</p>"
+            f"<p class=\"tags\">{escape(' '.join(item['tags']))}</p>"
+            f"<button data-copy=\"{escape(item['title'] + chr(10) + item['hook'] + chr(10) + item['body'] + chr(10) + ' '.join(item['tags']) + chr(10) + item['cta'])}\">复制笔记</button>"
+            "</article>"
+        )
+        for item in pack["xiaohongshu"]
+    )
+    douyin_cards = "".join(
+        (
+            '<article class="script-card">'
+            f"<div class=\"platform\">抖音 · {escape(item['duration'])}</div><h3>{escape(item['title'])}</h3>"
+            f"<p><b>前 3 秒：</b>{escape(item['hook'])}</p>"
+            f"<ol>{''.join(f'<li>{escape(shot)}</li>' for shot in item['shots'])}</ol>"
+            f"<p><b>旁白：</b>{escape(item['voiceover'])}</p>"
+            f"<p><b>CTA：</b>{escape(item['cta'])}</p>"
+            f"<button data-copy=\"{escape(item['title'] + chr(10) + item['hook'] + chr(10) + item['voiceover'] + chr(10) + item['cta'])}\">复制脚本</button>"
+            "</article>"
+        )
+        for item in pack["douyin"]
+    )
+    human_cards = "".join(
+        (
+            '<article class="human-card">'
+            f"<h3>{escape(item['sage'])}</h3>"
+            f"<p><b>视觉：</b>{escape(item['avatar_direction'])}</p>"
+            f"<blockquote>{escape(item['opening'])}</blockquote>"
+            f"<p><b>主打场景：</b>{escape(item['use_case'])}</p>"
+            f"<p><a class=\"pill\" href=\"/api/digital-human-poster/{escape(item['id'])}.svg\" target=\"_blank\">打开竖屏海报</a></p>"
+            f"<button data-copy=\"{escape(item['sage'] + chr(10) + item['avatar_direction'] + chr(10) + item['opening'] + chr(10) + item['use_case'])}\">复制数字人设定</button>"
+            "</article>"
+        )
+        for item in pack["digital_humans"]
+    )
+    calendar_rows = "".join(
+        (
+            "<tr>"
+            f"<td>{escape(item['day'])}</td>"
+            f"<td>{escape(item['channel'])}</td>"
+            f"<td>{escape(item['asset'])}</td>"
+            f"<td>{escape(item['topic'])}</td>"
+            "</tr>"
+        )
+        for item in pack["calendar"]
+    )
+
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Sage 增长落地控制台</title>
+  <meta name="description" content="Digital Sage 的商业模式、小红书、抖音和数字人宣传控制台。">
+  <link rel="canonical" href="https://www.digitalsage.cloud/growth">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {{
+      --bg: #08080b;
+      --card: rgba(28, 28, 34, 0.94);
+      --ink: #fafafa;
+      --muted: #a1a1aa;
+      --line: rgba(245, 217, 138, 0.14);
+      --gold: #e2b64f;
+      --gold2: #f5d98a;
+      --shadow: 0 28px 80px rgba(0,0,0,.36);
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at 16% 8%, rgba(226,182,79,.16), transparent 28%),
+        radial-gradient(circle at 84% 18%, rgba(94,78,44,.24), transparent 24%),
+        linear-gradient(180deg, #050506 0%, var(--bg) 44%, #0d0d10 100%);
+    }}
+    a {{ color: var(--gold2); text-decoration: none; }}
+    .page {{ width: min(1240px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 64px; }}
+    .nav {{ display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0 24px; }}
+    .nav strong {{ letter-spacing: .14em; text-transform: uppercase; }}
+    .nav-links {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+    .pill, button {{
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255,255,255,.045);
+      font: inherit;
+      cursor: pointer;
+    }}
+    button {{ color: #17130a; background: linear-gradient(135deg, var(--gold2), var(--gold)); border: 0; font-weight: 800; }}
+    .hero {{
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 56px 28px;
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 70% 18%, rgba(245,217,138,.13), transparent 30%),
+        linear-gradient(145deg, rgba(24,24,29,.98), rgba(12,12,15,.96));
+      box-shadow: var(--shadow);
+    }}
+    .eyebrow {{ color: var(--gold2); font-size: .78rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }}
+    h1, h2, h3 {{ font-family: "Noto Serif SC", serif; }}
+    h1 {{ max-width: 920px; margin: 16px auto; font-size: clamp(2.7rem, 7vw, 5.8rem); line-height: 1.02; letter-spacing: -.06em; }}
+    .hero p {{ max-width: 820px; margin: 0 auto; color: var(--muted); line-height: 1.85; font-size: 1.05rem; }}
+    .hero-actions {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 28px; }}
+    .primary {{ color: #17130a; background: linear-gradient(135deg, var(--gold2), var(--gold)); }}
+    section {{ margin-top: 28px; }}
+    .section-head {{ display: flex; justify-content: space-between; gap: 16px; align-items: end; margin-bottom: 14px; }}
+    .section-head h2 {{ margin: 8px 0 0; font-size: clamp(1.7rem, 3vw, 2.7rem); }}
+    .section-head p {{ color: var(--muted); line-height: 1.75; max-width: 620px; }}
+    .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }}
+    .card, .price-card, .script-card, .human-card, .table-card {{
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }}
+    .card h3, .price-card h3, .script-card h3, .human-card h3 {{ margin: 0 0 10px; font-size: 1.22rem; }}
+    .card p, .price-card p, .script-card p, .human-card p, li {{ color: var(--muted); line-height: 1.72; }}
+    .meta, .platform, .price-card span, .tags {{ color: var(--gold2); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }}
+    .price-card strong {{ display: block; margin: 12px 0; color: var(--gold2); font-size: 2rem; }}
+    .cta-line {{ margin: -10px 0 14px; padding: 0 20px 18px; color: var(--gold2); }}
+    blockquote {{ margin: 12px 0; padding-left: 14px; border-left: 3px solid var(--gold); color: var(--ink); line-height: 1.8; }}
+    .lead-box {{
+      display: grid;
+      grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr);
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }}
+    .lead-box p {{ color: var(--muted); line-height: 1.8; }}
+    .lead-form {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }}
+    .lead-form label {{ display: grid; gap: 7px; color: var(--gold2); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }}
+    .lead-form input, .lead-form textarea, .lead-form select {{
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+    }}
+    .lead-form textarea {{ min-height: 108px; resize: vertical; }}
+    .span-2 {{ grid-column: 1 / -1; }}
+    .lead-status {{ min-height: 24px; color: var(--gold2); font-weight: 800; }}
+    table {{ width: 100%; border-collapse: collapse; }}
+    th, td {{ padding: 14px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }}
+    th {{ color: var(--gold2); }}
+    td {{ color: var(--muted); }}
+    .toast {{ position: fixed; right: 18px; bottom: 18px; display: none; padding: 12px 14px; border-radius: 14px; color: #17130a; background: var(--gold2); font-weight: 800; }}
+    @media (max-width: 760px) {{
+      .nav, .section-head {{ align-items: flex-start; flex-direction: column; }}
+      .lead-box, .lead-form {{ grid-template-columns: 1fr; }}
+      .hero {{ min-height: auto; }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <strong>Digital Sage Growth</strong>
+      <div class="nav-links">
+        <a class="pill" href="/">主站首页</a>
+        <a class="pill" href="/courses/">课程总目录</a>
+        <a class="pill" href="/api/growth-campaigns">JSON 数据</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Launch Console</div>
+        <h1>实际落地：把 100 位智者做成可收费、可传播、可复用的增长飞轮。</h1>
+        <p>这不是一份静态方案，而是上线可访问的增长控制台：收费模型、转化漏斗、小红书笔记、抖音短视频、数字人分身脚本、7 天冷启动排期都已经结构化，可以直接复制执行。</p>
+        <div class="hero-actions">
+          <a class="pill primary" href="#pricing">查看收费模型</a>
+          <a class="pill" href="#xiaohongshu">复制小红书笔记</a>
+          <a class="pill" href="#douyin">复制抖音脚本</a>
+          <a class="pill" href="#digital-human">数字人宣传</a>
+        </div>
+      </div>
+    </header>
+
+    <section id="pricing">
+      <div class="section-head">
+        <div><div class="eyebrow">Business Model</div><h2>现金流设计</h2></div>
+        <p>先用免费文字试用降低门槛，再把用户导向语音、视频和记忆订阅。价格用于冷启动验证，后续可按转化率调整。</p>
+      </div>
+      <div class="grid">{pricing_cards}</div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">Funnel</div><h2>从内容种草到付费通话</h2></div>
+        <p>每条内容都只服务一个目的：让用户带着真实问题进入产品，而不是只看完一个 AI 概念。</p>
+      </div>
+      <div class="grid">{funnel_cards}</div>
+    </section>
+
+    <section id="xiaohongshu">
+      <div class="section-head">
+        <div><div class="eyebrow">Xiaohongshu</div><h2>小红书种草笔记</h2></div>
+        <p>小红书主打信任与收藏，内容要像真实使用体验，避免硬广腔。每条都保留封面、开头、正文、标签和 CTA。</p>
+      </div>
+      <div class="grid">{xhs_cards}</div>
+    </section>
+
+    <section id="douyin">
+      <div class="section-head">
+        <div><div class="eyebrow">Douyin</div><h2>抖音短视频脚本</h2></div>
+        <p>抖音主打强钩子与高密度信息，前 3 秒必须出现冲突、问题或反差，再快速展示产品如何产生答案。</p>
+      </div>
+      <div class="grid">{douyin_cards}</div>
+    </section>
+
+    <section id="digital-human">
+      <div class="section-head">
+        <div><div class="eyebrow">Digital Human</div><h2>数字人分身宣传</h2></div>
+        <p>每个数字人都绑定一个高频问题场景，方便后续接入视频生成、直播切片、电话桥接和课程导流。</p>
+      </div>
+      <div class="grid">{human_cards}</div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">7-Day Launch</div><h2>冷启动排期</h2></div>
+        <p>先跑一周，观察点击、收藏、私信、免费试用、付费预约五个指标。不要一开始就追求全渠道完美。</p>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>日期</th><th>渠道</th><th>素材</th><th>主题</th></tr></thead>
+          <tbody>{calendar_rows}</tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="lead">
+      <div class="lead-box">
+        <div>
+          <div class="eyebrow">Lead Capture</div>
+          <h2>让用户留下第一个付费意向</h2>
+          <p>这个表单会把预约需求写入服务器的 <code>data/growth_leads.jsonl</code>。先用它验证“谁愿意为智者通话付费”，后续再接 Stripe、Creem、微信或 CRM。</p>
+        </div>
+        <form class="lead-form" id="leadForm">
+          <label>姓名 / 昵称<input name="name" required placeholder="例如：张总 / Lucy"></label>
+          <label>联系方式<input name="contact" required placeholder="微信、手机号或邮箱"></label>
+          <label>来源渠道
+            <select name="channel">
+              <option value="xiaohongshu">小红书</option>
+              <option value="douyin">抖音</option>
+              <option value="digital-human">数字人视频</option>
+              <option value="growth-page">官网增长页</option>
+            </select>
+          </label>
+          <label>意向预算<input name="budget" placeholder="如：20 分钟语音 / 60 分钟战略局"></label>
+          <label class="span-2">想解决的问题<textarea name="need" required placeholder="写下你希望哪位智者帮你拆的问题"></textarea></label>
+          <div class="lead-status" id="leadStatus"></div>
+          <button type="submit">提交预约意向</button>
+        </form>
+      </div>
+    </section>
+  </div>
+  <div class="toast" id="toast">已复制</div>
+  <script>
+    const toast = document.getElementById("toast");
+    document.querySelectorAll("[data-copy]").forEach((button) => {{
+      button.addEventListener("click", async () => {{
+        await navigator.clipboard.writeText(button.dataset.copy || "");
+        toast.style.display = "block";
+        window.setTimeout(() => toast.style.display = "none", 1200);
+      }});
+    }});
+    const leadForm = document.getElementById("leadForm");
+    const leadStatus = document.getElementById("leadStatus");
+    leadForm.addEventListener("submit", async (event) => {{
+      event.preventDefault();
+      leadStatus.textContent = "提交中...";
+      const payload = Object.fromEntries(new FormData(leadForm).entries());
+      const res = await fetch("/api/growth-leads", {{
+        method: "POST",
+        headers: {{ "Content-Type": "application/json" }},
+        body: JSON.stringify(payload)
+      }});
+      if (!res.ok) {{
+        leadStatus.textContent = "提交失败，请稍后重试";
+        return;
+      }}
+      leadStatus.textContent = "已收到，下一步可以进入付费预约";
+      leadForm.reset();
+    }});
+  </script>
+</body>
+</html>"""
+
+
+def _build_checkout_shell() -> str:
+    plan_options = "".join(
+        f'<option value="{escape(plan["id"])}">{escape(plan["name"])} · {escape(plan["price"])} · {escape(plan["unit"])}</option>'
+        for plan in GROWTH_CAMPAIGN_PACK["pricing"]
+    )
+    sage_options = "".join(
+        f'<option value="{escape(item["id"])}">{escape(item["sage"])} · {escape(item["use_case"])}</option>'
+        for item in GROWTH_CAMPAIGN_PACK["digital_humans"]
+    )
+    pricing_cards = "".join(
+        (
+            '<article class="plan-card">'
+            f"<span>{escape(plan['unit'])}</span>"
+            f"<h3>{escape(plan['name'])}</h3>"
+            f"<strong>{escape(plan['price'])}</strong>"
+            f"<p>{escape(plan['best_for'])}</p>"
+            f"<button type=\"button\" data-plan=\"{escape(plan['id'])}\">选择这个套餐</button>"
+            "</article>"
+        )
+        for plan in GROWTH_CAMPAIGN_PACK["pricing"]
+    )
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Sage 下单预约</title>
+  <meta name="description" content="预约 Digital Sage 智者文字、语音、视频和记忆订阅服务。">
+  <link rel="canonical" href="https://www.digitalsage.cloud/checkout">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {{ --bg:#08080b; --card:rgba(28,28,34,.94); --ink:#fafafa; --muted:#a1a1aa; --line:rgba(245,217,138,.14); --gold:#e2b64f; --gold2:#f5d98a; --shadow:0 28px 80px rgba(0,0,0,.36); }}
+    * {{ box-sizing: border-box; }}
+    body {{ margin:0; color:var(--ink); font-family:Inter,"PingFang SC",sans-serif; background:radial-gradient(circle at 18% 8%,rgba(226,182,79,.16),transparent 28%),linear-gradient(180deg,#050506 0%,var(--bg) 48%,#0d0d10 100%); }}
+    a {{ color:var(--gold2); text-decoration:none; }}
+    .page {{ width:min(1180px,calc(100vw - 32px)); margin:0 auto; padding:24px 0 64px; }}
+    .nav {{ display:flex; justify-content:space-between; gap:12px; align-items:center; padding-bottom:24px; }}
+    .pill, button {{ min-height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.045); color:var(--ink); font:inherit; cursor:pointer; }}
+    button,.primary {{ color:#17130a; border:0; background:linear-gradient(135deg,var(--gold2),var(--gold)); font-weight:800; }}
+    .hero,.panel,.plan-card {{ border:1px solid var(--line); border-radius:28px; background:var(--card); box-shadow:var(--shadow); }}
+    .hero {{ padding:54px 28px; text-align:center; }}
+    h1,h2,h3 {{ font-family:"Noto Serif SC",serif; }}
+    h1 {{ max-width:860px; margin:12px auto; font-size:clamp(2.5rem,6vw,5rem); line-height:1.04; letter-spacing:-.05em; }}
+    p {{ color:var(--muted); line-height:1.8; }}
+    .eyebrow,.meta {{ color:var(--gold2); font-size:.78rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }}
+    .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-top:22px; }}
+    .plan-card {{ padding:20px; }}
+    .plan-card span {{ color:var(--gold2); font-size:.8rem; font-weight:800; }}
+    .plan-card strong {{ display:block; margin:12px 0; color:var(--gold2); font-size:2rem; }}
+    .checkout {{ display:grid; grid-template-columns:minmax(280px,.75fr) minmax(0,1.25fr); gap:18px; margin-top:28px; }}
+    .panel {{ padding:22px; }}
+    form {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }}
+    label {{ display:grid; gap:7px; color:var(--gold2); font-size:.78rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }}
+    input,select,textarea {{ width:100%; min-height:44px; border:1px solid var(--line); border-radius:14px; color:var(--ink); background:rgba(255,255,255,.06); padding:10px 12px; font:inherit; outline:none; }}
+    textarea {{ min-height:116px; resize:vertical; }}
+    .span-2 {{ grid-column:1 / -1; }}
+    .result {{ min-height:78px; padding:16px; border:1px solid var(--line); border-radius:18px; color:var(--gold2); background:rgba(255,255,255,.045); }}
+    @media (max-width:800px) {{ .nav,.checkout {{ grid-template-columns:1fr; flex-direction:column; align-items:flex-start; }} form {{ grid-template-columns:1fr; }} }}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <strong>Digital Sage Checkout</strong>
+      <div><a class="pill" href="/">首页</a> <a class="pill" href="/growth">增长控制台</a> <a class="pill" href="/api/pricing">价格 API</a></div>
+    </nav>
+    <header class="hero">
+      <div class="eyebrow">Order Funnel</div>
+      <h1>预约一次智者文字、语音、视频或记忆订阅服务。</h1>
+      <p>当前版本先完成真实订单记录和人工跟进，订单会写入服务器 <code>data/orders.jsonl</code>。后续可把同一订单号接入 Stripe、Creem、微信支付或 CRM。</p>
+    </header>
+    <section class="grid">{pricing_cards}</section>
+    <section class="checkout">
+      <div class="panel">
+        <div class="eyebrow">How it works</div>
+        <h2>商业闭环</h2>
+        <p>1. 用户从小红书/抖音/数字人视频进入官网。<br>2. 免费文字试用建立信任。<br>3. 下单预约语音/视频/战略局。<br>4. 通话后沉淀为记忆订阅和课程复购。</p>
+        <div class="result" id="result">提交后这里会显示订单号和下一步付款/跟进方式。</div>
+      </div>
+      <div class="panel">
+        <form id="orderForm">
+          <label>套餐<select name="plan_id" id="planSelect">{plan_options}</select></label>
+          <label>智者<select name="sage_id">{sage_options}</select></label>
+          <label>姓名 / 昵称<input name="name" required placeholder="例如：张总 / Lucy"></label>
+          <label>联系方式<input name="contact" required placeholder="微信、手机号或邮箱"></label>
+          <label>来源渠道<select name="channel"><option value="xiaohongshu">小红书</option><option value="douyin">抖音</option><option value="digital-human">数字人视频</option><option value="direct">直接访问</option></select></label>
+          <label>支付方式<select name="payment_method"><option value="auto">自动创建收款链接</option><option value="stripe">Stripe Checkout</option><option value="creem">Creem Checkout</option><option value="manual">人工确认/微信</option></select></label>
+          <label class="span-2">这次想解决的问题<textarea name="use_case" required placeholder="例如：现金流只够 6 个月，我应该先保利润、客户还是团队？"></textarea></label>
+          <button type="submit">提交订单</button>
+        </form>
+      </div>
+    </section>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const initialPlan = params.get("plan");
+    if (initialPlan) document.getElementById("planSelect").value = initialPlan;
+    document.querySelectorAll("[data-plan]").forEach((button) => {{
+      button.addEventListener("click", () => {{
+        document.getElementById("planSelect").value = button.dataset.plan;
+        document.getElementById("orderForm").scrollIntoView({{ behavior: "smooth", block: "center" }});
+      }});
+    }});
+    document.getElementById("orderForm").addEventListener("submit", async (event) => {{
+      event.preventDefault();
+      const result = document.getElementById("result");
+      result.textContent = "订单提交中...";
+      const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const res = await fetch("/api/orders", {{ method:"POST", headers:{{ "Content-Type":"application/json" }}, body:JSON.stringify(payload) }});
+      const data = await res.json();
+      if (!res.ok) {{ result.textContent = data.detail || "订单失败"; return; }}
+      const payButton = data.checkout_url ? `<br><br><a class="pill primary" href="${{data.checkout_url}}">前往支付</a>` : "";
+      result.innerHTML = `订单已创建：<b>${{data.order_id}}</b><br>状态：${{data.status}}<br>${{data.next_step}}${{payButton}}`;
+      event.currentTarget.reset();
+    }});
+  </script>
+</body>
+</html>"""
+
+
+def _utm_url(path: str, source: str, medium: str, campaign: str = "digital_sage_launch") -> str:
+    return f"{PUBLIC_BASE_URL}{path}?utm_source={source}&utm_medium={medium}&utm_campaign={campaign}"
+
+
+def _order_success_url(order_id: str) -> str:
+    return f"{PUBLIC_BASE_URL}/checkout?order={order_id}&status=success"
+
+
+def _order_cancel_url(order_id: str) -> str:
+    return f"{PUBLIC_BASE_URL}/checkout?order={order_id}&status=cancelled"
+
+
+def _safe_checkout_result(result: dict) -> dict:
+    return {
+        "provider": result.get("provider", "manual"),
+        "ok": bool(result.get("ok")),
+        "reason": result.get("reason", ""),
+    }
+
+
+async def _create_stripe_checkout(order: dict, plan: dict) -> dict:
+    if not STRIPE_SECRET_KEY:
+        return {"provider": "stripe", "ok": False, "reason": "missing_stripe_secret_key"}
+
+    mode = "subscription" if plan["id"] == "memory_subscription" else "payment"
+    data = {
+        "mode": mode,
+        "success_url": _order_success_url(order["order_id"]),
+        "cancel_url": _order_cancel_url(order["order_id"]),
+        "client_reference_id": order["order_id"],
+        "metadata[order_id]": order["order_id"],
+        "metadata[plan_id]": plan["id"],
+        "metadata[channel]": order["channel"],
+        "metadata[sage_id]": order.get("sage_id", ""),
+        "line_items[0][quantity]": "1",
+        "line_items[0][price_data][currency]": STRIPE_CURRENCY,
+        "line_items[0][price_data][unit_amount]": str(int(plan["amount_cny"]) * 100),
+        "line_items[0][price_data][product_data][name]": f"Digital Sage - {plan['name']}",
+        "line_items[0][price_data][product_data][description]": plan["best_for"],
+    }
+    if mode == "subscription":
+        data["line_items[0][price_data][recurring][interval]"] = "month"
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
+                "https://api.stripe.com/v1/checkout/sessions",
+                data=data,
+                auth=(STRIPE_SECRET_KEY, ""),
+                headers={"Stripe-Version": STRIPE_API_VERSION},
+            )
+        if response.status_code >= 400:
+            return {
+                "provider": "stripe",
+                "ok": False,
+                "reason": f"stripe_http_{response.status_code}",
+            }
+        payload = response.json()
+        return {
+            "provider": "stripe",
+            "ok": True,
+            "session_id": payload.get("id", ""),
+            "checkout_url": payload.get("url", ""),
+        }
+    except httpx.HTTPError as exc:
+        return {"provider": "stripe", "ok": False, "reason": f"stripe_network_{exc.__class__.__name__}"}
+
+
+def _creem_product_env(plan_id: str) -> str:
+    return f"CREEM_PRODUCT_{plan_id.upper()}"
+
+
+async def _create_creem_checkout(order: dict, plan: dict) -> dict:
+    if not CREEM_API_KEY:
+        return {"provider": "creem", "ok": False, "reason": "missing_creem_api_key"}
+
+    product_id = os.getenv(_creem_product_env(plan["id"]), "")
+    if not product_id:
+        return {"provider": "creem", "ok": False, "reason": f"missing_{_creem_product_env(plan['id']).lower()}"}
+
+    payload = {
+        "product_id": product_id,
+        "request_id": order["order_id"],
+        "units": 1,
+        "success_url": _order_success_url(order["order_id"]),
+        "metadata": {
+            "order_id": order["order_id"],
+            "plan_id": plan["id"],
+            "channel": order["channel"],
+            "sage_id": order.get("sage_id", ""),
+        },
+    }
+    if "@" in order["contact"]:
+        payload["customer"] = {"email": order["contact"]}
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
+                f"{CREEM_API_BASE}/v1/checkouts",
+                json=payload,
+                headers={"x-api-key": CREEM_API_KEY, "Content-Type": "application/json"},
+            )
+        if response.status_code >= 400:
+            return {
+                "provider": "creem",
+                "ok": False,
+                "reason": f"creem_http_{response.status_code}",
+            }
+        data = response.json()
+        return {
+            "provider": "creem",
+            "ok": True,
+            "session_id": data.get("id", ""),
+            "checkout_url": data.get("checkout_url", ""),
+        }
+    except httpx.HTTPError as exc:
+        return {"provider": "creem", "ok": False, "reason": f"creem_network_{exc.__class__.__name__}"}
+
+
+async def _create_payment_checkout(order: dict, plan: dict, requested_method: str) -> dict:
+    if int(plan["amount_cny"]) <= 0:
+        return {"provider": "free", "ok": True, "reason": "free_trial"}
+
+    method = (requested_method or "auto").strip().lower()
+    if method in {"stripe", "stripe_checkout", "stripe_prepare"}:
+        return await _create_stripe_checkout(order, plan)
+    if method in {"creem", "creem_checkout", "creem_prepare"}:
+        return await _create_creem_checkout(order, plan)
+    if method == "auto":
+        stripe_result = await _create_stripe_checkout(order, plan)
+        if stripe_result.get("ok") and stripe_result.get("checkout_url"):
+            return stripe_result
+        creem_result = await _create_creem_checkout(order, plan)
+        if creem_result.get("ok") and creem_result.get("checkout_url"):
+            return creem_result
+        return {
+            "provider": "manual",
+            "ok": False,
+            "reason": f"{stripe_result.get('reason', 'stripe_unavailable')};{creem_result.get('reason', 'creem_unavailable')}",
+        }
+
+    return {"provider": "manual", "ok": False, "reason": "manual_followup"}
+
+
+def _render_digital_human_poster(sage_id: str, item: dict) -> str:
+    sage = escape(item["sage"])
+    opening = escape(item["opening"])
+    use_case = escape(item["use_case"])
+    avatar_href = f"https://www.digitalsage.cloud/api/avatar/{escape(sage_id)}.svg"
+    checkout_href = escape(_utm_url("/checkout", f"digital_human_{sage_id}", "poster"))
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <radialGradient id="g" cx="25%" cy="15%" r="90%">
+      <stop offset="0%" stop-color="#4a3715"/>
+      <stop offset="45%" stop-color="#111116"/>
+      <stop offset="100%" stop-color="#050506"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#f5d98a"/>
+      <stop offset="1" stop-color="#e2b64f"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="26" stdDeviation="32" flood-color="#000" flood-opacity=".45"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#g)"/>
+  <circle cx="880" cy="210" r="260" fill="#e2b64f" opacity=".10"/>
+  <circle cx="170" cy="1650" r="360" fill="#f5d98a" opacity=".08"/>
+  <text x="80" y="120" fill="#f5d98a" font-family="Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="7">DIGITAL SAGE</text>
+  <text x="80" y="210" fill="#fafafa" font-family="PingFang SC, Noto Serif SC, serif" font-size="76" font-weight="800">{sage}</text>
+  <text x="80" y="292" fill="#a1a1aa" font-family="PingFang SC, Arial, sans-serif" font-size="34">你的随身智者分身</text>
+  <rect x="150" y="360" width="780" height="780" rx="80" fill="rgba(255,255,255,.06)" stroke="#e2b64f" stroke-opacity=".24" filter="url(#shadow)"/>
+  <image href="{avatar_href}" x="240" y="430" width="600" height="600" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="80" y="1210" width="920" height="360" rx="42" fill="rgba(255,255,255,.07)" stroke="#e2b64f" stroke-opacity=".22"/>
+  <foreignObject x="126" y="1260" width="828" height="260">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: PingFang SC, Arial, sans-serif; color:#fafafa; font-size:44px; line-height:1.45; font-weight:700;">“{opening}”</div>
+  </foreignObject>
+  <foreignObject x="126" y="1588" width="828" height="130">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: PingFang SC, Arial, sans-serif; color:#a1a1aa; font-size:30px; line-height:1.5;">适合：{use_case}</div>
+  </foreignObject>
+  <rect x="80" y="1760" width="920" height="82" rx="41" fill="url(#gold)"/>
+  <text x="540" y="1813" text-anchor="middle" fill="#17130a" font-family="PingFang SC, Arial, sans-serif" font-size="34" font-weight="800">扫码/搜索 Digital Sage，预约一次智者通话</text>
+  <text x="540" y="1880" text-anchor="middle" fill="#71717a" font-family="Arial, sans-serif" font-size="24">{checkout_href}</text>
+</svg>"""
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index() -> str:
     return _build_shell()
+
+
+@app.get("/growth", response_class=HTMLResponse)
+async def growth_console() -> str:
+    return _build_growth_shell()
+
+
+@app.get("/checkout", response_class=HTMLResponse)
+async def checkout_page() -> str:
+    return _build_checkout_shell()
 
 
 @app.get("/health")
@@ -1995,6 +3877,10 @@ async def health() -> dict:
         "version": "2.0.0",
         "celebrities_loaded": len(CELEBRITY_PROFILES),
         "categories": categories,
+        "llm_provider": LLM_PROVIDER_LABEL,
+        "llm_base": LLM_API_BASE,
+        "llm_primary_model": LLM_PRIMARY_MODEL,
+        "llm_fallback_model": LLM_FALLBACK_MODEL,
     }
 
 
@@ -2027,7 +3913,7 @@ async def chat_with_celebrity(req: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=404, detail="未找到该名人")
 
     prompt = build_chat_prompt(req.celebrity_id, req.message, req.topic or "general")
-    response, source = await _call_mimo(
+    response, source = await _call_deepseek(
         profile,
         prompt,
         req.message,
@@ -2052,7 +3938,7 @@ async def get_expert_advice(req: ExpertAdviceRequest) -> dict:
         f"请以 {profile['name']} 的方式，围绕 {', '.join(profile['focus_tags'][:3])} 进行分析，"
         "给出分步骤的建议、主要风险和一个最重要的下一步行动。"
     )
-    response, source = await _call_mimo(
+    response, source = await _call_deepseek(
         profile,
         prompt,
         req.situation,
@@ -2090,6 +3976,168 @@ async def get_speaking_style(celeb_id: str) -> dict:
         "celebrity": profile["name"],
         "speaking_style": profile["speaking_style"],
     }
+
+
+@app.get("/api/growth-campaigns")
+async def get_growth_campaigns() -> dict:
+    return {
+        "product": "Digital Sage",
+        "domain": "https://www.digitalsage.cloud",
+        "status": "launch-ready",
+        "campaign_pack": GROWTH_CAMPAIGN_PACK,
+    }
+
+
+@app.get("/api/pricing")
+async def get_pricing() -> dict:
+    return {
+        "currency": "CNY",
+        "plans": [
+            {
+                **plan,
+                "checkout_url": f"/checkout?plan={plan['id']}",
+                "utm_checkout_url": _utm_url("/checkout", "pricing_api", "direct", "digital_sage_launch"),
+            }
+            for plan in GROWTH_CAMPAIGN_PACK["pricing"]
+        ],
+    }
+
+
+@app.get("/api/social-assets")
+async def get_social_assets() -> dict:
+    return {
+        "utm_links": {
+            "xiaohongshu_home": _utm_url("/", "xiaohongshu", "social"),
+            "xiaohongshu_checkout": _utm_url("/checkout", "xiaohongshu", "social"),
+            "douyin_home": _utm_url("/", "douyin", "short_video"),
+            "douyin_checkout": _utm_url("/checkout", "douyin", "short_video"),
+            "digital_human_checkout": _utm_url("/checkout", "digital_human", "poster"),
+        },
+        "xiaohongshu": GROWTH_CAMPAIGN_PACK["xiaohongshu"],
+        "douyin": GROWTH_CAMPAIGN_PACK["douyin"],
+        "digital_human_posters": [
+            {
+                "sage": item["sage"],
+                "id": item["id"],
+                "poster_url": f"/api/digital-human-poster/{item['id']}.svg",
+                "checkout_url": _utm_url("/checkout", f"digital_human_{item['id']}", "poster"),
+            }
+            for item in GROWTH_CAMPAIGN_PACK["digital_humans"]
+        ],
+    }
+
+
+@app.get("/api/digital-human-poster/{sage_id}.svg")
+async def get_digital_human_poster(sage_id: str) -> Response:
+    item = DIGITAL_HUMANS_BY_ID.get(sage_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="未找到该数字人宣传素材")
+    return Response(content=_render_digital_human_poster(sage_id, item), media_type="image/svg+xml")
+
+
+@app.post("/api/growth-leads")
+async def create_growth_lead(req: GrowthLeadRequest) -> dict:
+    name = req.name.strip()
+    contact = req.contact.strip()
+    need = req.need.strip()
+    if not name or not contact or not need:
+        raise HTTPException(status_code=400, detail="name, contact and need are required")
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    lead = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "name": name,
+        "contact": contact,
+        "channel": req.channel.strip() or "growth-page",
+        "need": need,
+        "budget": (req.budget or "").strip(),
+        "status": "new",
+    }
+    lead_path = DATA_DIR / "growth_leads.jsonl"
+    with lead_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(lead, ensure_ascii=False) + "\n")
+
+    return {
+        "ok": True,
+        "lead_id": f"lead-{int(datetime.now(timezone.utc).timestamp())}",
+        "next_step": "人工跟进或接入支付下单页",
+    }
+
+
+@app.post("/api/orders")
+async def create_order(req: OrderRequest) -> dict:
+    plan = PRICING_PLANS.get(req.plan_id)
+    if not plan:
+        raise HTTPException(status_code=400, detail="未知套餐")
+
+    name = req.name.strip()
+    contact = req.contact.strip()
+    use_case = req.use_case.strip()
+    if not name or not contact or not use_case:
+        raise HTTPException(status_code=400, detail="name, contact and use_case are required")
+
+    sage_id = (req.sage_id or "").strip()
+    if sage_id and sage_id not in CELEBRITY_PROFILES:
+        raise HTTPException(status_code=400, detail="未知智者")
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    order_id = f"ds-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{uuid4().hex[:8]}"
+    order = {
+        "order_id": order_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "plan_id": plan["id"],
+        "plan_name": plan["name"],
+        "amount_cny": plan["amount_cny"],
+        "name": name,
+        "contact": contact,
+        "sage_id": sage_id,
+        "sage_name": CELEBRITY_PROFILES.get(sage_id, {}).get("name", ""),
+        "channel": req.channel.strip() or "checkout",
+        "use_case": use_case,
+        "payment_method": req.payment_method.strip() or "manual",
+        "status": "pending_payment",
+    }
+    checkout = await _create_payment_checkout(order, plan, req.payment_method)
+    checkout_url = checkout.get("checkout_url", "")
+    if checkout.get("provider") == "free":
+        order["status"] = "free_confirmed"
+    elif checkout.get("ok") and checkout_url:
+        order["status"] = "checkout_created"
+    else:
+        order["status"] = "pending_payment"
+    order["checkout_provider"] = checkout.get("provider", "manual")
+    order["checkout_url"] = checkout_url
+    order["checkout_session_id"] = checkout.get("session_id", "")
+    order["checkout_result"] = _safe_checkout_result(checkout)
+
+    with (DATA_DIR / "orders.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(order, ensure_ascii=False) + "\n")
+
+    if checkout_url:
+        next_step = "已创建收款链接，请点击前往支付。支付完成后系统会保留订单号，后续可接 webhook 自动确认。"
+    elif order["status"] == "free_confirmed":
+        next_step = "免费文字试用已确认。下一步请选择一位智者开始体验，再引导到语音或视频服务。"
+    else:
+        next_step = "已记录订单。当前未配置可用收款密钥或选择人工确认，请通过微信/客服跟进，或在服务器配置 Stripe/Creem 后自动创建收款链接。"
+
+    return {
+        "ok": True,
+        "order_id": order_id,
+        "status": order["status"],
+        "amount_cny": plan["amount_cny"],
+        "plan": plan["name"],
+        "checkout_provider": order["checkout_provider"],
+        "checkout_url": checkout_url,
+        "next_step": next_step,
+    }
+
+
+@app.get("/courses.html", response_class=HTMLResponse)
+async def courses_page():
+    courses_html = BASE_DIR / "docs/courses.html"
+    if courses_html.exists():
+        return courses_html.read_text(encoding="utf-8")
+    return "<h1>Course list not found</h1>"
 
 
 if __name__ == "__main__":

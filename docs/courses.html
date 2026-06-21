@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Sage — 100位智者课程</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans SC',sans-serif; background:#0a0a14; color:#e0e0f0; line-height:1.6; }
+.container { max-width:1200px; margin:0 auto; padding:20px; }
+
+header { text-align:center; padding:50px 20px 30px; }
+header h1 { font-size:2.5em; background:linear-gradient(135deg, #e2b64f, #00d4ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+header p { color:#8888aa; margin-top:8px; font-size:1.1em; }
+
+.category-section { margin:30px 0; }
+.cat-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid #ffffff08; }
+.cat-header .cat-icon { font-size:1.3em; }
+.cat-header h2 { font-size:1.3em; }
+.cat-header .count { color:#8888aa; font-size:0.9em; }
+
+.course-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:14px; }
+.course-card { background:#12122a; border:1px solid #ffffff08; border-radius:14px; padding:18px; transition:all 0.2s; cursor:pointer; text-decoration:none; color:inherit; display:block; }
+.course-card:hover { border-color:var(--card-accent); transform:translateY(-2px); background:#1a1a3e; }
+.course-card h3 { font-size:1.05em; margin-bottom:4px; }
+.course-card .title { color:#8888aa; font-size:0.85em; margin-bottom:6px; }
+.course-card .tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.course-card .tag { font-size:11px; padding:2px 10px; border-radius:10px; background:var(--card-accent)15; color:var(--card-accent); }
+.course-card .diff { font-size:12px; color:#8888aa; margin-top:8px; }
+
+.search-bar { margin:20px auto; max-width:500px; }
+.search-bar input { width:100%; padding:14px 20px; background:#1a1a3e; border:1px solid #ffffff15; border-radius:30px; color:#e0e0f0; font-size:16px; outline:none; }
+.search-bar input:focus { border-color:#e2b64f; }
+
+footer { text-align:center; padding:40px 20px; color:#8888aa; font-size:13px; border-top:1px solid #ffffff08; margin-top:40px; }
+footer a { color:#00d4ff; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>Digital Sage 思想课程</h1>
+  <p>与100位历史智者对话 · 系统化思维训练</p>
+</header>
+
+<div class="search-bar">
+  <input type="text" id="search" placeholder="🔍 搜索智者姓名、领域或关键词..." oninput="filterCourses()">
+</div>
+
+<div class="category-section" data-category="科学家">
+  <div class="cat-header">
+    <span class="cat-icon">🔬</span>
+    <h2 style="color:#7cff6b">科学家</h2>
+    <span class="count">17 位智者</span>
+  </div>
+  <div class="course-grid">
+
+    <a class="course-card" href="courses/carl_sagan.html" style="--card-accent:#7cff6b">
+      <h3>🔬 卡尔·萨根（）</h3>
+      <div class="title">天文学家</div>
+      <div class="tags"><span class="tag">宇宙视角、怀疑精神、公众沟通</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/nikola_tesla.html" style="--card-accent:#7cff6b">
+      <h3>🔬 尼古拉·特斯拉（）</h3>
+      <div class="title">发明家</div>
+      <div class="tags"><span class="tag">发明、能量、远见</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/tu_youyou.html" style="--card-accent:#7cff6b">
+      <h3>🔬 屠呦呦（）</h3>
+      <div class="title">药学家</div>
+      <div class="tags"><span class="tag">传统与现代、证据、救人</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/zhang_feng.html" style="--card-accent:#7cff6b">
+      <h3>🔬 张锋（）</h3>
+      <div class="title">基因编辑科学家</div>
+      <div class="tags"><span class="tag">工具革命、转化医学、伦理</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/stephen_hawking.html" style="--card-accent:#7cff6b">
+      <h3>🔬 斯蒂芬·霍金（）</h3>
+      <div class="title">宇宙学家</div>
+      <div class="tags"><span class="tag">宇宙、边界、韧性</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/yang_zhenning.html" style="--card-accent:#7cff6b">
+      <h3>🔬 杨振宁（）</h3>
+      <div class="title">理论物理学家</div>
+      <div class="tags"><span class="tag">对称美、基础科学、耐心</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/edward_wilson.html" style="--card-accent:#7cff6b">
+      <h3>🔬 爱德华·威尔逊（）</h3>
+      <div class="title">生物学家</div>
+      <div class="tags"><span class="tag">生物多样性、演化、整合</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/marie_curie.html" style="--card-accent:#7cff6b">
+      <h3>🔬 玛丽·居里（）</h3>
+      <div class="title">放射性研究先驱</div>
+      <div class="tags"><span class="tag">实验、毅力、奉献</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/jane_goodall.html" style="--card-accent:#7cff6b">
+      <h3>🔬 珍·古道尔（）</h3>
+      <div class="title">灵长类学家</div>
+      <div class="tags"><span class="tag">观察、共情、生态</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/richard_feynman.html" style="--card-accent:#7cff6b">
+      <h3>🔬 理查德·费曼（）</h3>
+      <div class="title">理论物理学家</div>
+      <div class="tags"><span class="tag">好奇心、直觉、解释能力</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/rosalind_franklin.html" style="--card-accent:#7cff6b">
+      <h3>🔬 罗莎琳德·富兰克林（）</h3>
+      <div class="title">结构生物学家</div>
+      <div class="tags"><span class="tag">图像证据、精确、专业主义</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/alan_turing.html" style="--card-accent:#7cff6b">
+      <h3>🔬 艾伦·图灵（）</h3>
+      <div class="title">计算理论奠基者</div>
+      <div class="tags"><span class="tag">计算、形式化、智能</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/isaac_newton.html" style="--card-accent:#7cff6b">
+      <h3>🔬 艾萨克·牛顿（）</h3>
+      <div class="title">经典力学奠基者</div>
+      <div class="tags"><span class="tag">定律、演绎、专注</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/ada_lovelace.html" style="--card-accent:#7cff6b">
+      <h3>🔬 艾达·洛芙莱斯（）</h3>
+      <div class="title">计算先驱</div>
+      <div class="tags"><span class="tag">抽象、算法、跨学科</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/tim_berners_lee.html" style="--card-accent:#7cff6b">
+      <h3>🔬 蒂姆·伯纳斯-李（）</h3>
+      <div class="title">万维网发明者</div>
+      <div class="tags"><span class="tag">开放网络、标准、公共性</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/albert_einstein.html" style="--card-accent:#7cff6b">
+      <h3>🔬 阿尔伯特·爱因斯坦（）</h3>
+      <div class="title">物理学家</div>
+      <div class="tags"><span class="tag">想象力、统一性、第一原理</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/yan_ning.html" style="--card-accent:#7cff6b">
+      <h3>🔬 颜宁（）</h3>
+      <div class="title">结构生物学家</div>
+      <div class="tags"><span class="tag">极致、独立、科学共同体</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+  </div>
+</div>
+
+<div class="category-section" data-category="商业领袖">
+  <div class="cat-header">
+    <span class="cat-icon">💼</span>
+    <h2 style="color:#e2b64f">商业领袖</h2>
+    <span class="count">58 位智者</span>
+  </div>
+  <div class="course-grid">
+
+    <a class="course-card" href="courses/issey_miyake.html" style="--card-accent:#e2b64f">
+      <h3>💼 三宅一生（）</h3>
+      <div class="title">设计师</div>
+      <div class="tags"><span class="tag">材料实验、身体感、东方美学</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/daniel_kahneman.html" style="--card-accent:#e2b64f">
+      <h3>💼 丹尼尔·卡尼曼（）</h3>
+      <div class="title">行为经济学家</div>
+      <div class="tags"><span class="tag">系统一系统二、偏误、判断</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/daniel_pink.html" style="--card-accent:#e2b64f">
+      <h3>💼 丹尼尔·平克（）</h3>
+      <div class="title">商业作家</div>
+      <div class="tags"><span class="tag">动机、节奏、说服</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/jordan_peterson.html" style="--card-accent:#e2b64f">
+      <h3>💼 乔丹·彼得森（）</h3>
+      <div class="title">心理学家</div>
+      <div class="tags"><span class="tag">责任、秩序、意义</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/jony_ive.html" style="--card-accent:#e2b64f">
+      <h3>💼 乔尼·艾夫（）</h3>
+      <div class="title">工业设计师</div>
+      <div class="tags"><span class="tag">材料、细节、克制</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/jonathan_haidt.html" style="--card-accent:#e2b64f">
+      <h3>💼 乔纳森·海特（）</h3>
+      <div class="title">社会心理学家</div>
+      <div class="tags"><span class="tag">道德直觉、群体、社交媒体</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/abraham_lincoln.html" style="--card-accent:#e2b64f">
+      <h3>💼 亚伯拉罕·林肯（）</h3>
+      <div class="title">美国总统</div>
+      <div class="tags"><span class="tag">团结、道义、耐心</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/adam_grant.html" style="--card-accent:#e2b64f">
+      <h3>💼 亚当·格兰特（）</h3>
+      <div class="title">组织心理学家</div>
+      <div class="tags"><span class="tag">给予者、复盘、重构观点</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/aristotle.html" style="--card-accent:#e2b64f">
+      <h3>💼 亚里士多德（）</h3>
+      <div class="title">古希腊哲学家</div>
+      <div class="tags"><span class="tag">中道、分类、实践智慧</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/ren_zhengfei.html" style="--card-accent:#e2b64f">
+      <h3>💼 任正非（）</h3>
+      <div class="title">华为创始人</div>
+      <div class="tags"><span class="tag">灰度、组织、战略耐心</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/clay_christensen.html" style="--card-accent:#e2b64f">
+      <h3>💼 克莱顿·克里斯坦森（）</h3>
+      <div class="title">创新理论学者</div>
+      <div class="tags"><span class="tag">颠覆式创新、用户任务、长期赛道</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/leonardo_da_vinci.html" style="--card-accent:#e2b64f">
+      <h3>💼 列奥纳多·达·芬奇（）</h3>
+      <div class="title">文艺复兴通才</div>
+      <div class="tags"><span class="tag">观察、跨学科、手工与科学</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/carol_dweck.html" style="--card-accent:#e2b64f">
+      <h3>💼 卡罗尔·德韦克（）</h3>
+      <div class="title">心理学家</div>
+      <div class="tags"><span class="tag">成长型思维、学习、反馈</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/steve_jobs.html" style="--card-accent:#e2b64f">
+      <h3>💼 史蒂夫·乔布斯（）</h3>
+      <div class="title">Apple 联合创始人</div>
+      <div class="tags"><span class="tag">产品、审美、端到端体验</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/elinor_ostrom.html" style="--card-accent:#e2b64f">
+      <h3>💼 埃莉诺·奥斯特罗姆（）</h3>
+      <div class="title">制度经济学家</div>
+      <div class="tags"><span class="tag">共同治理、制度设计、地方知识</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/confucius.html" style="--card-accent:#e2b64f">
+      <h3>💼 孔子（）</h3>
+      <div class="title">儒家思想家</div>
+      <div class="tags"><span class="tag">仁、礼、修身</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/masayoshi_son.html" style="--card-accent:#e2b64f">
+      <h3>💼 孙正义（）</h3>
+      <div class="title">软银创始人</div>
+      <div class="tags"><span class="tag">愿景投资、杠杆、生态布局</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/annie_duke.html" style="--card-accent:#e2b64f">
+      <h3>💼 安妮·杜克（）</h3>
+      <div class="title">决策作家</div>
+      <div class="tags"><span class="tag">概率思维、下注、复盘</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/angela_duckworth.html" style="--card-accent:#e2b64f">
+      <h3>💼 安杰拉·达克沃斯（）</h3>
+      <div class="title">心理学家</div>
+      <div class="tags"><span class="tag">毅力、长期练习、目标</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/tadao_ando.html" style="--card-accent:#e2b64f">
+      <h3>💼 安藤忠雄（）</h3>
+      <div class="title">建筑师</div>
+      <div class="tags"><span class="tag">光、水泥、空间秩序</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/hayao_miyazaki.html" style="--card-accent:#e2b64f">
+      <h3>💼 宫崎骏（）</h3>
+      <div class="title">动画导演</div>
+      <div class="tags"><span class="tag">自然、人性、手作</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/yuval_harari.html" style="--card-accent:#e2b64f">
+      <h3>💼 尤瓦尔·赫拉利（）</h3>
+      <div class="title">历史学家</div>
+      <div class="tags"><span class="tag">叙事、文明、长期史观</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/rei_kawakubo.html" style="--card-accent:#e2b64f">
+      <h3>💼 川久保玲（）</h3>
+      <div class="title">时装设计师</div>
+      <div class="tags"><span class="tag">反叛、轮廓、实验</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/zhangyiming.html" style="--card-accent:#e2b64f">
+      <h3>💼 张一鸣（）</h3>
+      <div class="title">字节跳动创始人</div>
+      <div class="tags"><span class="tag">延迟满足、算法、全球化</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/peter_senge.html" style="--card-accent:#e2b64f">
+      <h3>💼 彼得·圣吉（）</h3>
+      <div class="title">系统管理学者</div>
+      <div class="tags"><span class="tag">学习型组织、反馈回路、协同</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/peter_drucker.html" style="--card-accent:#e2b64f">
+      <h3>💼 彼得·德鲁克（）</h3>
+      <div class="title">现代管理学之父</div>
+      <div class="tags"><span class="tag">管理、知识工作者、使命</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/peter_thiel.html" style="--card-accent:#e2b64f">
+      <h3>💼 彼得·蒂尔（）</h3>
+      <div class="title">投资人与创业者</div>
+      <div class="tags"><span class="tag">垄断、反共识、零到一</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/zaha_hadid.html" style="--card-accent:#e2b64f">
+      <h3>💼 扎哈·哈迪德（）</h3>
+      <div class="title">建筑师</div>
+      <div class="tags"><span class="tag">流动结构、空间想象、未来感</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/caodewang.html" style="--card-accent:#e2b64f">
+      <h3>💼 曹德旺（）</h3>
+      <div class="title">福耀玻璃创始人</div>
+      <div class="tags"><span class="tag">制造、务实、工匠精神</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/benjamin_franklin.html" style="--card-accent:#e2b64f">
+      <h3>💼 本杰明·富兰克林（）</h3>
+      <div class="title">政治家与发明家</div>
+      <div class="tags"><span class="tag">自律、实用主义、公共精神</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/lee_kuan_yew.html" style="--card-accent:#e2b64f">
+      <h3>💼 李光耀（）</h3>
+      <div class="title">新加坡建国者</div>
+      <div class="tags"><span class="tag">治理、人才、长期主义</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/bezos.html" style="--card-accent:#e2b64f">
+      <h3>💼 杰夫·贝索斯（）</h3>
+      <div class="title">亚马逊创始人</div>
+      <div class="tags"><span class="tag">客户至上、Day 1、飞轮</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/charlie_munger.html" style="--card-accent:#e2b64f">
+      <h3>💼 查理·芒格（）</h3>
+      <div class="title">多元思维模型大师</div>
+      <div class="tags"><span class="tag">逆向思维、多元模型、认知偏误</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/duan_yongping.html" style="--card-accent:#e2b64f">
+      <h3>💼 段永平（）</h3>
+      <div class="title">投资人与企业家</div>
+      <div class="tags"><span class="tag">本分、长期、企业文化</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/buffett.html" style="--card-accent:#e2b64f">
+      <h3>💼 沃伦·巴菲特（）</h3>
+      <div class="title">价值投资之父</div>
+      <div class="tags"><span class="tag">价值投资、复利、护城河</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/winston_churchill.html" style="--card-accent:#e2b64f">
+      <h3>💼 温斯顿·丘吉尔（）</h3>
+      <div class="title">英国前首相</div>
+      <div class="tags"><span class="tag">韧性、演讲、危机领导</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/wang_xing.html" style="--card-accent:#e2b64f">
+      <h3>💼 王兴（）</h3>
+      <div class="title">美团创始人</div>
+      <div class="tags"><span class="tag">供给、效率、长期战争</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/wang_yangming.html" style="--card-accent:#e2b64f">
+      <h3>💼 王阳明（）</h3>
+      <div class="title">心学思想家</div>
+      <div class="tags"><span class="tag">知行合一、致良知、内省</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/ray_dalio.html" style="--card-accent:#e2b64f">
+      <h3>💼 瑞·达利欧（）</h3>
+      <div class="title">桥水创始人</div>
+      <div class="tags"><span class="tag">原则、透明、系统化决策</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/muhammad_yunus.html" style="--card-accent:#e2b64f">
+      <h3>💼 穆罕默德·尤努斯（）</h3>
+      <div class="title">社会企业家</div>
+      <div class="tags"><span class="tag">普惠金融、社会创新、贫困治理</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/john_maeda.html" style="--card-accent:#e2b64f">
+      <h3>💼 约翰·前田（）</h3>
+      <div class="title">设计与技术思想家</div>
+      <div class="tags"><span class="tag">设计管理、简约、跨界</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/nelson_mandela.html" style="--card-accent:#e2b64f">
+      <h3>💼 纳尔逊·曼德拉（）</h3>
+      <div class="title">南非前总统</div>
+      <div class="tags"><span class="tag">和解、韧性、制度转型</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/naval_ravikant.html" style="--card-accent:#e2b64f">
+      <h3>💼 纳瓦尔（）</h3>
+      <div class="title">创业投资人与思想者</div>
+      <div class="tags"><span class="tag">幸福、杠杆、特定知识</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/nassim_taleb.html" style="--card-accent:#e2b64f">
+      <h3>💼 纳西姆·塔勒布（）</h3>
+      <div class="title">风险思想家</div>
+      <div class="tags"><span class="tag">反脆弱、尾部风险、杠铃策略</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/laozi.html" style="--card-accent:#e2b64f">
+      <h3>💼 老子（）</h3>
+      <div class="title">道家思想家</div>
+      <div class="tags"><span class="tag">无为、柔弱胜刚强、顺势</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/socrates.html" style="--card-accent:#e2b64f">
+      <h3>💼 苏格拉底（）</h3>
+      <div class="title">古希腊哲学家</div>
+      <div class="tags"><span class="tag">反诘、德性、认识自己</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/indra_nooyi.html" style="--card-accent:#e2b64f">
+      <h3>💼 英德拉·努伊（）</h3>
+      <div class="title">百事前 CEO</div>
+      <div class="tags"><span class="tag">战略、领导力、长期转型</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/tim_cook.html" style="--card-accent:#e2b64f">
+      <h3>💼 蒂姆·库克（）</h3>
+      <div class="title">Apple CEO</div>
+      <div class="tags"><span class="tag">供应链、运营、隐私</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/simone_de_beauvoir.html" style="--card-accent:#e2b64f">
+      <h3>💼 西蒙娜·德·波伏娃（）</h3>
+      <div class="title">哲学家与作家</div>
+      <div class="tags"><span class="tag">自由、主体性、责任</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/sheryl_sandberg.html" style="--card-accent:#e2b64f">
+      <h3>💼 谢丽尔·桑德伯格（）</h3>
+      <div class="title">运营与组织领导者</div>
+      <div class="tags"><span class="tag">领导力、组织、女性成长</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/dieter_rams.html" style="--card-accent:#e2b64f">
+      <h3>💼 迪特·拉姆斯（）</h3>
+      <div class="title">工业设计师</div>
+      <div class="tags"><span class="tag">简洁、系统、诚实设计</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/deng_xiaoping.html" style="--card-accent:#e2b64f">
+      <h3>💼 邓小平（）</h3>
+      <div class="title">改革开放总设计师</div>
+      <div class="tags"><span class="tag">实事求是、改革、发展</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/reed_hastings.html" style="--card-accent:#e2b64f">
+      <h3>💼 里德·哈斯廷斯（）</h3>
+      <div class="title">Netflix 联合创始人</div>
+      <div class="tags"><span class="tag">自由与责任、文化、订阅</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/lei_jun.html" style="--card-accent:#e2b64f">
+      <h3>💼 雷军（）</h3>
+      <div class="title">小米创始人</div>
+      <div class="tags"><span class="tag">效率、用户参与、性价比</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/howard_schultz.html" style="--card-accent:#e2b64f">
+      <h3>💼 霍华德·舒尔茨（）</h3>
+      <div class="title">星巴克前 CEO</div>
+      <div class="tags"><span class="tag">品牌体验、员工、社区</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/martin_seligman.html" style="--card-accent:#e2b64f">
+      <h3>💼 马丁·塞利格曼（）</h3>
+      <div class="title">积极心理学家</div>
+      <div class="tags"><span class="tag">幸福、韧性、优势</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/jack_ma.html" style="--card-accent:#e2b64f">
+      <h3>💼 马云（）</h3>
+      <div class="title">阿里巴巴创始人</div>
+      <div class="tags"><span class="tag">愿景、创业、服务小企业</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/akira_kurosawa.html" style="--card-accent:#e2b64f">
+      <h3>💼 黑泽明（）</h3>
+      <div class="title">电影导演</div>
+      <div class="tags"><span class="tag">叙事、节奏、人性</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+  </div>
+</div>
+
+<div class="category-section" data-category="科技思想家">
+  <div class="cat-header">
+    <span class="cat-icon">⚡</span>
+    <h2 style="color:#00d4ff">科技思想家</h2>
+    <span class="count">15 位智者</span>
+  </div>
+  <div class="course-grid">
+
+    <a class="course-card" href="courses/ilya_sutskever.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 伊利亚·苏茨克维尔（）</h3>
+      <div class="title">深度学习研究者</div>
+      <div class="tags"><span class="tag">深度学习、尺度定律、对齐</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/andrew_ng.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 吴恩达（）</h3>
+      <div class="title">AI 教育推动者</div>
+      <div class="tags"><span class="tag">AI 民主化、应用落地、学习曲线</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/musk.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 埃隆·马斯克（）</h3>
+      <div class="title">第一性原理创业者</div>
+      <div class="tags"><span class="tag">第一性原理、制造、火星</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/andrej_karpathy.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 安德烈·卡帕西（）</h3>
+      <div class="title">AI 工程研究者</div>
+      <div class="tags"><span class="tag">工程直觉、数据、模型调试</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/sam_altman.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 山姆·奥特曼（）</h3>
+      <div class="title">OpenAI CEO</div>
+      <div class="tags"><span class="tag">AGI、创业、分发</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/demis_hassabis.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 德米斯·哈萨比斯（）</h3>
+      <div class="title">DeepMind CEO</div>
+      <div class="tags"><span class="tag">通用智能、科学发现、强化学习</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/larry_page.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 拉里·佩奇（）</h3>
+      <div class="title">Google 联合创始人</div>
+      <div class="tags"><span class="tag">信息组织、登月项目、自动化</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/li_feifei.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 李飞飞（）</h3>
+      <div class="title">AI 科学家</div>
+      <div class="tags"><span class="tag">人本 AI、视觉智能、教育</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/linus_torvalds.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 林纳斯·托瓦兹（）</h3>
+      <div class="title">Linux 创始人</div>
+      <div class="tags"><span class="tag">开源、工程审美、直接反馈</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/bill_gates.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 比尔·盖茨（）</h3>
+      <div class="title">微软联合创始人</div>
+      <div class="tags"><span class="tag">平台、软件、全球健康</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/susan_wojcicki.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 苏珊·沃西基（）</h3>
+      <div class="title">平台产品领导者</div>
+      <div class="tags"><span class="tag">创作者经济、分发、平台治理</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/satya_nadella.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 萨提亚·纳德拉（）</h3>
+      <div class="title">微软 CEO</div>
+      <div class="tags"><span class="tag">同理心、平台、学习型组织</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/sergey_brin.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 谢尔盖·布林（）</h3>
+      <div class="title">Google 联合创始人</div>
+      <div class="tags"><span class="tag">搜索、实验、工程文化</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/mark_zuckerberg.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 马克·扎克伯格（）</h3>
+      <div class="title">Meta CEO</div>
+      <div class="tags"><span class="tag">产品迭代、网络效应、平台</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+
+    <a class="course-card" href="courses/jensen_huang.html" style="--card-accent:#00d4ff">
+      <h3>⚡ 黄仁勋（）</h3>
+      <div class="title">NVIDIA 创始人</div>
+      <div class="tags"><span class="tag">算力、平台、生态</span></div>
+      <div class="diff">★★★☆☆</div>
+    </a>
+  </div>
+</div>
+
+<div class="category-section" data-category="医学专家">
+  <div class="cat-header">
+    <span class="cat-icon">🏥</span>
+    <h2 style="color:#ff6b8a">医学专家</h2>
+    <span class="count">10 位智者</span>
+  </div>
+  <div class="course-grid">
+
+    <a class="course-card" href="courses/elizabeth_blackburn.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 伊丽莎白·布莱克本（）</h3>
+      <div class="title">分子生物学家</div>
+      <div class="tags"><span class="tag">端粒、老化、生物机制</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/paul_farmer.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 保罗·法默（）</h3>
+      <div class="title">全球健康专家</div>
+      <div class="tags"><span class="tag">公平、基层医疗、行动</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/david_sinclair.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 大卫·辛克莱（）</h3>
+      <div class="title">衰老研究者</div>
+      <div class="tags"><span class="tag">长寿、机制、预防</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/william_osler.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 威廉·奥斯勒（）</h3>
+      <div class="title">现代医学教育先驱</div>
+      <div class="tags"><span class="tag">临床观察、终身学习、医德</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/anthony_fauci.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 安东尼·福奇（）</h3>
+      <div class="title">传染病学家</div>
+      <div class="tags"><span class="tag">证据、政策沟通、风险管理</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/barry_marshall.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 巴里·马歇尔（）</h3>
+      <div class="title">胃病学家</div>
+      <div class="tags"><span class="tag">证据、反常识、实验勇气</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/zhang_wenhong.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 张文宏（）</h3>
+      <div class="title">感染病专家</div>
+      <div class="tags"><span class="tag">风险沟通、临床、常识</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/li_lanjuan.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 李兰娟（）</h3>
+      <div class="title">感染病学专家</div>
+      <div class="tags"><span class="tag">系统防控、救治、科研转化</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/zhongnanshan.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 钟南山（）</h3>
+      <div class="title">呼吸病学专家</div>
+      <div class="tags"><span class="tag">循证、公共卫生、实话实说</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+
+    <a class="course-card" href="courses/atu_gawande.html" style="--card-accent:#ff6b8a">
+      <h3>🏥 阿图·葛文德（）</h3>
+      <div class="title">外科医生与作家</div>
+      <div class="tags"><span class="tag">清单、医学人文、系统改进</span></div>
+      <div class="diff">★★★★☆</div>
+    </a>
+  </div>
+</div>
+
+</div>
+<script>
+function filterCourses() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.course-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+  // Show/hide category sections
+  document.querySelectorAll('.category-section').forEach(sec => {
+    const visible = sec.querySelectorAll('.course-card[style*="display"]').length < sec.querySelectorAll('.course-card').length;
+    const anyVisible = Array.from(sec.querySelectorAll('.course-card')).some(c => c.style.display !== 'none');
+    sec.style.display = anyVisible ? '' : 'none';
+  });
+}
+</script>
+<footer>
+  <p>Digital Sage — 与 100 位智者对话 | <a href="/">首页</a> | <a href="/pricing.html">定价</a></p>
+  <p>© 2026 Digital Sage</p>
+</footer>
+</body>
+</html>
