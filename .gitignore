@@ -9,3 +9,4 @@ media/demo/_build/
 *_secret*
 credentials.json
 data/*.jsonl
+.venv
