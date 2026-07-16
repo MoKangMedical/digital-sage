@@ -129,7 +129,7 @@ footer a {{ color:var(--accent); text-decoration:none; }}
 
 FOOTER = '''</div>
 <footer>
-  <p>Digital Sage — 与 100 位智者对话 | <a href="../courses.html">课程列表</a> | <a href="/">首页</a></p>
+  <p>Digital Sage — 与 120 位智者对话 | <a href="../courses.html">课程列表</a> | <a href="/">首页</a></p>
   <p style="margin-top:8px">© 2026 Digital Sage. 思想的力量超越时空。</p>
 </footer>
 </body>
@@ -420,7 +420,7 @@ def generate_course_list(all_data):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Digital Sage — 100位智者课程</title>
+<title>Digital Sage — 120位智者课程</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -519,7 +519,7 @@ function filterCourses() {
 }
 </script>
 <footer>
-  <p>Digital Sage — 与 100 位智者对话 | <a href="/">首页</a> | <a href="/pricing.html">定价</a></p>
+  <p>Digital Sage — 与 120 位智者对话 | <a href="/">首页</a> | <a href="/pricing.html">定价</a></p>
   <p>© 2026 Digital Sage</p>
 </footer>
 </body>

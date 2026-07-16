@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柏拉图（Plato） — Digital Sage 思想课程</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a14;
+  --surface: #12122a;
+  --card: #1a1a3e;
+  --text: #e0e0f0;
+  --muted: #8888aa;
+  --accent: #c084fc;
+  --accent-bg: rgba(192,132,252,0.1);
+  --gold: #e2b64f;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans SC',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+.container { max-width:900px; margin:0 auto; padding:20px; }
+
+/* Hero */
+.hero { background:linear-gradient(135deg, rgba(192,132,252,0.1) 0%, var(--bg) 100%); border:1px solid #c084fc33; border-radius:20px; padding:40px 30px; margin:30px 0; position:relative; overflow:hidden; }
+.hero::before { content:''; position:absolute; top:-50%; right:-20%; width:300px; height:300px; background:radial-gradient(circle, #c084fc15 0%, transparent 70%); }
+.hero .category { display:inline-block; background:#c084fc22; color:#c084fc; padding:4px 14px; border-radius:20px; font-size:13px; margin-bottom:16px; }
+.hero h1 { font-size:2.2em; font-weight:700; margin:8px 0; position:relative; }
+.hero .subtitle { color:var(--muted); font-size:1.1em; }
+.hero .quote { margin-top:20px; padding:16px 20px; background:var(--card); border-left:3px solid var(--accent); border-radius:0 12px 12px 0; font-style:italic; color:var(--gold); }
+
+/* Meta bar */
+.meta { display:flex; gap:20px; flex-wrap:wrap; margin:24px 0; }
+.meta-item { background:var(--card); padding:12px 20px; border-radius:12px; }
+.meta-item .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+.meta-item .value { font-size:15px; font-weight:500; margin-top:2px; }
+
+/* Stars for difficulty */
+.stars { color:var(--accent); letter-spacing:2px; }
+
+/* Section */
+.section { background:var(--surface); border-radius:16px; padding:30px; margin:24px 0; border:1px solid #ffffff08; }
+.section h2 { font-size:1.5em; margin-bottom:20px; color:#c084fc; }
+.section h3 { font-size:1.1em; color:var(--gold); margin:20px 0 12px; }
+
+/* Values grid */
+.values { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:14px; }
+.value-card { background:var(--card); padding:18px; border-radius:12px; border-left:3px solid var(--accent); }
+.value-card .num { font-size:12px; color:#c084fc; }
+
+/* Positions */
+.position-item { padding:10px 0; border-bottom:1px solid #ffffff08; }
+.position-item .key { color:#c084fc; font-weight:500; }
+
+/* Framework steps */
+.framework-steps { counter-reset:step; }
+.framework-steps .step { padding:14px 18px; margin:8px 0; background:var(--card); border-radius:10px; position:relative; padding-left:50px; }
+.framework-steps .step::before { counter-increment:step; content:counter(step); position:absolute; left:16px; top:14px; width:24px; height:24px; background:#c084fc33; color:#c084fc; border-radius:50%; text-align:center; line-height:24px; font-size:13px; font-weight:700; }
+
+/* Cases */
+.case { background:var(--card); padding:20px; border-radius:12px; margin:12px 0; }
+.case .case-title { font-weight:600; color:var(--gold); margin-bottom:10px; }
+.case .lesson { color:var(--accent); margin-top:8px; }
+
+/* Learning path */
+.path-stage { background:var(--card); padding:18px 20px; border-radius:10px; margin:10px 0; }
+.path-stage .stage-header { font-weight:600; color:var(--accent); }
+
+/* Exercises */
+.exercise-group { margin:16px 0; }
+.exercise-group h4 { color:var(--accent); margin-bottom:8px; }
+.exercise-group li { margin:6px 0; padding-left:8px; color:var(--muted); }
+
+/* Prompt box */
+.prompt-box { background:#0d0d1a; border:1px solid #c084fc22; border-radius:10px; padding:16px; margin:10px 0; }
+.prompt-box code { color:#7cff6b; font-size:13px; white-space:pre-wrap; }
+
+/* SVG container */
+.svg-container { background:var(--card); border-radius:14px; padding:20px; margin:16px 0; text-align:center; }
+.svg-container svg { max-width:100%; }
+
+/* Connections */
+.connection { display:inline-block; background:#c084fc15; color:#c084fc; padding:6px 14px; border-radius:20px; margin:4px; font-size:13px; }
+
+/* Footer */
+footer { text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; border-top:1px solid #ffffff08; margin-top:40px; }
+footer a { color:var(--accent); text-decoration:none; }
+
+/* Responsive */
+@media(max-width:600px) {
+  .hero h1 { font-size:1.5em; }
+  .meta { flex-direction:column; gap:8px; }
+  .container { padding:12px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <span class="category">🧠 思想家</span>
+  <h1>柏拉图（Plato）</h1>
+  <p class="subtitle">古希腊哲学家 · Plato</p>
+  <div class="quote">"未经审视的人生不值得过。"</div>
+</div>
+
+<!-- Meta Bar -->
+<div class="meta">
+  <div class="meta-item">
+    <div class="label">难度</div>
+    <div class="value"><span class="stars">★★★★★</span></div>
+  </div>
+  <div class="meta-item">
+    <div class="label">核心领域</div>
+    <div class="value">理念论、理想国、辩证法、灵魂教育</div>
+  </div>
+  <div class="meta-item">
+    <div class="label">课程时长</div>
+    <div class="value">约 7-14 天</div>
+  </div>
+  <div class="meta-item">
+    <div class="label">前置要求</div>
+    <div class="value">建议先修相关基础课程</div>
+  </div>
+</div>
+<div class="svg-container"><svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <!-- Title -->
+  <text x="300" y="35" text-anchor="middle" fill="#c084fc" font-size="18" font-weight="700">柏拉图（Plato） 思想地图</text>
+  <!-- Center node -->
+  <circle cx="300" cy="180" r="55" fill="#c084fc22" stroke="#c084fc" stroke-width="2" filter="url(#glow)"/>
+  <text x="300" y="175" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">柏拉图（Plato）</text>
+  <text x="300" y="195" text-anchor="middle" fill="#c084fc" font-size="11">思想家</text>
+  <!-- Branch values -->
+
+  <line x1="300" y1="180" x2="140" y2="130" stroke="#c084fc44" stroke-width="1.5"/>
+  <rect x="75" y="112" width="130" height="36" rx="10" fill="#c084fc15" stroke="#c084fc55" stroke-width="1"/>
+  <text x="140" y="135" text-anchor="middle" fill="#ddd" font-size="11">理念优先：看得见的世界只…</text>
+
+  <line x1="300" y1="180" x2="460" y2="130" stroke="#c084fc44" stroke-width="1.5"/>
+  <rect x="395" y="112" width="130" height="36" rx="10" fill="#c084fc15" stroke="#c084fc55" stroke-width="1"/>
+  <text x="460" y="135" text-anchor="middle" fill="#ddd" font-size="11">理性为王：灵魂的本质是理…</text>
+
+  <line x1="300" y1="180" x2="140" y2="250" stroke="#c084fc44" stroke-width="1.5"/>
+  <rect x="75" y="232" width="130" height="36" rx="10" fill="#c084fc15" stroke="#c084fc55" stroke-width="1"/>
+  <text x="140" y="255" text-anchor="middle" fill="#ddd" font-size="11">教育即解放：真正的教育不…</text>
+
+  <line x1="300" y1="180" x2="460" y2="250" stroke="#c084fc44" stroke-width="1.5"/>
+  <rect x="395" y="232" width="130" height="36" rx="10" fill="#c084fc15" stroke="#c084fc55" stroke-width="1"/>
+  <text x="460" y="255" text-anchor="middle" fill="#ddd" font-size="11">聚焦 理念论：透过现象追…</text>
+
+</svg></div>
+<div class="section"><h2>🧬 核心价值观</h2><div class="values">
+<div class="value-card"><div class="num">01</div>理念优先：看得见的世界只是理念世界的投影</div>
+<div class="value-card"><div class="num">02</div>理性为王：灵魂的本质是理性，最好的生活是理性的生活</div>
+<div class="value-card"><div class="num">03</div>教育即解放：真正的教育不是灌输，而是引导灵魂转向光明</div>
+<div class="value-card"><div class="num">04</div>聚焦 理念论：透过现象追问事物的本质和完美原型</div>
+<div class="value-card"><div class="num">05</div>聚焦 辩证法：通过持续的对话和质疑逼近真理</div>
+</div></div>
+<div class="section"><h2>🎯 决策框架</h2><div class="framework-steps">
+<div class="step">我现在看到的现象背后，本质是什么？</div>
+<div class="step">如果撇开所有偶然性，这个事物的完美理念是什么？</div>
+<div class="step">如果把 理念论 作为分析工具，当前问题属于哪个层次？</div>
+<div class="step">围绕 辩证法 我还需要和什么人进行怎样的对话？</div>
+<div class="step">什么样的制度设计能让理性最大化地指导行动？</div>
+</div></div>
+<div class="section"><h2>💡 关键立场</h2>
+<div class="position-item"><span class="key">知识</span>：真正的知识不是从外部获得的，而是灵魂回忆起的</div>
+<div class="position-item"><span class="key">政治</span>：最理想的国家由最智慧的人来治理</div>
+<div class="position-item"><span class="key">教育</span>：教育的目的是让每个人发挥出自身最好的潜力</div>
+<div class="position-item"><span class="key">正义</span>：正义是灵魂中理性、意志与欲望各安其位</div>
+<div class="position-item"><span class="key">重点议题</span>：先建立 理念论 的思维基础，再讨论具体问题</div>
+<div class="position-item"><span class="key">长期判断</span>：围绕 理性 建立的认知体系是人生最稳固的底盘</div>
+</div>
+<div class="section"><h2>📖 经验案例</h2>
+<div class="case">
+<div class="case-title">创办学园</div>
+<p>在雅典郊外创办学园，培养了亚里士多德等学生——教训：伟大的思想需要制度化的传承</p>
+<p class="lesson">结果：学园持续了约900年</p>
+</div>
+<div class="case">
+<div class="case-title">《理想国》的写作</div>
+<p>用对话体的形式探讨正义的根源——教训：深刻的思考可以用人人都能参与的形式表达</p>
+<p class="lesson">结果：成为西方哲学最核心的文本之一</p>
+</div>
+<div class="case">
+<div class="case-title">三赴叙拉古</div>
+<p>试图将哲学理念付诸政治实践但以失败告终——教训：理想和现实之间有着无法简单逾越的鸿沟</p>
+<p class="lesson">结果：让柏拉图从理论哲学转向更务实的哲学实践</p>
+</div>
+</div>
+<div class="section"><h2>🛤️ 学习路径</h2>
+<div class="path-stage">
+<div class="stage-header">理解 <span style="color:var(--muted)">(1-2天)</span></div>
+<ul style="margin-top:8px;padding-left:20px;">
+<li style="margin:4px 0;color:var(--muted)"> 阅读本课程的「思想体系」部分</li>
+<li style="margin:4px 0;color:var(--muted)"> 在 Digital Sage 中与 柏拉图 对话3次</li>
+<li style="margin:4px 0;color:var(--muted)"> 记录 柏拉图 的核心思维方式</li>
+</ul></div>
+<div class="path-stage">
+<div class="stage-header">应用 <span style="color:var(--muted)">(3-5天)</span></div>
+<ul style="margin-top:8px;padding-left:20px;">
+<li style="margin:4px 0;color:var(--muted)"> 用 柏拉图 的决策框架分析一个你面临的问题</li>
+<li style="margin:4px 0;color:var(--muted)"> 用 柏拉图 的说话风格写一段分析（300字）</li>
+<li style="margin:4px 0;color:var(--muted)"> 在日常决策中尝试用 柏拉图 的思维方式</li>
+</ul></div>
+<div class="path-stage">
+<div class="stage-header">内化 <span style="color:var(--muted)">(1-2周)</span></div>
+<ul style="margin-top:8px;padding-left:20px;">
+<li style="margin:4px 0;color:var(--muted)"> 将 柏拉图 的核心价值观与你自己的价值观对比</li>
+<li style="margin:4px 0;color:var(--muted)"> 找到3个可以融入日常的思维习惯</li>
+<li style="margin:4px 0;color:var(--muted)"> 形成你自己的「柏拉图思维清单」</li>
+</ul></div>
+</div>
+<div class="section"><h2>📝 练习与思考</h2>
+<div class="exercise-group"><h4>概念理解</h4><ul>
+<li>用自己的话解释 柏拉图 的核心价值观</li>
+<li>柏拉图 与其他同领域智者的最大区别是什么？</li>
+<li>柏拉图 的思想在今天是否仍然适用？为什么？</li>
+</ul></div>
+<div class="exercise-group"><h4>应用练习</h4><ul>
+<li>用 柏拉图 的决策框架分析一个商业/人生决策</li>
+<li>如果 柏拉图 面对你当前最大的挑战，他/她会怎么做？</li>
+<li>用 柏拉图 的说话风格写一段评论（200字）</li>
+</ul></div>
+<div class="exercise-group"><h4>思辨练习</h4><ul>
+<li>柏拉图 的思想有什么局限性？</li>
+<li>如果 柏拉图 和另一位智者对话，他们会达成共识吗？</li>
+<li>柏拉图 的思想如何与其他领域结合？</li>
+</ul></div>
+</div>
+<div class="section"><h2>🤖 与智者对话</h2>
+<h3>入门对话</h3>
+<div class="prompt-box"><code>在 Digital Sage 中选择「柏拉图」，问：
+「请用您最核心的思维方式，分析一下[你的问题]。」</code></div>
+<h3>进阶对话</h3>
+<div class="prompt-box"><code>问 柏拉图：
+「您最大的失败是什么？从中学到了什么？」
+「如果只能给年轻人一条建议，您会说什么？」
+「您如何看待[当前热点话题]？」</code></div>
+<h3>深度对话</h3>
+<div class="prompt-box"><code>问 柏拉图：
+「请用您的决策框架，帮我分析[具体案例]。」
+「您的核心价值观中，哪一个最难践行？为什么？」
+「如果您活在2026年，您会做什么？」</code></div>
+</div>
+<div class="section"><h2>🔗 思想连接</h2>
+<p style="color:var(--muted);margin-bottom:12px">同一领域的其他智者：</p>
+<span class="connection">思想家领域</span>
+<span class="connection">跨领域启发</span>
+</div>
+</div>
+<footer>
+  <p>Digital Sage — 与 120 位智者对话 | <a href="../courses.html">课程列表</a> | <a href="/">首页</a></p>
+  <p style="margin-top:8px">© 2026 Digital Sage. 思想的力量超越时空。</p>
+</footer>
+</body>
+</html>
